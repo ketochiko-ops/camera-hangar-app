@@ -9,18 +9,27 @@ import {
 import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
+import {
+  formatItemLabel,
+  useLabelMode,
+  type LabelMode,
+} from "../context/LabelModeContext";
 import styles from "./Equipment.module.css";
 export function DetailBoard({
   item,
   camera,
   portrait = false,
   exporting = false,
+  labelMode,
 }: {
   item: Equipment;
   camera?: Camera;
   portrait?: boolean;
   exporting?: boolean;
+  labelMode?: LabelMode;
 }) {
+  const { mode } = useLabelMode();
+  const activeMode = labelMode ?? mode;
   const cam = isCamera(item);
   const specs = cam
     ? cameraDetailSpecs(item)
@@ -90,7 +99,11 @@ export function DetailBoard({
         </div>
         <RatingBars
           ratings={item.ratings}
-          labels={cam ? cameraRatingLabels : lensRatingLabels}
+          labels={Object.fromEntries(
+            Object.entries(cam ? cameraRatingLabels : lensRatingLabels).map(
+              ([key, label]) => [key, formatItemLabel(label, activeMode)],
+            ),
+          )}
         />
         <div className={styles.panelTitle}>
           <span>TECHNICAL DATA</span>
@@ -99,7 +112,7 @@ export function DetailBoard({
         <dl className={styles.specs}>
           {specs.map(([label, value]) => (
             <div key={label}>
-              <dt>{label}</dt>
+              <dt>{formatItemLabel(label, activeMode)}</dt>
               <dd>{value}</dd>
             </div>
           ))}

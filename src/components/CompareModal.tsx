@@ -9,6 +9,7 @@ import { Modal } from "./Modal";
 import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
+import { formatItemLabel, useLabelMode } from "../context/LabelModeContext";
 import styles from "./Manage.module.css";
 export function CompareModal({
   items,
@@ -17,6 +18,7 @@ export function CompareModal({
   items: Equipment[];
   onClose(): void;
 }) {
+  const { mode } = useLabelMode();
   return (
     <Modal title="機材を比較" onClose={onClose} wide>
       <div
@@ -40,7 +42,11 @@ export function CompareModal({
               <p>{item.category}</p>
               <RatingBars
                 ratings={item.ratings}
-                labels={cam ? cameraRatingLabels : lensRatingLabels}
+                labels={Object.fromEntries(
+                  Object.entries(
+                    cam ? cameraRatingLabels : lensRatingLabels,
+                  ).map(([key, label]) => [key, formatItemLabel(label, mode)]),
+                )}
               />
               <dl>
                 {(cam
@@ -56,7 +62,7 @@ export function CompareModal({
                     ]
                 ).map(([k, v]) => (
                   <div key={k}>
-                    <dt>{k}</dt>
+                    <dt>{formatItemLabel(k, mode)}</dt>
                     <dd>{v}</dd>
                   </div>
                 ))}

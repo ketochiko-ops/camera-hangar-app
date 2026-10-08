@@ -13,6 +13,7 @@ import {
 import { validateEquipment, type FormErrors } from "../utils/domain";
 import { prepareImage } from "../utils/image";
 import { useInventory } from "../context/InventoryContext";
+import { formatItemLabel, useLabelMode } from "../context/LabelModeContext";
 import { EquipmentImage } from "./EquipmentImage";
 import { Modal } from "./Modal";
 import styles from "./Manage.module.css";
@@ -23,6 +24,7 @@ export function EquipmentEditor({
   initial: Equipment;
   onClose(): void;
 }) {
+  const { mode } = useLabelMode();
   const [item, setItem] = useState<Equipment>(() => structuredClone(initial));
   // Keep list fields as text until submit so typing a comma or space never loses it.
   const [mountsText, setMountsText] = useState(
@@ -49,7 +51,7 @@ export function EquipmentEditor({
     placeholder = "",
   ) => (
     <label className={styles.field} key={key}>
-      {label}
+      {formatItemLabel(label, mode)}
       {required && <span> *</span>}
       <input
         name={key}
@@ -196,7 +198,7 @@ export function EquipmentEditor({
             <>
               {field(
                 "compatibleMounts",
-                `${lensSpecLabels.compatibleMounts} (COMMA-SEPARATED)`,
+                `${formatItemLabel(lensSpecLabels.compatibleMounts, mode)} (COMMA-SEPARATED)`,
                 mountsText,
                 setMountsText,
                 true,
@@ -293,7 +295,7 @@ export function EquipmentEditor({
           {Object.entries(cam ? cameraRatingLabels : lensRatingLabels).map(
             ([key, label]) => (
               <label key={key} className={styles.field}>
-                {label}
+                {formatItemLabel(label, mode)}
                 <input
                   name={`ratings.${key}`}
                   type="number"

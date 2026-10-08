@@ -54,8 +54,10 @@
     linear-gradient(var(--accent), var(--accent)) right top/1px 19px no-repeat,
     linear-gradient(var(--accent), var(--accent)) left bottom/19px 1px no-repeat,
     linear-gradient(var(--accent), var(--accent)) left bottom/1px 19px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) right bottom/19px 1px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) right bottom/1px 19px no-repeat;
+    linear-gradient(var(--accent), var(--accent)) right bottom/19px 1px
+      no-repeat,
+    linear-gradient(var(--accent), var(--accent)) right bottom/1px 19px
+      no-repeat;
   opacity: 0.45;
   pointer-events: none;
 }
@@ -213,15 +215,20 @@
   font: 10px var(--mono);
   letter-spacing: 0.2px;
   margin-bottom: 5px;
+  gap: 8px;
 }
 .ratingLabel > span {
   color: #b3d5e5;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
 }
 .ratingLabel strong {
   font-size: 12px;
   font-weight: 400;
   color: var(--accent);
   text-shadow: var(--accent-glow);
+  flex-shrink: 0;
 }
 .ratingLabel small {
   color: #849b92;
@@ -400,6 +407,17 @@
 .exportBoard .ratings {
   gap: 10px;
 }
+.exportBoard:not(.portrait) .details {
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+.exportBoard:not(.portrait) .ratings {
+  gap: 7px;
+  padding-bottom: 10px;
+}
+.exportBoard:not(.portrait) .specs > div {
+  padding: 5px 0;
+}
 .exportBoard .panelTitle {
   font-size: 11px;
 }
@@ -408,6 +426,7 @@
 }
 .exportBoard .specs dt {
   font-size: 11px;
+  line-height: 1.4;
 }
 .exportBoard .specs dd {
   font-size: 13px;

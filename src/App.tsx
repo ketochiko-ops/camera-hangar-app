@@ -1,5 +1,10 @@
 import { useRef, useState } from "react";
 import { useInventory } from "./context/InventoryContext";
+import {
+  LabelModeProvider,
+  useLabelMode,
+  type LabelMode,
+} from "./context/LabelModeContext";
 import { filterLenses, isCompatible } from "./utils/domain";
 import { isCamera, type Camera, type Equipment } from "./types";
 import { DetailBoard } from "./components/DetailBoard";
@@ -16,7 +21,15 @@ import {
 import styles from "./App.module.css";
 type Page = "camera" | "lens" | "manage";
 export function App() {
+  return (
+    <LabelModeProvider>
+      <EquipmentApp />
+    </LabelModeProvider>
+  );
+}
+function EquipmentApp() {
   const { data, error } = useInventory();
+  const { mode: labelMode, setMode: setLabelMode } = useLabelMode();
   const [page, setPage] = useState<Page>("camera");
   const [cameraId, setCameraId] = useState(data.cameras[0]?.id);
   const [lensId, setLensId] = useState<string>();
@@ -29,6 +42,7 @@ export function App() {
     item: Equipment;
     camera?: Camera;
     ratio: ExportRatio;
+    labelMode: LabelMode;
   }>();
   const [exportMessage, setExportMessage] = useState("");
   const [exportError, setExportError] = useState("");
@@ -76,6 +90,7 @@ export function App() {
       item: structuredClone(item),
       camera: camera ? structuredClone(camera) : undefined,
       ratio,
+      labelMode,
     });
     try {
       await new Promise<void>((resolve) =>
@@ -162,13 +177,29 @@ export function App() {
       </aside>
       <div className={styles.main}>
         <header className={styles.topbar}>
-          <span>
+          <span className={styles.topbarTitle}>
             PERSONAL OPTICS DIVISION{" "}
             <span className={styles.topDivider}>/</span> EQUIPMENT ARCHIVE
           </span>
-          <span className={styles.system}>
-            <i /> SYSTEM ONLINE
-          </span>
+          <div className={styles.topbarActions}>
+            <label className={styles.labelModeControl}>
+              項目表示
+              <select
+                aria-label="項目名の表示"
+                value={labelMode}
+                disabled={!!exportState}
+                onChange={(event) =>
+                  setLabelMode(event.target.value as LabelMode)
+                }
+              >
+                <option value="english">英語のみ</option>
+                <option value="bilingual">英語＋日本語</option>
+              </select>
+            </label>
+            <span className={styles.system}>
+              <i /> SYSTEM ONLINE
+            </span>
+          </div>
         </header>
         <main className={styles.content}>
           {error && (
@@ -433,6 +464,7 @@ export function App() {
               camera={exportState.camera}
               portrait={exportState.ratio !== "16:9"}
               exporting
+              labelMode={exportState.labelMode}
             />
           </div>
         </div>

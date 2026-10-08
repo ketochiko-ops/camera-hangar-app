@@ -286,47 +286,180 @@ test("legacy saved scores remain usable and new scores persist after editing", a
     autofocus: 8,
   });
 });
-for (const view of ["camera", "lens"] as const)
-  for (const [ratio, width, height] of [
-    ["16:9", 1600, 900],
-    ["1:1", 1200, 1200],
-    ["4:5", 1200, 1500],
-  ] as const) {
-    test(`${view} exports real PNG ${ratio}`, async ({ page }) => {
-      if (view === "lens")
-        await page.getByRole("button", { name: /LENS.*LOADOUT/ }).click();
-      await page.getByLabel("出力サイズ").selectOption(ratio);
-      const promise = page.waitForEvent("download");
-      await page.getByRole("button", { name: "PNG出力", exact: true }).click();
-      const download = await promise;
-      expect(download.suggestedFilename()).toMatch(/\.png$/);
-      const path = await download.path();
-      expect(path).toBeTruthy();
-      const data = await readFile(path!);
-      expect(data.subarray(1, 4).toString()).toBe("PNG");
-      expect(data.readUInt32BE(16)).toBe(width);
-      expect(data.readUInt32BE(20)).toBe(height);
-      expect(data.length).toBeGreaterThan(10000);
-      await expect(page.getByText("PNGを保存しました。")).toBeVisible();
-      // Decode the image in a browser to ensure the download is readable raster data.
-      const decoded = await page.evaluate(async (base64) => {
-        const img = new Image();
-        img.src = `data:image/png;base64,${base64}`;
-        await img.decode();
-        return [img.naturalWidth, img.naturalHeight];
-      }, data.toString("base64"));
-      expect(decoded).toEqual([width, height]);
-    });
-  }
-test("tablet and phone do not overflow horizontally", async ({ page }) => {
-  for (const width of [1024, 768, 390]) {
-    await page.setViewportSize({ width, height: 900 });
-    await expect(page.getByTestId("detail-board")).toBeVisible();
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= window.innerWidth,
-      ),
-    ).toBe(true);
+for (const labelMode of ["english", "bilingual"] as const)
+  for (const view of ["camera", "lens"] as const)
+    for (const [ratio, width, height] of [
+      ["16:9", 1600, 900],
+      ["1:1", 1200, 1200],
+      ["4:5", 1200, 1500],
+    ] as const) {
+      test(`${view} exports real PNG ${ratio} with ${labelMode} labels`, async ({
+        page,
+      }) => {
+        if (view === "lens")
+          await page.getByRole("button", { name: /LENS.*LOADOUT/ }).click();
+        await page
+          .getByRole("combobox", { name: "項目名の表示" })
+          .selectOption(labelMode);
+        await expect(
+          page.getByTestId("detail-board").getByRole("meter", {
+            name:
+              labelMode === "bilingual"
+                ? "RESOLUTION / 解像性能"
+                : "RESOLUTION",
+            exact: true,
+          }),
+        ).toBeVisible();
+        await page.getByLabel("出力サイズ").selectOption(ratio);
+        // Hold font readiness so the export layout can be checked before capture.
+        await page.evaluate(() => {
+          const ready = document.fonts.ready;
+          let release!: () => void;
+          const held = new Promise<void>((resolve) => {
+            release = resolve;
+          });
+          Object.defineProperty(document.fonts, "ready", {
+            value: Promise.all([ready, held]),
+            configurable: true,
+          });
+          (
+            window as unknown as Window & { releaseExportFonts(): void }
+          ).releaseExportFonts = release;
+        });
+        const promise = page.waitForEvent("download");
+        await page
+          .getByRole("button", { name: "PNG出力", exact: true })
+          .click();
+        const exportBoard = page.locator(
+          '[aria-hidden="true"] [data-testid="detail-board"]',
+        );
+        await expect(
+          exportBoard.locator('[role="meter"]').first(),
+        ).toHaveAttribute(
+          "aria-label",
+          labelMode === "bilingual" ? "RESOLUTION / 解像性能" : "RESOLUTION",
+        );
+        await expect(
+          page.getByRole("combobox", { name: "項目名の表示" }),
+        ).toBeDisabled();
+        const contentFits = await exportBoard.evaluate((node) => {
+          const details = node.querySelector("dl")!.parentElement!;
+          const bottom =
+            details.getBoundingClientRect().bottom -
+            parseFloat(getComputedStyle(details).paddingBottom);
+          return Array.from(details.querySelectorAll('dt, dd, [role="meter"]'))
+            .filter(
+              (element) => element.getBoundingClientRect().bottom > bottom + 1,
+            )
+            .map((element) => ({
+              label: element.textContent,
+              bottom: element.getBoundingClientRect().bottom,
+              limit: bottom,
+            }));
+        });
+        await page.evaluate(() =>
+          (
+            window as unknown as Window & { releaseExportFonts(): void }
+          ).releaseExportFonts(),
+        );
+        const download = await promise;
+        expect(
+          contentFits,
+          `${view} ${ratio} ${labelMode} labels fit inside the detail panel`,
+        ).toEqual([]);
+        expect(download.suggestedFilename()).toMatch(/\.png$/);
+        const path = await download.path();
+        expect(path).toBeTruthy();
+        const data = await readFile(path!);
+        expect(data.subarray(1, 4).toString()).toBe("PNG");
+        expect(data.readUInt32BE(16)).toBe(width);
+        expect(data.readUInt32BE(20)).toBe(height);
+        expect(data.length).toBeGreaterThan(10000);
+        await expect(page.getByText("PNGを保存しました。")).toBeVisible();
+        // Decode the image in a browser to ensure the download is readable raster data.
+        const decoded = await page.evaluate(async (base64) => {
+          const img = new Image();
+          img.src = `data:image/png;base64,${base64}`;
+          await img.decode();
+          return [img.naturalWidth, img.naturalHeight];
+        }, data.toString("base64"));
+        expect(decoded).toEqual([width, height]);
+      });
+    }
+test("label mode persists across reloads and works for cameras, lenses, comparison and CSV", async ({
+  page,
+}) => {
+  const selector = page.getByRole("combobox", { name: "項目名の表示" });
+  await expect(selector).toHaveValue("english");
+  await selector.selectOption("bilingual");
+  const board = page.getByTestId("detail-board");
+  await expect(
+    board.getByRole("meter", { name: "LOW LIGHT / 低照度性能" }),
+  ).toBeVisible();
+  await expect(
+    board.getByText("MEDIA / 記録メディア", { exact: true }),
+  ).toBeVisible();
+  await page.getByLabel("Nikon Z fを比較に追加").check();
+  await page.getByLabel("Nikon Z fcを比較に追加").check();
+  await page.getByRole("button", { name: "比較 2/3" }).click();
+  const comparison = page.getByRole("dialog", { name: "機材を比較" });
+  await expect(
+    comparison.getByText("PIXELS / 画素数", { exact: true }),
+  ).toHaveCount(2);
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: /LENS.*LOADOUT/ }).click();
+  await expect(
+    board.getByText("FOCAL LENGTH / 焦点距離", { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(selector).toHaveValue("bilingual");
+  await page.getByRole("button", { name: /データ管理/ }).click();
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  await expect(
+    page.getByLabel("BURST / 連写速度", { exact: true }),
+  ).toHaveValue("14frames /s");
+  await expect(page.getByLabel("BOKEH / ボケ", { exact: true })).toHaveValue(
+    "0",
+  );
+  await page.getByRole("button", { name: "キャンセル" }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "CSVテンプレート" }).click();
+  const header = await readFile((await (await download).path())!, "utf8");
+  expect(header).toContain("rating_low_light");
+  expect(header).not.toMatch(/[\u3040-\u30ff\u4e00-\u9fff]/);
+  expect(
+    await page.evaluate(() =>
+      localStorage.getItem("optical-arsenal:inventory:v1"),
+    ),
+  ).toBeNull();
+  await selector.selectOption("english");
+  await page.getByRole("button", { name: /CAMERA SELECT/ }).click();
+  await expect(
+    board.getByRole("meter", { name: "LOW LIGHT", exact: true }),
+  ).toBeVisible();
+  await expect(
+    board.getByText("SENSOR / センサー", { exact: true }),
+  ).toHaveCount(0);
+});
+test("tablet and phone do not overflow horizontally in either label mode", async ({
+  page,
+}) => {
+  for (const mode of ["english", "bilingual"]) {
+    await page
+      .getByRole("combobox", { name: "項目名の表示" })
+      .selectOption(mode);
+    for (const width of [1024, 768, 390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(page.getByTestId("detail-board")).toBeVisible();
+      await expect(
+        page.getByRole("combobox", { name: "項目名の表示" }),
+      ).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+      ).toBe(true);
+    }
   }
 });
 test("empty archive remains empty after deleting all cameras", async ({

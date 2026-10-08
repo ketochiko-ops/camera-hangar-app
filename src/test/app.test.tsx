@@ -1,12 +1,107 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { App } from "../App";
 import { InventoryProvider } from "../context/InventoryContext";
 import { RatingBars } from "../components/RatingBars";
 import { createLocalRepository } from "../utils/storage";
 import { sampleInventory } from "../data/sample";
+import { LABEL_MODE_KEY } from "../context/LabelModeContext";
+import { STORAGE_KEY } from "../utils/storage";
 describe("UI integration", () => {
+  it("switches detail, comparison and editor labels, remembers the choice, and keeps equipment data unchanged", async () => {
+    const user = userEvent.setup();
+    const inventory = JSON.stringify(sampleInventory);
+    localStorage.setItem(STORAGE_KEY, inventory);
+    const app = () => (
+      <InventoryProvider>
+        <App />
+      </InventoryProvider>
+    );
+    let view = render(app());
+    const selector = screen.getByRole("combobox", { name: "項目名の表示" });
+    expect(selector).toHaveValue("english");
+    await user.selectOptions(selector, "bilingual");
+    expect(
+      within(screen.getByTestId("detail-board")).getByRole("meter", {
+        name: "LOW LIGHT / 低照度性能",
+      }),
+    ).toBeVisible();
+    expect(
+      within(screen.getByTestId("detail-board")).getByText("PIXELS / 画素数"),
+    ).toBeVisible();
+    await user.click(screen.getByLabelText("Nikon Z fを比較に追加"));
+    await user.click(screen.getByLabelText("Nikon Z fcを比較に追加"));
+    await user.click(screen.getByRole("button", { name: "比較 2/3" }));
+    expect(
+      within(screen.getByRole("dialog")).getAllByText("SENSOR / センサー"),
+    ).toHaveLength(2);
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "閉じる",
+      }),
+    );
+    await user.click(screen.getByRole("button", { name: /データ管理/ }));
+    await user.click(screen.getByRole("button", { name: "Nikon Z fを編集" }));
+    expect(screen.getByLabelText("BOKEH / ボケ")).toHaveValue(0);
+    expect(screen.getByLabelText("PIXELS / 画素数")).toHaveValue("24.5 MP");
+    await user.click(screen.getByRole("button", { name: "キャンセル" }));
+    await user.click(screen.getByRole("button", { name: /^LENSES/ }));
+    await user.click(
+      screen.getByRole("button", { name: "NIKKOR Z 40mm f/2を編集" }),
+    );
+    expect(screen.getByLabelText(/^FOCAL LENGTH \/ 焦点距離/)).toHaveValue(
+      "40 mm",
+    );
+    await user.click(screen.getByRole("button", { name: "キャンセル" }));
+    view.unmount();
+    view = render(app());
+    expect(screen.getByRole("combobox", { name: "項目名の表示" })).toHaveValue(
+      "bilingual",
+    );
+    expect(
+      screen.getByRole("meter", { name: "MOBILITY / 携行性" }),
+    ).toBeVisible();
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "項目名の表示" }),
+      "english",
+    );
+    expect(screen.getByRole("meter", { name: "MOBILITY" })).toBeVisible();
+    expect(screen.queryByText("SENSOR / センサー")).not.toBeInTheDocument();
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(inventory);
+    expect(localStorage.getItem(LABEL_MODE_KEY)).toBe("english");
+  });
+  it("allows label switching even when browser preference storage is unavailable", async () => {
+    const read = vi
+      .spyOn(Storage.prototype, "getItem")
+      .mockImplementation(() => {
+        throw new Error("Storage blocked");
+      });
+    const write = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementation(() => {
+        throw new Error("Storage blocked");
+      });
+    try {
+      const user = userEvent.setup();
+      render(
+        <InventoryProvider
+          repository={{ load: () => ({ data: sampleInventory }), save() {} }}
+        >
+          <App />
+        </InventoryProvider>,
+      );
+      await user.selectOptions(
+        screen.getByRole("combobox", { name: "項目名の表示" }),
+        "bilingual",
+      );
+      expect(screen.getByRole("meter", { name: "BOKEH / ボケ" })).toBeVisible();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    } finally {
+      read.mockRestore();
+      write.mockRestore();
+    }
+  });
   it("renders accessible horizontal rating bars", () => {
     render(
       <RatingBars
