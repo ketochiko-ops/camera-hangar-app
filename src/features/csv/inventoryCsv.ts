@@ -443,7 +443,7 @@ export function mergeCsvImport(data: Inventory, batch: CsvImport): Inventory {
 }
 
 export function csvCreationPrompt(kind: EquipmentKind): string {
-  return `調査結果から${kind === "camera" ? "カメラ" : "レンズ"}登録用のUTF-8 CSVファイルを作成してください。\nヘッダーは次の列名をそのまま使ってください。\n${csvColumns(kind).join(",")}\n必須項目：${requiredColumns(kind).join(", ")}。\n1行に1機材。新規登録のidは空欄。既存機材の更新は出力CSVのidを保持。複数マウント・用途タグは | 区切り。カンマ・改行・引用符を含む値は二重引用符で囲み、値内の引用符は二重にしてください。\n評価は0〜10の数値。主観評価を測定値と混同せず、評価できない項目は空欄（アプリでは0として登録）。不明な任意スペックも空欄にし、必須情報が確認できない機材は含めないでください。\nセンサーは例 FULL FRAME CMOS、重量は例 710 g、画素数は例 24.5 MP、連写は例 14frames /s、焦点距離は例 24–70 mm、開放F値は例 f/2.8、発売年は4桁。nameは100文字以内、summaryは700文字以内、その他の各セルは180文字以内。写真はCSVに含めません。\n調査元URLと不確かな情報はCSVと別に説明してください。CSV内に説明行やMarkdownのコードフェンス、追加列を入れないでください。`;
+  return `調査結果から${kind === "camera" ? "カメラ" : "レンズ"}登録用のUTF-8 CSVファイルを作成してください。\nヘッダーは次の列名をそのまま使ってください。\n${csvColumns(kind).join(",")}\n必須項目：${requiredColumns(kind).join(", ")}。\n1行に1機材。新規登録のidは空欄。既存機材の更新は出力CSVのidを保持。複数マウント・用途タグは | 区切り。カンマ・改行・引用符を含む値は二重引用符で囲み、値内の引用符は二重にしてください。\n${kind === "camera" ? "rating_responseはAF性能の評価です。" : ""}評価は0〜10の数値。主観評価を測定値と混同せず、評価できない項目は空欄（アプリでは0として登録）。不明な任意スペックも空欄にし、必須情報が確認できない機材は含めないでください。\nセンサーは例 FULL FRAME CMOS、重量は例 710 g、画素数は例 24.5 MP、連写は例 14frames /s、焦点距離は例 24–70 mm、開放F値は例 f/2.8、発売年は4桁。nameは100文字以内、summaryは700文字以内、その他の各セルは180文字以内。写真はCSVに含めません。\n調査元URLと不確かな情報はCSVと別に説明してください。CSV内に説明行やMarkdownのコードフェンス、追加列を入れないでください。`;
 }
 
 export function downloadCsv(text: string, filename: string): void {

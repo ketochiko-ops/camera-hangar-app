@@ -141,6 +141,7 @@ test("invalid CSV and cancellation leave the archive unchanged; templates and pr
   await expect(page.getByLabel("カメラCSV作成の依頼文")).toHaveValue(
     /name,maker,category/,
   );
+  await expect(page.getByLabel("カメラCSV作成の依頼文")).toHaveValue(/rating_responseはAF性能/);
   await page.setViewportSize({ width: 390, height: 900 });
   expect(
     await page.evaluate(

@@ -6,7 +6,7 @@ const japaneseLabels: Record<string, string> = {
   DETAIL: "解像性能",
   NIGHT: "低照度性能",
   LATITUDE: "ダイナミックレンジ",
-  RESPONSE: "応答性能",
+  AF: "AF性能",
   STABILITY: "手ぶれ補正性能",
   ENDURANCE: "バッテリー持続力",
   RESOLUTION: "解像性能",

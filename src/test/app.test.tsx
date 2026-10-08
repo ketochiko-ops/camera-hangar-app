@@ -27,6 +27,10 @@ describe("UI integration", () => {
         name: "NIGHT / 低照度性能",
       }),
     ).toBeVisible();
+    expect(screen.getByRole("meter", { name: "AF / AF性能" })).toHaveAttribute(
+      "aria-valuenow",
+      "9",
+    );
     expect(
       within(screen.getByTestId("detail-board")).getByText("PIXELS / 画素数"),
     ).toBeVisible();
@@ -36,6 +40,11 @@ describe("UI integration", () => {
     expect(
       within(screen.getByRole("dialog")).getAllByText("SENSOR / センサー"),
     ).toHaveLength(2);
+    expect(
+      within(screen.getByRole("dialog")).getAllByRole("meter", {
+        name: "AF / AF性能",
+      }),
+    ).toHaveLength(2);
     await user.click(
       within(screen.getByRole("dialog")).getByRole("button", {
         name: "閉じる",
@@ -43,7 +52,8 @@ describe("UI integration", () => {
     );
     await user.click(screen.getByRole("button", { name: /データ管理/ }));
     await user.click(screen.getByRole("button", { name: "Nikon Z fを編集" }));
-    expect(screen.getByLabelText("STABILITY / 手ぶれ補正性能")).toHaveValue(0);
+    expect(screen.getByLabelText("STABILITY / 手ぶれ補正性能")).toHaveValue(9);
+    expect(screen.getByLabelText("AF / AF性能")).toHaveValue(9);
     expect(screen.getByLabelText("PIXELS / 画素数")).toHaveValue("24.5 MP");
     await user.click(screen.getByRole("button", { name: "キャンセル" }));
     await user.click(screen.getByRole("button", { name: /^LENSES/ }));

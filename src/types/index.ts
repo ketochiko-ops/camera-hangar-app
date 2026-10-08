@@ -11,7 +11,7 @@ export const cameraRatingLabels = {
   detail: "DETAIL",
   night: "NIGHT",
   latitude: "LATITUDE",
-  response: "RESPONSE",
+  response: "AF",
   stability: "STABILITY",
   endurance: "ENDURANCE",
   mobility: "MOBILITY",

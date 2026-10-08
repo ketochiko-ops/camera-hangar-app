@@ -101,10 +101,12 @@ Example Lens,Example Maker,Prime,"メモにカンマ, を含む例",Nikon Z,50 m
 | DETAIL    | `rating_detail`    | 解像性能           |
 | NIGHT     | `rating_night`     | 低照度性能         |
 | LATITUDE  | `rating_latitude`  | ダイナミックレンジ |
-| RESPONSE  | `rating_response`  | 応答性能           |
+| AF        | `rating_response`  | AF性能             |
 | STABILITY | `rating_stability` | 手ぶれ補正性能     |
 | ENDURANCE | `rating_endurance` | バッテリー持続力   |
 | MOBILITY  | `rating_mobility`  | 携行性             |
+
+AFの内部キーとCSV列名は互換性のため`response`・`rating_response`を維持しています。日本語併記モードでは「AF / AF性能」と表示します。
 
 レンズの評価は次の7項目・順序です。
 
@@ -118,7 +120,7 @@ Example Lens,Example Maker,Prime,"メモにカンマ, を含む例",Nikon Z,50 m
 | MOBILITY    | `rating_mobility`    | 携行性                 |
 | VERSATILITY | `rating_versatility` | 汎用性                 |
 
-旧カメラCSVも読み込めます。`rating_resolution`をDETAIL、`rating_low_light`（または`rating_high_iso`）をNIGHT、`rating_dynamic_range`をLATITUDE、`rating_autofocus`をRESPONSEへ引き継ぎます。`rating_portability`はMOBILITYへ引き継ぎます。新しい列がある場合、その値を優先します（空欄は0）。STABILITY・ENDURANCEは旧評価から推測せず、列がなければ0です。
+旧カメラCSVも読み込めます。`rating_resolution`をDETAIL、`rating_low_light`（または`rating_high_iso`）をNIGHT、`rating_dynamic_range`をLATITUDE、`rating_autofocus`をAFへ引き継ぎます。`rating_portability`はMOBILITYへ引き継ぎます。新しい列がある場合、その値を優先します（空欄は0）。STABILITY・ENDURANCEは旧評価から推測せず、列がなければ0です。
 
 旧レンズCSVの`rating_sharpness`、`rating_portability`、`rating_close_up`は、それぞれRESOLUTION、MOBILITY、CLOSE FOCUSへ引き継ぎます。別名と対応する元の列を同じCSVに含めると重複列エラーになります（例：`rating_high_iso`と`rating_low_light`）。
 

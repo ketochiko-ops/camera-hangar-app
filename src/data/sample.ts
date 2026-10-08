@@ -10,7 +10,15 @@ const camera = (
   sensor: string,
   weight: string,
   year: string,
-  scores: number[],
+  scores: [
+    detail: number,
+    night: number,
+    latitude: number,
+    af: number,
+    stability: number,
+    endurance: number,
+    mobility: number,
+  ],
   summary: string,
 ): Camera => ({
   id,
@@ -32,12 +40,12 @@ const camera = (
   },
   ratings: {
     detail: scores[0],
-    night: scores[2],
-    latitude: scores[1],
+    night: scores[1],
+    latitude: scores[2],
     response: scores[3],
     stability: scores[4],
-    endurance: scores[6],
-    mobility: scores[5],
+    endurance: scores[5],
+    mobility: scores[6],
   },
 });
 const lens = (
@@ -88,7 +96,7 @@ export const sampleInventory: Inventory = {
       "FULL FRAME CMOS",
       "710 g",
       "2023",
-      [7.5, 0, 9, 0, 0, 6, 0],
+      [7.5, 9, 8.5, 9, 9, 6, 6],
       "クラシックな操作感と現代の撮影性能を組み合わせた、日常からポートレートまでの相棒。光を見つけ、ダイヤルを回し、次の一枚へ。",
     ),
     camera(
@@ -102,7 +110,7 @@ export const sampleInventory: Inventory = {
       "APS-C CMOS",
       "445 g",
       "2021",
-      [6.5, 0, 7, 0, 0, 9, 0],
+      [6.5, 7, 7, 7.5, 0, 6, 9],
       "軽快なボディで街の光を切り取る。持ち歩きたくなるサイズとダイヤル操作が魅力。",
     ),
     camera(
@@ -116,7 +124,7 @@ export const sampleInventory: Inventory = {
       "APS-C CMOS",
       "720 g",
       "2017",
-      [6.5, 0, 8, 0, 0, 5, 0],
+      [6.5, 8, 8, 8, 0, 9.5, 5],
       "光学ファインダーで被写体を追いかけるフィールド機。手持ちのFマウントレンズと出かけよう。",
     ),
     camera(
@@ -130,7 +138,7 @@ export const sampleInventory: Inventory = {
       "FULL FRAME CMOS",
       "890 g",
       "2016",
-      [8, 0, 8, 0, 0, 4, 0],
+      [8, 8, 8, 8, 0, 9, 4],
       "フルサイズの階調と安定した操作性。人物撮影からイベントまで幅広く対応する。",
     ),
     camera(
@@ -144,7 +152,7 @@ export const sampleInventory: Inventory = {
       "FULL FRAME CMOS",
       "657 g",
       "2021",
-      [9.5, 0, 8.5, 0, 0, 7, 0],
+      [9.5, 8.5, 9, 8.5, 7, 8.5, 7],
       "細部のディテールを記録する高解像機。風景や作品撮影でじっくりと構図を詰める。",
     ),
     camera(
@@ -158,7 +166,7 @@ export const sampleInventory: Inventory = {
       "APS-C CMOS",
       "557 g",
       "2022",
-      [9, 0, 7.5, 0, 0, 8, 0],
+      [9, 7.5, 8, 8.5, 8.5, 8, 8],
       "高解像センサーと直感的なダイヤル。写真表現を楽しむための軽快なハイブリッド機。",
     ),
   ],

@@ -21,7 +21,7 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
     "DETAIL",
     "NIGHT",
     "LATITUDE",
-    "RESPONSE",
+    "AF",
     "STABILITY",
     "ENDURANCE",
     "MOBILITY",
@@ -224,7 +224,7 @@ test("compares up to three cameras", async ({ page }) => {
     "DETAIL",
     "NIGHT",
     "LATITUDE",
-    "RESPONSE",
+    "AF",
     "STABILITY",
     "ENDURANCE",
     "MOBILITY",
@@ -346,6 +346,14 @@ for (const labelMode of ["english", "bilingual"] as const)
         await expect(
           exportBoard.locator('[role="meter"]').first(),
         ).toHaveAttribute("aria-label", formattedFirstLabel);
+        if (view === "camera")
+          await expect(
+            exportBoard.getByRole("meter", {
+              name: labelMode === "bilingual" ? "AF / AF性能" : "AF",
+              exact: true,
+              includeHidden: true,
+            }),
+          ).toHaveAttribute("aria-valuenow", "9");
         await expect(
           page.getByRole("combobox", { name: "項目名の表示" }),
         ).toBeDisabled();
@@ -427,7 +435,10 @@ test("label mode persists across reloads and works for cameras, lenses, comparis
   ).toHaveValue("14frames /s");
   await expect(
     page.getByLabel("STABILITY / 手ぶれ補正性能", { exact: true }),
-  ).toHaveValue("0");
+  ).toHaveValue("9");
+  await expect(page.getByLabel("AF / AF性能", { exact: true })).toHaveValue(
+    "9",
+  );
   await page.getByRole("button", { name: "キャンセル" }).click();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "CSVテンプレート" }).click();
