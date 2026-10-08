@@ -6,6 +6,7 @@ import { EquipmentEditor } from "./EquipmentEditor";
 import { EquipmentImage } from "./EquipmentImage";
 import { Modal } from "./Modal";
 import { Icon } from "./Icon";
+import { CsvTransfer } from "./CsvTransfer";
 import styles from "./Manage.module.css";
 export function ManagePage() {
   const { data, remove, error, clearError } = useInventory();
@@ -50,6 +51,7 @@ export function ManagePage() {
           LENSES <span>{data.lenses.length}</span>
         </button>
       </div>
+      <CsvTransfer key={kind} kind={kind} />
       <div className={styles.manageList}>
         {items.map((item) => (
           <article key={item.id}>

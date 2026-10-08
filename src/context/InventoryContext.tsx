@@ -4,11 +4,13 @@ import {
   createLocalRepository,
   type InventoryRepository,
 } from "../utils/storage";
+import { mergeCsvImport, type CsvImport } from "../features/csv/inventoryCsv";
 type InventoryContextValue = {
   data: Inventory;
   error?: string;
   saveCamera(camera: Camera): boolean;
   saveLens(lens: Lens): boolean;
+  importCsv(batch: CsvImport): boolean;
   remove(kind: "camera" | "lens", id: string): boolean;
   clearError(): void;
 };
@@ -58,6 +60,14 @@ export function InventoryProvider({
         ? { ...data, cameras: data.cameras.filter((c) => c.id !== id) }
         : { ...data, lenses: data.lenses.filter((l) => l.id !== id) },
     );
+  const importCsv = (batch: CsvImport) => {
+    try {
+      return commit(mergeCsvImport(data, batch));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "CSVを登録できません。");
+      return false;
+    }
+  };
   return (
     <InventoryContext.Provider
       value={{
@@ -65,6 +75,7 @@ export function InventoryProvider({
         error,
         saveCamera,
         saveLens,
+        importCsv,
         remove,
         clearError: () => setError(undefined),
       }}
