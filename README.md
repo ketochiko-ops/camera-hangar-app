@@ -83,7 +83,7 @@ npm run dev
 npm run dev -- --host 127.0.0.1
 ```
 
-配布元の公開・作業ブランチは **develop** です。新規Gitリポジトリを作る場合も次のようにしてください。
+本番公開ブランチは **develop**、手動確認用ブランチは **pre-develop** です。新規Gitリポジトリを作る場合も次のようにしてください。
 
 ```bash
 git init -b develop
@@ -119,7 +119,7 @@ LinuxのCI等でOS依存パッケージも必要な場合は `npx playwright ins
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e
 ```
 
-E2EはViteを4173ポートで自動起動します。非CI環境では同じURLで起動済みのサーバーを再利用します。失敗時のトレースは`test-results/`へ保存します。`.github/workflows/ci.yml`はdevelopへのpush・PRで同じ確認を行います。
+E2EはViteを4173ポートで自動起動します。非CI環境では同じURLで起動済みのサーバーを再利用します。失敗時のトレースは`test-results/`へ保存します。`.github/workflows/ci.yml`はpre-develop・developへのpush・PRで同じ確認を行います。pre-developへのpushでは、すべての確認に合格したビルドをGitHub Pagesへ公開します。
 
 テストは表示状態だけでなく実際のデータも確認します。
 
@@ -138,6 +138,23 @@ npm run preview
 ```
 
 生成された`dist/`を静的ホスティングへ置くだけで利用できます。Viteの`base: './'`を設定しており、サブディレクトリへの配置も考慮しています。画面切替はクライアント内で行うため、SPAの履歴ルーティング用リライトは不要です。ビルド結果を`file://`で直接開かず、HTTPサーバーで配信してください。Vercel用のビルド設定は`vercel.json`に記載しています。
+
+## GitHub Pagesで確認してから本番公開
+
+確認用URL： **https://ketochiko-ops.github.io/camera-hangar-app/**
+
+1. 初回のみ、GitHubの[Settings → Pages](https://github.com/ketochiko-ops/camera-hangar-app/settings/pages)でSourceを **GitHub Actions** にします。
+2. 作業ブランチの変更を`pre-develop`へ取り込み、pushします。GitHub ActionsがUT・IT・ビルド・E2Eを実行し、合格後に確認用サイトを更新します。失敗した場合、以前の確認用サイトを保持します。
+3. PC・スマートフォン・タブレットから確認用URLを開き、表示・操作・CSV入出力・PNG出力を手動確認します。
+4. 確認できた変更について`pre-develop → develop`のPRを作成し、チェック通過後にマージします。Vercelの本番サイトが更新されます。
+
+初回設定後にPages公開が失敗した場合は、[Actions](https://github.com/ketochiko-ops/camera-hangar-app/actions)で該当実行の「Re-run failed jobs」を選択してください。ワークフローをdevelopにも取り込んだ後は、手動実行のブランチにpre-developを指定して再公開することもできます。
+
+GitHub Pagesの`github-pages`環境にデプロイ対象ブランチの制限がある場合は、[Settings → Environments](https://github.com/ketochiko-ops/camera-hangar-app/settings/environments)でpre-developを許可してください。SourceをActionsにした場合、Pagesの公開元はワークフローの条件でpre-developに限定しています。
+
+`vercel.json`の`git.deploymentEnabled`で、developだけVercelのGit自動デプロイを許可しています。pre-developや作業ブランチのpushは、VercelのPreviewビルドを起動しません。GitHub Pagesのビルド・配信にはGitHub側の利用枠が適用され、Vercelの利用枠は使いません。
+
+登録機材・写真はブラウザとオリジンごとのlocalStorageへ保存されます。確認用サイトとVercel本番サイト、PCとスマートフォンの間でデータは共有されません。機材の移動にはCSVを利用できますが、写真はCSVに含まれません。
 
 ## Vercelでの自動デプロイ
 
