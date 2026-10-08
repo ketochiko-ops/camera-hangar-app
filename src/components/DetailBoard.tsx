@@ -3,6 +3,7 @@ import {
   lensRatingLabels,
   isCamera,
   specLabels,
+  lensSpecLabels,
   type Equipment,
   type Camera,
 } from "../types";
@@ -23,17 +24,17 @@ export function DetailBoard({
   const cam = isCamera(item);
   const specs = cam
     ? [
-        ["マウント", item.mount],
+        ["MOUNT", item.mount],
         ...Object.entries(item.specs).map(([k, v]) => [
           specLabels[k as keyof Camera["specs"]],
           v || "—",
         ]),
       ]
     : [
-        ["対応マウント", item.compatibleMounts.join(" / ")],
-        ["焦点距離", item.focalLength],
-        ["開放F値", item.maxAperture],
-        ["重量", item.weight],
+        [lensSpecLabels.compatibleMounts, item.compatibleMounts.join(" / ")],
+        [lensSpecLabels.focalLength, item.focalLength],
+        [lensSpecLabels.maxAperture, item.maxAperture],
+        [lensSpecLabels.weight, item.weight],
       ];
   return (
     <section

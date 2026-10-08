@@ -34,6 +34,7 @@
 }
 .tabs button[aria-pressed="true"] {
   color: var(--accent);
+  text-shadow: var(--accent-glow);
   border-bottom-color: var(--accent);
 }
 .tabs span {

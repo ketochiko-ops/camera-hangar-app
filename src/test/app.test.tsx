@@ -57,7 +57,7 @@ describe("UI integration", () => {
     await user.type(screen.getByLabelText(/機材名/), "Test Camera");
     await user.type(screen.getByLabelText(/メーカー/), "Test");
     await user.type(screen.getByLabelText(/^カテゴリ/), "Mirrorless");
-    await user.type(screen.getByLabelText(/^マウント/), "Test Mount");
+    await user.type(screen.getByLabelText(/^MOUNT/), "Test Mount");
     await user.type(screen.getByLabelText(/説明・機材メモ/), "My camera");
     await user.click(screen.getByRole("button", { name: "保存する" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -98,7 +98,7 @@ describe("UI integration", () => {
     await user.click(
       screen.getByRole("button", { name: "NIKKOR Z 40mm f/2を編集" }),
     );
-    const mounts = screen.getByLabelText(/対応マウント/);
+    const mounts = screen.getByLabelText(/COMPATIBLE MOUNTS/);
     await user.clear(mounts);
     await user.type(mounts, "Nikon Z, Nikon F");
     expect(mounts).toHaveValue("Nikon Z, Nikon F");

@@ -51,7 +51,7 @@ test("camera and lens CRUD persist across reload", async ({ page }) => {
   await openManagement(page);
   await page.getByRole("button", { name: "カメラを追加" }).click();
   await fillBase(page, "My Camera");
-  await page.getByLabel(/^マウント/).fill("Personal X");
+  await page.getByLabel(/^MOUNT/).fill("Personal X");
   await page.getByRole("button", { name: "保存する" }).click();
   await page.getByRole("button", { name: /CAMERA SELECT/ }).click();
   await page.getByRole("button", { name: "My Cameraを選択" }).click();
@@ -64,10 +64,10 @@ test("camera and lens CRUD persist across reload", async ({ page }) => {
   await page.getByRole("button", { name: /^LENSES/ }).click();
   await page.getByRole("button", { name: "レンズを追加" }).click();
   await fillBase(page, "My Lens");
-  await page.getByLabel(/対応マウント/).fill("Personal X, Nikon F");
-  await page.getByLabel(/焦点距離/).fill("50 mm");
-  await page.getByLabel(/開放F値/).fill("f/1.8");
-  await page.getByLabel(/^重量/).fill("250 g");
+  await page.getByLabel(/COMPATIBLE MOUNTS/).fill("Personal X, Nikon F");
+  await page.getByLabel(/FOCAL LENGTH/).fill("50 mm");
+  await page.getByLabel(/MAX APERTURE/).fill("f/1.8");
+  await page.getByLabel(/^WEIGHT/).fill("250 g");
   await page.getByRole("button", { name: "保存する" }).click();
   await page.getByRole("button", { name: /LENS.*LOADOUT/ }).click();
   await page.getByRole("button", { name: "My Lensを選択" }).click();
@@ -107,8 +107,8 @@ test("camera and lens CRUD persist across reload", async ({ page }) => {
 test("form errors and local photo upload", async ({ page }) => {
   await openManagement(page);
   await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
-  await page.getByLabel("RESOLUTION / 解像力").fill("11");
-  await page.getByLabel("発売年").fill("invalid");
+  await page.getByLabel(/^RESOLUTION\b/).fill("11");
+  await page.getByLabel(/^RELEASE YEAR\b/).fill("invalid");
   await page.getByRole("button", { name: "保存する" }).click();
   await expect(
     page.getByText("評価は0〜10の数値で入力してください。"),
@@ -116,8 +116,8 @@ test("form errors and local photo upload", async ({ page }) => {
   await expect(
     page.getByText("発売年は1800〜2199の整数で入力してください。"),
   ).toBeVisible();
-  await page.getByLabel("RESOLUTION / 解像力").fill("8");
-  await page.getByLabel("発売年").fill("2023");
+  await page.getByLabel(/^RESOLUTION\b/).fill("8");
+  await page.getByLabel(/^RELEASE YEAR\b/).fill("2023");
   await page.getByLabel("機材画像をアップロード").setInputFiles({
     name: "invalid.svg",
     mimeType: "image/svg+xml",
