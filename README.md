@@ -144,7 +144,7 @@ npm run preview
 
 | 設定 | 値 |
 | --- | --- |
-| Production Branch | `develop` |
+| Production Branch | `develop`（Vercel画面での設定が必要） |
 | Framework Preset | Vite |
 | Root Directory | リポジトリ直下 |
 | Install Command | `npm ci` |
@@ -153,7 +153,7 @@ npm run preview
 | Node.js | 24.x |
 | 環境変数 | この静的アプリでは不要 |
 
-VercelのGit連携はProduction Branchへのpushで起動するため、PRを`develop`へマージすると本番が更新されます。直接`develop`にpushした場合も起動します。GitHub ActionsはUT・IT・E2E・ビルド検査を担当し、VercelはGit連携でデプロイします。CIにVercelのトークンを置く必要はありません。
+Vercelの[Settings → Environments](https://vercel.com/ketochiko-ops-projects/camera-hangar-app/settings/environments)でProductionのBranch Trackingを`develop`へ設定してください。接続済みツールにはこの設定の変更機能がないため、現時点ではこの1項目だけ画面操作が必要です。設定後は、PRを`develop`へマージすると本番が更新されます。直接`develop`にpushした場合も起動します。GitHub ActionsはUT・IT・E2E・ビルド検査を担当し、VercelはGit連携でデプロイします。CIにVercelのトークンを置く必要はありません。
 
 テスト通過をマージの条件にする場合は、GitHubの`develop`ブランチルールで`verify`チェックを必須にしてください。VercelのGit連携だけではGitHub Actionsの完了を待たないため、本番更新をテスト通過後に限定したい場合は、このブランチルールまたはVercel Deployment Checksを追加します。
 
