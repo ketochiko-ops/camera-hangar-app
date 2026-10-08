@@ -34,7 +34,7 @@ Firefox・Safari・スマートフォン実機は未検証です。GitHub Action
 - 初回公開コミット：`8394264`
 - 初回developへのpushはVercelの初回デプロイ特例でProductionになりましたが、2回目のpushはPreviewでした。その後、ProductionのBranch Trackingをdevelopへ切り替えました。
 - 最新の実装コミット`318a4c7`はAPIからProductionとして別途公開し、READYを確認しました。
-- Production Branchの変更はユーザーがVercel画面から実施し、変更済みの連絡を受けました。設定後の確認としてこの文書更新をdevelopへpushし、VercelのGit連携による本番デプロイを検証します。
+- Production Branchの変更はユーザーがVercel画面から実施しました。設定後のコミット`d3aac4b`をdevelopへpushすると、VercelのGit連携から本番デプロイ`dpl_F4jw2ZToirSVKxnqMmFvimRD18mv`が自動起動し、`source: git`・`target: production`・`READY`と公開URLの割り当てを確認できました。
 - Vercel上でNode.js 24.x、`npm ci`、`npm run build`、`dist`出力のビルドが成功。
 - Vercelコネクター経由で本番HTML・JavaScript・CSSのHTTP 200応答を確認。
 - 実行環境の送信先制限により、本番への直接ブラウザ接続・匿名アクセスの再検証は行っていません。ローカルの実ブラウザE2Eは12件通過しています。
