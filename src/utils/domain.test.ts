@@ -49,9 +49,9 @@ describe("validation", () => {
   it("rejects nonfinite and out of range ratings", () => {
     const c = structuredClone(sampleInventory.cameras[0]);
     c.ratings.resolution = 11;
-    c.ratings.highIso = NaN;
+    c.ratings.lowLight = NaN;
     expect(validateEquipment(c)["ratings.resolution"]).toBeTruthy();
-    expect(validateEquipment(c)["ratings.highIso"]).toBeTruthy();
+    expect(validateEquipment(c)["ratings.lowLight"]).toBeTruthy();
   });
   it("rejects malformed numeric fields", () => {
     const c = structuredClone(sampleInventory.cameras[0]);

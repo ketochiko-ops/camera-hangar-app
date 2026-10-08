@@ -2,13 +2,13 @@ import {
   cameraRatingLabels,
   lensRatingLabels,
   isCamera,
-  specLabels,
   lensSpecLabels,
   type Equipment,
   type Camera,
 } from "../types";
 import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
+import { cameraDetailSpecs } from "../utils/equipmentProfile";
 import styles from "./Equipment.module.css";
 export function DetailBoard({
   item,
@@ -23,13 +23,7 @@ export function DetailBoard({
 }) {
   const cam = isCamera(item);
   const specs = cam
-    ? [
-        ["MOUNT", item.mount],
-        ...Object.entries(item.specs).map(([k, v]) => [
-          specLabels[k as keyof Camera["specs"]],
-          v || "—",
-        ]),
-      ]
+    ? cameraDetailSpecs(item)
     : [
         [lensSpecLabels.compatibleMounts, item.compatibleMounts.join(" / ")],
         [lensSpecLabels.focalLength, item.focalLength],

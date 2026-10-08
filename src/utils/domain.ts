@@ -1,6 +1,7 @@
 import {
   cameraRatingLabels,
   lensRatingLabels,
+  legacyCameraRatingKeys,
   isCamera,
   type Equipment,
   type Lens,
@@ -31,7 +32,7 @@ export const filterLenses = (
     : lenses;
 export type FormErrors = Record<string, string>;
 const positiveRange =
-  /^\s*(?:約\s*)?(?:f\/)?\d+(?:\.\d+)?(?:\s*[-–〜]\s*\d+(?:\.\d+)?)?\s*(?:g|kg|mm|MP|fps|コマ\/秒)?\s*$/i;
+  /^\s*(?:約\s*)?(?:f\/)?\d+(?:\.\d+)?(?:\s*[-–〜]\s*\d+(?:\.\d+)?)?\s*(?:g|kg|mm|MP|fps|frames?\s*\/\s*s|コマ\/秒)?\s*$/i;
 export function validateEquipment(item: Equipment): FormErrors {
   const errors: FormErrors = {};
   const required = (key: string, value: unknown) => {
@@ -74,7 +75,13 @@ export function validateEquipment(item: Equipment): FormErrors {
     }
   }
   const labels = isCamera(item) ? cameraRatingLabels : lensRatingLabels;
-  for (const key of Object.keys(labels)) {
+  const keys = [
+    ...Object.keys(labels),
+    ...(isCamera(item)
+      ? legacyCameraRatingKeys.filter((key) => Object.hasOwn(item.ratings, key))
+      : []),
+  ];
+  for (const key of keys) {
     const value = (item.ratings as Record<string, number>)[key];
     if (!Number.isFinite(value) || value < 0 || value > 10)
       errors[`ratings.${key}`] = "評価は0〜10の数値で入力してください。";

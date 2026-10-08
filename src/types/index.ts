@@ -1,22 +1,25 @@
-export const cameraRatingLabels = {
+export const ratingLabels = {
   resolution: "RESOLUTION",
-  highIso: "HIGH ISO",
-  autofocus: "AUTOFOCUS",
-  dynamicRange: "DYNAMIC RANGE",
-  handling: "HANDLING",
-  portability: "PORTABILITY",
-  colorRendering: "COLOR",
-} as const;
-export const lensRatingLabels = {
-  sharpness: "SHARPNESS",
-  portability: "PORTABILITY",
-  versatility: "VERSATILITY",
+  bokeh: "BOKEH",
   lowLight: "LOW LIGHT",
-  closeUp: "CLOSE UP",
-  backgroundBlur: "BOKEH",
+  reach: "REACH",
+  closeFocus: "CLOSE FOCUS",
+  mobility: "MOBILITY",
+  versatility: "VERSATILITY",
 } as const;
+export const cameraRatingLabels = ratingLabels;
+export const lensRatingLabels = ratingLabels;
 export type RatingKey = keyof typeof cameraRatingLabels;
 export type LensRatingKey = keyof typeof lensRatingLabels;
+// Former camera scores remain available in saved data and CSV backups.
+export const legacyCameraRatingKeys = [
+  "autofocus",
+  "dynamicRange",
+  "handling",
+  "colorRendering",
+] as const;
+export type Ratings = Record<RatingKey, number> &
+  Partial<Record<(typeof legacyCameraRatingKeys)[number], number>>;
 export type Camera = {
   id: string;
   name: string;
@@ -36,7 +39,7 @@ export type Camera = {
     autofocusNote: string;
     releaseYear: string;
   };
-  ratings: Record<RatingKey, number>;
+  ratings: Ratings;
 };
 export type Lens = {
   id: string;
@@ -50,7 +53,7 @@ export type Lens = {
   weight: string;
   summary: string;
   usageTags: string[];
-  ratings: Record<LensRatingKey, number>;
+  ratings: Ratings;
 };
 export type Equipment = Camera | Lens;
 export type EquipmentKind = "camera" | "lens";
@@ -58,14 +61,22 @@ export type Inventory = { version: 1; cameras: Camera[]; lenses: Lens[] };
 export const isCamera = (item: Equipment): item is Camera => "specs" in item;
 export const specLabels: Record<keyof Camera["specs"], string> = {
   sensor: "SENSOR",
-  resolution: "EFFECTIVE PIXELS",
-  continuousShooting: "BURST RATE",
+  resolution: "PIXELS",
+  continuousShooting: "BURST",
   ibis: "IMAGE STABILIZATION",
   weight: "WEIGHT",
-  storageSlots: "STORAGE MEDIA",
+  storageSlots: "MEDIA",
   autofocusNote: "AF SYSTEM",
-  releaseYear: "RELEASE YEAR",
+  releaseYear: "RELEASE",
 };
+export const cameraDetailSpecKeys = [
+  "sensor",
+  "resolution",
+  "continuousShooting",
+  "storageSlots",
+  "weight",
+  "releaseYear",
+] as const;
 export const lensSpecLabels = {
   compatibleMounts: "COMPATIBLE MOUNTS",
   focalLength: "FOCAL LENGTH",

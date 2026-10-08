@@ -1,5 +1,6 @@
 import { sampleInventory } from "../data/sample";
 import { validateEquipment } from "./domain";
+import { migrateLegacyRatings } from "./equipmentProfile";
 import { specLabels, type Camera, type Inventory, type Lens } from "../types";
 export const STORAGE_KEY = "optical-arsenal:inventory:v1";
 export interface InventoryRepository {
@@ -24,6 +25,18 @@ export function createLocalRepository(
           !Array.isArray(data.lenses)
         )
           throw new Error("Invalid schema");
+        for (const [items, camera] of [
+          [data.cameras, true],
+          [data.lenses, false],
+        ] as const) {
+          for (const item of items) {
+            if (item && typeof item === "object")
+              item.ratings = migrateLegacyRatings(
+                item.ratings,
+                camera,
+              ) as Camera["ratings"];
+          }
+        }
         const valid = (items: (Camera | Lens)[], camera: boolean) =>
           items.every(
             (item) =>

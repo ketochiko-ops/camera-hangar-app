@@ -2,14 +2,13 @@ import {
   cameraRatingLabels,
   lensRatingLabels,
   isCamera,
-  specLabels,
   lensSpecLabels,
   type Equipment,
-  type Camera,
 } from "../types";
 import { Modal } from "./Modal";
 import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
+import { cameraDetailSpecs } from "../utils/equipmentProfile";
 import styles from "./Manage.module.css";
 export function CompareModal({
   items,
@@ -45,13 +44,7 @@ export function CompareModal({
               />
               <dl>
                 {(cam
-                  ? [
-                      ["MOUNT", item.mount],
-                      ...Object.entries(item.specs).map(([k, v]) => [
-                        specLabels[k as keyof Camera["specs"]],
-                        v || "—",
-                      ]),
-                    ]
+                  ? cameraDetailSpecs(item)
                   : [
                       [
                         lensSpecLabels.compatibleMounts,

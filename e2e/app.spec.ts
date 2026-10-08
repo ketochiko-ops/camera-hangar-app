@@ -16,6 +16,43 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Nikon Z fを選択" }),
   ).toBeVisible();
+  const board = page.getByTestId("detail-board");
+  const ratingNames = [
+    "RESOLUTION",
+    "BOKEH",
+    "LOW LIGHT",
+    "REACH",
+    "CLOSE FOCUS",
+    "MOBILITY",
+    "VERSATILITY",
+  ];
+  const specNames = [
+    "SENSOR",
+    "PIXELS",
+    "MOUNT",
+    "BURST",
+    "MEDIA",
+    "WEIGHT",
+    "RELEASE",
+  ];
+  await expect(board.getByRole("meter")).toHaveCount(7);
+  expect(
+    await board
+      .getByRole("meter")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getAttribute("aria-label")),
+      ),
+  ).toEqual(ratingNames);
+  expect(await board.locator("dt").allTextContents()).toEqual(specNames);
+  expect(await board.locator("dd").allTextContents()).toEqual([
+    "FULL FRAME CMOS",
+    "24.5 MP",
+    "NIKON Z",
+    "14frames /s",
+    "SD + microSD",
+    "710 g",
+    "2023",
+  ]);
   await expect(
     page.getByRole("button", { name: "FUJIFILM X-T5を選択" }),
   ).toBeVisible();
@@ -26,6 +63,14 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
       .getByRole("heading", { name: "Nikon D7500" }),
   ).toBeVisible();
   await page.getByRole("button", { name: /LENS.*LOADOUT/ }).click();
+  await expect(board.getByRole("meter")).toHaveCount(7);
+  expect(
+    await board
+      .getByRole("meter")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getAttribute("aria-label")),
+      ),
+  ).toEqual(ratingNames);
   await expect(
     page.getByRole("button", { name: "NIKKOR Z 40mm f/2を選択" }),
   ).toHaveCount(0);
@@ -108,7 +153,7 @@ test("form errors and local photo upload", async ({ page }) => {
   await openManagement(page);
   await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
   await page.getByLabel(/^RESOLUTION\b/).fill("11");
-  await page.getByLabel(/^RELEASE YEAR\b/).fill("invalid");
+  await page.getByLabel(/^RELEASE\b/).fill("invalid");
   await page.getByRole("button", { name: "保存する" }).click();
   await expect(
     page.getByText("評価は0〜10の数値で入力してください。"),
@@ -117,7 +162,7 @@ test("form errors and local photo upload", async ({ page }) => {
     page.getByText("発売年は1800〜2199の整数で入力してください。"),
   ).toBeVisible();
   await page.getByLabel(/^RESOLUTION\b/).fill("8");
-  await page.getByLabel(/^RELEASE YEAR\b/).fill("2023");
+  await page.getByLabel(/^RELEASE\b/).fill("2023");
   await page.getByLabel("機材画像をアップロード").setInputFiles({
     name: "invalid.svg",
     mimeType: "image/svg+xml",
@@ -157,8 +202,89 @@ test("compares up to three cameras", async ({ page }) => {
       .getByRole("dialog", { name: "機材を比較" })
       .getByRole("heading", { name: "Nikon Z f", exact: true }),
   ).toBeVisible();
+  const first = page
+    .getByRole("dialog", { name: "機材を比較" })
+    .locator("article")
+    .first();
+  expect(
+    await first
+      .getByRole("meter")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getAttribute("aria-label")),
+      ),
+  ).toEqual([
+    "RESOLUTION",
+    "BOKEH",
+    "LOW LIGHT",
+    "REACH",
+    "CLOSE FOCUS",
+    "MOBILITY",
+    "VERSATILITY",
+  ]);
+  expect(await first.locator("dt").allTextContents()).toEqual([
+    "SENSOR",
+    "PIXELS",
+    "MOUNT",
+    "BURST",
+    "MEDIA",
+    "WEIGHT",
+    "RELEASE",
+  ]);
+  await expect(first.getByText("14frames /s", { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
+});
+test("legacy saved scores remain usable and new scores persist after editing", async ({
+  page,
+}) => {
+  const inventory = await import("../src/data/sample").then((module) =>
+    structuredClone(module.sampleInventory),
+  );
+  Object.assign(inventory.cameras[0], {
+    ratings: {
+      resolution: 7.5,
+      highIso: 9,
+      autofocus: 8,
+      dynamicRange: 7,
+      handling: 6,
+      portability: 5,
+      colorRendering: 4,
+    },
+  });
+  const raw = JSON.stringify(inventory);
+  await page.evaluate(
+    (value) => localStorage.setItem("optical-arsenal:inventory:v1", value),
+    raw,
+  );
+  await page.reload();
+  const board = page.getByTestId("detail-board");
+  await expect(
+    board.getByRole("meter", { name: "LOW LIGHT", exact: true }),
+  ).toHaveAttribute("aria-valuenow", "9");
+  await expect(
+    board.getByRole("meter", { name: "REACH", exact: true }),
+  ).toHaveAttribute("aria-valuenow", "0");
+  expect(
+    await page.evaluate(() =>
+      localStorage.getItem("optical-arsenal:inventory:v1"),
+    ),
+  ).toBe(raw);
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  await page.getByLabel(/^REACH\b/).fill("7.5");
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  const saved = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem("optical-arsenal:inventory:v1")!)
+        .cameras[0],
+  );
+  expect(saved.ratings).toMatchObject({
+    reach: 7.5,
+    lowLight: 9,
+    mobility: 5,
+    autofocus: 8,
+  });
 });
 for (const view of ["camera", "lens"] as const)
   for (const [ratio, width, height] of [

@@ -20,23 +20,32 @@ const cameraSpecs = {
   af_system: "autofocusNote",
   release_year: "releaseYear",
 } as const;
-const cameraRatings = {
+const profileRatings = {
   rating_resolution: "resolution",
-  rating_high_iso: "highIso",
+  rating_bokeh: "bokeh",
+  rating_low_light: "lowLight",
+  rating_reach: "reach",
+  rating_close_focus: "closeFocus",
+  rating_mobility: "mobility",
+  rating_versatility: "versatility",
+} as const;
+const legacyCameraRatings = {
   rating_autofocus: "autofocus",
   rating_dynamic_range: "dynamicRange",
   rating_handling: "handling",
-  rating_portability: "portability",
   rating_color: "colorRendering",
 } as const;
-const lensRatings = {
-  rating_sharpness: "sharpness",
-  rating_portability: "portability",
-  rating_versatility: "versatility",
-  rating_low_light: "lowLight",
-  rating_close_up: "closeUp",
-  rating_bokeh: "backgroundBlur",
-} as const;
+const ratingAliases: Record<EquipmentKind, Record<string, string>> = {
+  camera: {
+    rating_high_iso: "rating_low_light",
+    rating_portability: "rating_mobility",
+  },
+  lens: {
+    rating_sharpness: "rating_resolution",
+    rating_portability: "rating_mobility",
+    rating_close_up: "rating_close_focus",
+  },
+};
 const baseColumns = ["id", "name", "maker", "category", "summary"];
 const requiredBase = ["name", "maker", "category", "summary"];
 export const csvColumns = (kind: EquipmentKind): string[] =>
@@ -46,7 +55,7 @@ export const csvColumns = (kind: EquipmentKind): string[] =>
         "role",
         "mount",
         ...Object.keys(cameraSpecs),
-        ...Object.keys(cameraRatings),
+        ...Object.keys(profileRatings),
       ]
     : [
         ...baseColumns,
@@ -55,7 +64,7 @@ export const csvColumns = (kind: EquipmentKind): string[] =>
         "max_aperture",
         "weight",
         "usage_tags",
-        ...Object.keys(lensRatings),
+        ...Object.keys(profileRatings),
       ];
 const requiredColumns = (kind: EquipmentKind) =>
   kind === "camera"
@@ -90,17 +99,18 @@ export function equipmentCsvValues(item: Equipment): Record<string, string> {
     values.mount = item.mount;
     for (const [column, key] of Object.entries(cameraSpecs))
       values[column] = item.specs[key];
-    for (const [column, key] of Object.entries(cameraRatings))
-      values[column] = String(item.ratings[key]);
+    for (const [column, key] of Object.entries(legacyCameraRatings))
+      if (item.ratings[key] !== undefined)
+        values[column] = String(item.ratings[key]);
   } else {
     values.compatible_mounts = item.compatibleMounts.join("|");
     values.focal_length = item.focalLength;
     values.max_aperture = item.maxAperture;
     values.weight = item.weight;
     values.usage_tags = item.usageTags.join("|");
-    for (const [column, key] of Object.entries(lensRatings))
-      values[column] = String(item.ratings[key]);
   }
+  for (const [column, key] of Object.entries(profileRatings))
+    values[column] = String(item.ratings[key]);
   return values;
 }
 
@@ -108,7 +118,16 @@ export function exportEquipmentCsv(
   kind: EquipmentKind,
   items: Equipment[],
 ): string {
-  const columns = csvColumns(kind);
+  const columns = [
+    ...csvColumns(kind),
+    ...(kind === "camera"
+      ? Object.entries(legacyCameraRatings)
+          .filter(([, key]) =>
+            items.some((item) => item.ratings[key] !== undefined),
+          )
+          .map(([column]) => column)
+      : []),
+  ];
   const rows = items.map((item) => {
     if (isCamera(item) !== (kind === "camera"))
       throw new Error("機材の種類が一致しません。");
@@ -201,8 +220,16 @@ export function parseEquipmentCsv(
     issue(1, "CSV", "CSVが空です。");
     return result;
   }
-  const headers = rows[0].cells.map((cell) => cell.trim().toLowerCase());
-  const allowed = csvColumns(kind);
+  const headers = rows[0].cells.map((cell) => {
+    const header = cell.trim().toLowerCase();
+    return Object.hasOwn(ratingAliases[kind], header)
+      ? ratingAliases[kind][header]
+      : header;
+  });
+  const allowed = [
+    ...csvColumns(kind),
+    ...(kind === "camera" ? Object.keys(legacyCameraRatings) : []),
+  ];
   if (new Set(headers).size !== headers.length)
     issue(rows[0].line, "HEADER", "列名が重複しています。");
   for (const header of headers)
@@ -222,6 +249,16 @@ export function parseEquipmentCsv(
       "機材の行がありません。テンプレートに登録内容を入力してください。",
     );
   if (result.issues.length) return result;
+  const ratingColumns = {
+    ...profileRatings,
+    ...(kind === "camera"
+      ? Object.fromEntries(
+          Object.entries(legacyCameraRatings).filter(([column]) =>
+            headers.includes(column),
+          ),
+        )
+      : {}),
+  };
   const ids = new Set<string>();
   for (const row of rows.slice(1)) {
     if (row.cells.length !== headers.length) {
@@ -245,18 +282,16 @@ export function parseEquipmentCsv(
     if (ids.has(id)) issue(row.line, "id", "CSV内でIDが重複しています。");
     ids.add(id);
     const ratings = Object.fromEntries(
-      Object.entries(kind === "camera" ? cameraRatings : lensRatings).map(
-        ([column, key]) => {
-          const text = get(column).trim();
-          const value =
-            text === ""
-              ? 0
-              : /^(?:\d+(?:\.\d+)?|\.\d+)$/.test(text)
-                ? Number(text)
-                : NaN;
-          return [key, value];
-        },
-      ),
+      Object.entries(ratingColumns).map(([column, key]) => {
+        const text = get(column).trim();
+        const value =
+          text === ""
+            ? 0
+            : /^(?:\d+(?:\.\d+)?|\.\d+)$/.test(text)
+              ? Number(text)
+              : NaN;
+        return [key, value];
+      }),
     );
     const base = {
       id,
@@ -307,9 +342,10 @@ export function parseEquipmentCsv(
         ]),
       ),
       ...Object.fromEntries(
-        Object.entries(kind === "camera" ? cameraRatings : lensRatings).map(
-          ([column, key]) => [`ratings.${key}`, column],
-        ),
+        Object.entries(ratingColumns).map(([column, key]) => [
+          `ratings.${key}`,
+          column,
+        ]),
       ),
     };
     for (const [field, message] of Object.entries(validateEquipment(item)))
@@ -343,7 +379,19 @@ export function mergeCsvImport(data: Inventory, batch: CsvImport): Inventory {
       );
     seen.add(item.id);
     const previous = existing.get(item.id);
-    existing.set(item.id, { ...item, image: previous?.image });
+    const previousScores =
+      previous && isCamera(previous)
+        ? Object.fromEntries(
+            Object.values(legacyCameraRatings)
+              .filter((key) => previous.ratings[key] !== undefined)
+              .map((key) => [key, previous.ratings[key]]),
+          )
+        : {};
+    existing.set(item.id, {
+      ...item,
+      ratings: { ...previousScores, ...item.ratings },
+      image: previous?.image,
+    });
   }
   return batch.kind === "camera"
     ? { ...data, cameras: [...existing.values()] as Camera[] }
@@ -351,7 +399,7 @@ export function mergeCsvImport(data: Inventory, batch: CsvImport): Inventory {
 }
 
 export function csvCreationPrompt(kind: EquipmentKind): string {
-  return `調査結果から${kind === "camera" ? "カメラ" : "レンズ"}登録用のUTF-8 CSVファイルを作成してください。\nヘッダーは次の列名をそのまま使ってください。\n${csvColumns(kind).join(",")}\n必須項目：${requiredColumns(kind).join(", ")}。\n1行に1機材。新規登録のidは空欄。既存機材の更新は出力CSVのidを保持。複数マウント・用途タグは | 区切り。カンマ・改行・引用符を含む値は二重引用符で囲み、値内の引用符は二重にしてください。\n評価は0〜10の数値。主観評価を測定値と混同せず、評価できない項目は空欄（アプリでは0として登録）。不明な任意スペックも空欄にし、必須情報が確認できない機材は含めないでください。\n重量は例 710 g、画素数は例 24.5 MP、連写は例 14 fps、焦点距離は例 24–70 mm、開放F値は例 f/2.8、発売年は4桁。nameは100文字以内、summaryは700文字以内、その他の各セルは180文字以内。写真はCSVに含めません。\n調査元URLと不確かな情報はCSVと別に説明してください。CSV内に説明行やMarkdownのコードフェンス、追加列を入れないでください。`;
+  return `調査結果から${kind === "camera" ? "カメラ" : "レンズ"}登録用のUTF-8 CSVファイルを作成してください。\nヘッダーは次の列名をそのまま使ってください。\n${csvColumns(kind).join(",")}\n必須項目：${requiredColumns(kind).join(", ")}。\n1行に1機材。新規登録のidは空欄。既存機材の更新は出力CSVのidを保持。複数マウント・用途タグは | 区切り。カンマ・改行・引用符を含む値は二重引用符で囲み、値内の引用符は二重にしてください。\n評価は0〜10の数値。主観評価を測定値と混同せず、評価できない項目は空欄（アプリでは0として登録）。不明な任意スペックも空欄にし、必須情報が確認できない機材は含めないでください。\nセンサーは例 FULL FRAME CMOS、重量は例 710 g、画素数は例 24.5 MP、連写は例 14frames /s、焦点距離は例 24–70 mm、開放F値は例 f/2.8、発売年は4桁。nameは100文字以内、summaryは700文字以内、その他の各セルは180文字以内。写真はCSVに含めません。\n調査元URLと不確かな情報はCSVと別に説明してください。CSV内に説明行やMarkdownのコードフェンス、追加列を入れないでください。`;
 }
 
 export function downloadCsv(text: string, filename: string): void {

@@ -10,6 +10,72 @@ import {
 } from "./inventoryCsv";
 
 describe("equipment CSV", () => {
+  it("imports former camera ratings, preserves retired scores in exports and updates", () => {
+    const batch = parseEquipmentCsv(
+      "id,name,maker,category,summary,role,mount,burst_rate,rating_resolution,rating_high_iso,rating_portability,rating_autofocus,rating_dynamic_range,rating_handling,rating_color\nnikon-zf,Camera,Nikon,Mirrorless,Notes,MULTIROLE,Nikon Z,14frames /s,7,8,9,6,5,4,3",
+      "camera",
+    );
+    expect(batch.issues).toEqual([]);
+    expect(batch.items[0].ratings).toEqual({
+      resolution: 7,
+      bokeh: 0,
+      lowLight: 8,
+      reach: 0,
+      closeFocus: 0,
+      mobility: 9,
+      versatility: 0,
+      autofocus: 6,
+      dynamicRange: 5,
+      handling: 4,
+      colorRendering: 3,
+    });
+    const csv = exportEquipmentCsv("camera", batch.items);
+    expect(csv).toContain("rating_autofocus");
+    expect(parseEquipmentCsv(csv, "camera").items).toEqual(batch.items);
+    const stored = mergeCsvImport(sampleInventory, batch);
+    const update = parseEquipmentCsv(
+      exportEquipmentCsv("camera", [
+        { ...sampleInventory.cameras[0], name: "Updated" },
+      ]),
+      "camera",
+    );
+    expect(mergeCsvImport(stored, update).cameras[0].ratings).toMatchObject({
+      autofocus: 6,
+      dynamicRange: 5,
+      handling: 4,
+      colorRendering: 3,
+    });
+  });
+  it("imports former lens rating columns into the corresponding new scores", () => {
+    const parsed = parseEquipmentCsv(
+      "name,maker,category,summary,compatible_mounts,focal_length,max_aperture,weight,rating_sharpness,rating_portability,rating_versatility,rating_low_light,rating_close_up,rating_bokeh\nLens,Nikon,Prime,Notes,Nikon Z,40 mm,f/2,170 g,8,9,7,6,5,4",
+      "lens",
+    );
+    expect(parsed.issues).toEqual([]);
+    expect(parsed.items[0].ratings).toEqual({
+      resolution: 8,
+      bokeh: 4,
+      lowLight: 6,
+      reach: 0,
+      closeFocus: 5,
+      mobility: 9,
+      versatility: 7,
+    });
+  });
+  it("rejects duplicate old and new rating names and invalid retired scores", () => {
+    expect(
+      parseEquipmentCsv(
+        "name,maker,category,summary,role,mount,rating_high_iso,rating_low_light\nCamera,Nikon,Mirrorless,Notes,MULTIROLE,Nikon Z,5,6",
+        "camera",
+      ).issues[0].message,
+    ).toMatch(/重複/);
+    const parsed = parseEquipmentCsv(
+      "name,maker,category,summary,role,mount,rating_autofocus\nCamera,Nikon,Mirrorless,Notes,MULTIROLE,Nikon Z,11",
+      "camera",
+    );
+    expect(parsed.items).toEqual([]);
+    expect(parsed.issues[0].column).toBe("rating_autofocus");
+  });
   for (const kind of ["camera", "lens"] as const) {
     it(`round trips every ${kind} field with UTF-8 BOM and CRLF`, () => {
       const items =

@@ -3,6 +3,7 @@ import {
   cameraRatingLabels,
   lensRatingLabels,
   specLabels,
+  cameraDetailSpecKeys,
   lensSpecLabels,
   isCamera,
   type Camera,
@@ -260,10 +261,10 @@ export function EquipmentEditor({
               02 / TECHNICAL DATA <small>OPTIONAL</small>
             </h3>
             <div className={styles.formGrid}>
-              {Object.entries(specLabels).map(([key, label]) =>
+              {cameraDetailSpecKeys.map((key) =>
                 field(
                   `specs.${key}`,
-                  label,
+                  specLabels[key],
                   (item as Camera).specs[key as keyof Camera["specs"]],
                   (v) =>
                     setItem((prev) => ({
@@ -271,11 +272,14 @@ export function EquipmentEditor({
                       specs: { ...(prev as Camera).specs, [key]: v },
                     })),
                   false,
-                  key === "weight"
-                    ? "710 g"
-                    : key === "releaseYear"
-                      ? "2023"
-                      : "",
+                  {
+                    sensor: "FULL FRAME CMOS",
+                    resolution: "24.5 MP",
+                    continuousShooting: "14frames /s",
+                    storageSlots: "SD + microSD",
+                    weight: "710 g",
+                    releaseYear: "2023",
+                  }[key],
                 ),
               )}
             </div>
