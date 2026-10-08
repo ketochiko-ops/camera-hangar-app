@@ -157,7 +157,9 @@ VercelのGit連携はProduction Branchへのpushで起動するため、PRを`de
 
 テスト通過をマージの条件にする場合は、GitHubの`develop`ブランチルールで`verify`チェックを必須にしてください。VercelのGit連携だけではGitHub Actionsの完了を待たないため、本番更新をテスト通過後に限定したい場合は、このブランチルールまたはVercel Deployment Checksを追加します。
 
-本番URLはVercelのProductionドメインを利用します。アップロード写真と登録機材は閲覧者ごとのlocalStorageに保持され、Vercelへ送信されません。ローカルと本番は別オリジンなのでデータは共有されません。
+本番URL： **https://camera-hangar-app.vercel.app**
+
+VercelのProductionドメインを利用します。アップロード写真と登録機材は閲覧者ごとのlocalStorageに保持され、Vercelへ送信されません。ローカルと本番は別オリジンなのでデータは共有されません。
 
 ## データ保存
 

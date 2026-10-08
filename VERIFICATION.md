@@ -22,4 +22,21 @@
 
 PNGの検証は出力関数のモックではなく、Chromiumの実際のダウンロードファイルを読み取って行っています。単体テストで保存容量エラーを再現し、結合テストでエラー時に編集内容を保持することも確認しています。壊れた保存データが上書きされないこと、複数マウントの手入力が保持されることは、失敗する再現テストを追加してから修正しました。
 
-Firefox・Safari・スマートフォン実機は未検証です。GitHub Actionsの定義は追加していますが、リモートへのpush・CI実行・サイト公開は行っていません。
+Firefox・Safari・スマートフォン実機は未検証です。GitHub Actionsの定義を追加しています。Vercelでの公開確認については以下に記載しています。
+
+## Vercel公開・自動デプロイの確認
+
+- プロジェクト：`camera-hangar-app`（既存プロジェクトを使用）
+- リポジトリ：`ketochiko-ops/camera-hangar-app`
+- GitHubデフォルトブランチ：`develop`
+- 公開URL：https://camera-hangar-app.vercel.app
+- Vercel上の環境：`production`、状態：`READY`、デプロイ元：`git`
+- 初回公開コミット：`8394264`
+- developへのpushによりGit連携から自動起動することを確認。CLI/APIから手動デプロイする方式ではありません。
+- Vercel上でNode.js 24.x、`npm ci`、`npm run build`、`dist`出力のビルドが成功。
+- Vercelコネクター経由で本番HTML・JavaScript・CSSのHTTP 200応答を確認。
+- 実行環境の送信先制限により、本番への直接ブラウザ接続・匿名アクセスの再検証は行っていません。ローカルの実ブラウザE2Eは12件通過しています。
+- 本番のエラー／fatal実行ログの照会で該当ログなし。このアプリは静的SPAで、サーバー関数は使いません。
+- ビルドログで発見した開発依存の既知の脆弱性を解消するため、Vite 7互換のVitest 4.1.11へ更新。`npm audit`は0件、UT・IT30件と本番ビルドも再確認済み。
+
+PRをdevelopへマージすると通常のGit pushとしてVercelの本番更新が起動します。GitHub Actionsのテスト成功をマージ条件にする場合は、READMEに記載したブランチルールを追加できます。GitHub Actionsの実行結果は、この環境のコネクターではpush起動の実行一覧を取得できないため、完了確認にはGitHubのActions画面を使用してください。
