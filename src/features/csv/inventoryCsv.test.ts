@@ -1,0 +1,191 @@
+import { describe, expect, it } from "vitest";
+import { sampleInventory } from "../../data/sample";
+import { isCamera } from "../../types";
+import {
+  CSV_MAX_BYTES,
+  csvColumns,
+  exportEquipmentCsv,
+  mergeCsvImport,
+  parseEquipmentCsv,
+} from "./inventoryCsv";
+
+describe("equipment CSV", () => {
+  for (const kind of ["camera", "lens"] as const) {
+    it(`round trips every ${kind} field with UTF-8 BOM and CRLF`, () => {
+      const items =
+        kind === "camera" ? sampleInventory.cameras : sampleInventory.lenses;
+      const csv = exportEquipmentCsv(kind, items);
+      expect(csv.startsWith("\uFEFF")).toBe(true);
+      const parsed = parseEquipmentCsv(csv, kind);
+      expect(parsed.issues).toEqual([]);
+      expect(parsed.items).toEqual(items);
+    });
+  }
+  it("preserves commas, escaped quotes, Japanese and multiline notes", () => {
+    const camera = structuredClone(sampleInventory.cameras[0]);
+    camera.name = 'Camera, "special edition"';
+    camera.summary = '撮影メモ, "風景"\r\n次の行\n最終行';
+    expect(
+      parseEquipmentCsv(exportEquipmentCsv("camera", [camera]), "camera").items,
+    ).toEqual([camera]);
+  });
+  it("escapes spreadsheet formulas reversibly, including literal apostrophes", () => {
+    const camera = structuredClone(sampleInventory.cameras[0]);
+    camera.name = '=HYPERLINK("example")';
+    camera.summary = "  +1+2";
+    camera.maker = "'Original";
+    const csv = exportEquipmentCsv("camera", [camera]);
+    expect(csv).toContain("'=HYPERLINK");
+    expect(csv).toContain("'  +1+2");
+    expect(parseEquipmentCsv(csv, "camera").items).toEqual([camera]);
+  });
+  it("accepts reordered minimal headers, generates IDs and defaults optional ratings to zero", () => {
+    const csv =
+      "mount,role,summary,category,maker,name,burst_rate\nNikon Z,MULTIROLE,調査済み,Mirrorless,Nikon,Test,14 fps\n";
+    const parsed = parseEquipmentCsv(csv, "camera");
+    expect(parsed.issues).toEqual([]);
+    const item = parsed.items[0];
+    expect(item.id).toBeTruthy();
+    expect(isCamera(item) && item.specs.continuousShooting).toBe("14 fps");
+    expect(Object.values(item.ratings)).toEqual(Array(7).fill(0));
+  });
+  it("normalizes pipe-delimited mounts and tags", () => {
+    const parsed = parseEquipmentCsv(
+      "name,maker,category,summary,compatible_mounts,focal_length,max_aperture,weight,usage_tags\nLens,Maker,Prime,Notes,Nikon Z | Nikon F | Nikon Z,50 mm,f/1.8,250 g,street| portrait |street",
+      "lens",
+    );
+    expect(parsed.issues).toEqual([]);
+    const item = parsed.items[0];
+    expect(!isCamera(item) && item.compatibleMounts).toEqual([
+      "Nikon Z",
+      "Nikon F",
+    ]);
+    expect(!isCamera(item) && item.usageTags).toEqual(["street", "portrait"]);
+  });
+  it("rejects a batch with invalid ratings without returning partial records", () => {
+    const items = structuredClone(sampleInventory.cameras.slice(0, 2));
+    items[1].ratings.resolution = 11;
+    const parsed = parseEquipmentCsv(
+      exportEquipmentCsv("camera", items),
+      "camera",
+    );
+    expect(parsed.items).toEqual([]);
+    expect(parsed.issues).toContainEqual({
+      line: 3,
+      column: "rating_resolution",
+      message: "評価は0〜10の数値で入力してください。",
+    });
+  });
+  it("reports the physical source line after a multiline CSV field", () => {
+    const parsed = parseEquipmentCsv(
+      'name,maker,category,summary,role,mount\r\nCamera,M,C,"Notes\r\nNext line",MULTIROLE,Nikon Z\r\nBad,M,C,Notes,MULTIROLE,\r\n',
+      "camera",
+    );
+    expect(parsed.issues).toContainEqual({
+      line: 4,
+      column: "mount",
+      message: "必須項目を入力してください。",
+    });
+  });
+  it("rejects malformed quoting and inconsistent column counts", () => {
+    expect(
+      parseEquipmentCsv('name,"unfinished', "camera").issues[0].message,
+    ).toMatch(/引用符/);
+    const header = "name,maker,category,summary,role,mount\n";
+    expect(
+      parseEquipmentCsv(`${header}Bad"quote,M,C,N,MULTIROLE,Z`, "camera")
+        .issues[0].message,
+    ).toMatch(/引用符/);
+    expect(
+      parseEquipmentCsv(`${header}Name,M,C,Notes,MULTIROLE,Z,extra`, "camera")
+        .issues[0].message,
+    ).toMatch(/列数/);
+  });
+  it("rejects wrong-kind, duplicate and unknown headers", () => {
+    expect(
+      parseEquipmentCsv(
+        exportEquipmentCsv("lens", sampleInventory.lenses),
+        "camera",
+      ).issues.length,
+    ).toBeGreaterThan(0);
+    expect(
+      parseEquipmentCsv("name,name\nx,x", "camera").issues[0].message,
+    ).toMatch(/重複/);
+    expect(
+      parseEquipmentCsv("__proto__\nx", "camera").issues[0].message,
+    ).toMatch(/未対応/);
+  });
+  it("rejects repeated IDs and enforces field, file and row limits", () => {
+    const item = sampleInventory.cameras[0];
+    expect(
+      parseEquipmentCsv(exportEquipmentCsv("camera", [item, item]), "camera")
+        .issues[0].column,
+    ).toBe("id");
+    expect(
+      parseEquipmentCsv(
+        exportEquipmentCsv("camera", [{ ...item, name: "x".repeat(101) }]),
+        "camera",
+      ).issues[0].column,
+    ).toBe("name");
+    expect(
+      parseEquipmentCsv("x".repeat(CSV_MAX_BYTES + 1), "camera").issues[0]
+        .message,
+    ).toMatch(/2 MiB/);
+    expect(
+      parseEquipmentCsv("name\n" + "x\n".repeat(1001), "camera").issues[0]
+        .message,
+    ).toMatch(/1000/);
+  });
+  it("rejects empty CSV and header-only templates", () => {
+    expect(parseEquipmentCsv("", "camera").issues[0].message).toMatch(/空/);
+    expect(
+      parseEquipmentCsv(csvColumns("camera").join(","), "camera").issues[0]
+        .message,
+    ).toMatch(/機材の行/);
+  });
+  it("updates by ID, keeps photos and other equipment, and does not mutate the source", () => {
+    const data = structuredClone(sampleInventory);
+    data.cameras[0].image = "data:image/png;base64,cGhvdG8=";
+    const before = structuredClone(data);
+    const update = { ...data.cameras[0], name: "Updated Camera" };
+    const addition = { ...data.cameras[1], id: "", name: "New Camera" };
+    const batch = parseEquipmentCsv(
+      exportEquipmentCsv("camera", [update, addition]),
+      "camera",
+    );
+    const merged = mergeCsvImport(data, batch);
+    expect(merged.cameras).toHaveLength(data.cameras.length + 1);
+    expect(merged.cameras[0]).toMatchObject({
+      name: "Updated Camera",
+      image: data.cameras[0].image,
+    });
+    expect(merged.lenses).toEqual(data.lenses);
+    expect(merged.cameras.at(-1)?.name).toBe("New Camera");
+    expect(data).toEqual(before);
+  });
+  it("rejects cross-kind ID collisions and invalid batches", () => {
+    const item = {
+      ...sampleInventory.cameras[0],
+      id: sampleInventory.lenses[0].id,
+    };
+    const batch = parseEquipmentCsv(
+      exportEquipmentCsv("camera", [item]),
+      "camera",
+    );
+    expect(() => mergeCsvImport(sampleInventory, batch)).toThrow(/ID/);
+    expect(() =>
+      mergeCsvImport(sampleInventory, {
+        kind: "camera",
+        items: [],
+        issues: [],
+      }),
+    ).toThrow();
+    expect(() =>
+      mergeCsvImport(sampleInventory, {
+        kind: "camera",
+        items: [sampleInventory.lenses[0]],
+        issues: [],
+      }),
+    ).toThrow();
+  });
+});

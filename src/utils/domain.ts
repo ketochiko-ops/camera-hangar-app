@@ -31,7 +31,7 @@ export const filterLenses = (
     : lenses;
 export type FormErrors = Record<string, string>;
 const positiveRange =
-  /^\s*(?:約\s*)?(?:f\/)?\d+(?:\.\d+)?(?:\s*[-–〜]\s*\d+(?:\.\d+)?)?\s*(?:g|kg|mm|MP|コマ\/秒)?\s*$/i;
+  /^\s*(?:約\s*)?(?:f\/)?\d+(?:\.\d+)?(?:\s*[-–〜]\s*\d+(?:\.\d+)?)?\s*(?:g|kg|mm|MP|fps|コマ\/秒)?\s*$/i;
 export function validateEquipment(item: Equipment): FormErrors {
   const errors: FormErrors = {};
   const required = (key: string, value: unknown) => {

@@ -89,6 +89,104 @@
   line-height: 1.9;
   padding: 20px 0;
 }
+.csvTransfer {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 18px;
+  margin-bottom: 24px;
+}
+.csvToolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.csvToolbar h2 {
+  font: 14px var(--mono);
+  color: var(--accent);
+  text-shadow: var(--accent-glow);
+  margin-right: auto;
+}
+.csvTransfer button {
+  font-size: 14px;
+}
+.csvTransfer p,
+.csvHelp summary {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.csvTransfer p {
+  margin-top: 12px;
+  color: #afc5d0;
+}
+.csvHelp {
+  margin-top: 14px;
+}
+.csvHelp summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+.csvHelp textarea {
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 12px 0;
+  resize: vertical;
+}
+.csvTransfer .csvSuccess {
+  color: var(--accent);
+}
+.csvPreview {
+  padding: 24px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.csvFilename {
+  font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+.csvIssues {
+  padding-left: 24px;
+  max-height: 45vh;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+.csvRecords {
+  max-height: 45vh;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  margin-top: 16px;
+}
+.csvRecords details {
+  border-bottom: 1px solid var(--line);
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+.csvRecords summary {
+  cursor: pointer;
+}
+.csvRecords summary span {
+  color: var(--accent);
+  font-family: var(--mono);
+  margin-right: 8px;
+}
+.csvRecords summary small {
+  font-size: 14px;
+  color: var(--muted);
+}
+.csvRecords dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 10px 20px;
+}
+.csvRecords dt {
+  font: 14px var(--mono);
+  color: #aac8da;
+}
+.csvRecords dd {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+}
 .modal {
   background: #162126;
   color: #dce6df;
