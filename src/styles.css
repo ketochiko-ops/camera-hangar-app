@@ -5,8 +5,10 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --accent: #d5e58a;
-  --amber: #d5e58a;
+  --accent: #75ddff;
+  --accent-blue: #4fa9ff;
+  --accent-hover: #b3efff;
+  --accent-glow: 0 0 8px #4fa9ff66, 0 0 20px #36cfff33;
   --muted: #98a6a9;
   --line: #334044;
   --panel: #172024;
@@ -56,11 +58,11 @@ button:disabled {
 button.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #1c261e;
+  color: #092333;
   font-weight: 700;
 }
 button.primary:hover:not(:disabled) {
-  background: #ebf7b5;
+  background: var(--accent-hover);
 }
 button.danger {
   color: #ffd1c6;
@@ -106,6 +108,7 @@ button svg {
   font: 11px var(--mono);
   letter-spacing: 1.3px;
   color: var(--accent);
+  text-shadow: var(--accent-glow);
 }
 .eyebrow > span {
   color: var(--muted);

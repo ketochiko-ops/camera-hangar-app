@@ -3,6 +3,7 @@ import {
   cameraRatingLabels,
   lensRatingLabels,
   specLabels,
+  lensSpecLabels,
   isCamera,
   type Camera,
   type Equipment,
@@ -182,7 +183,7 @@ export function EquipmentEditor({
             <>
               {field(
                 "mount",
-                "マウント",
+                "MOUNT",
                 item.mount,
                 (v) => set("mount", v),
                 true,
@@ -194,7 +195,7 @@ export function EquipmentEditor({
             <>
               {field(
                 "compatibleMounts",
-                "対応マウント（カンマ区切り）",
+                `${lensSpecLabels.compatibleMounts} (COMMA-SEPARATED)`,
                 mountsText,
                 setMountsText,
                 true,
@@ -202,7 +203,7 @@ export function EquipmentEditor({
               )}
               {field(
                 "focalLength",
-                "焦点距離",
+                lensSpecLabels.focalLength,
                 (item as Lens).focalLength,
                 (v) => set("focalLength", v),
                 true,
@@ -210,7 +211,7 @@ export function EquipmentEditor({
               )}
               {field(
                 "maxAperture",
-                "開放F値",
+                lensSpecLabels.maxAperture,
                 (item as Lens).maxAperture,
                 (v) => set("maxAperture", v),
                 true,
@@ -218,7 +219,7 @@ export function EquipmentEditor({
               )}
               {field(
                 "weight",
-                "重量",
+                lensSpecLabels.weight,
                 (item as Lens).weight,
                 (v) => set("weight", v),
                 true,
@@ -256,7 +257,7 @@ export function EquipmentEditor({
         {cam && (
           <>
             <h3 className={styles.sectionLabel}>
-              02 / 主要スペック <small>任意項目</small>
+              02 / TECHNICAL DATA <small>OPTIONAL</small>
             </h3>
             <div className={styles.formGrid}>
               {Object.entries(specLabels).map(([key, label]) =>
@@ -281,7 +282,8 @@ export function EquipmentEditor({
           </>
         )}
         <h3 className={styles.sectionLabel}>
-          {cam ? "03" : "02"} / 性能評価 <small>0〜10・小数可</small>
+          {cam ? "03" : "02"} / PERFORMANCE PROFILE{" "}
+          <small>0–10 · DECIMALS ALLOWED</small>
         </h3>
         <div className={styles.formGrid}>
           {Object.entries(cam ? cameraRatingLabels : lensRatingLabels).map(

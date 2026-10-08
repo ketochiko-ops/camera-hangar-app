@@ -1,19 +1,19 @@
 export const cameraRatingLabels = {
-  resolution: "RESOLUTION / 解像力",
-  highIso: "HIGH ISO / 高感度",
-  autofocus: "AUTOFOCUS / AF性能",
-  dynamicRange: "DYNAMIC RANGE / 階調",
-  handling: "HANDLING / 操作性",
-  portability: "PORTABILITY / 携帯性",
-  colorRendering: "COLOR / 色再現",
+  resolution: "RESOLUTION",
+  highIso: "HIGH ISO",
+  autofocus: "AUTOFOCUS",
+  dynamicRange: "DYNAMIC RANGE",
+  handling: "HANDLING",
+  portability: "PORTABILITY",
+  colorRendering: "COLOR",
 } as const;
 export const lensRatingLabels = {
-  sharpness: "SHARPNESS / 解像力",
-  portability: "PORTABILITY / 携帯性",
-  versatility: "VERSATILITY / 汎用性",
-  lowLight: "LOW LIGHT / 暗所性能",
-  closeUp: "CLOSE UP / 近接性能",
-  backgroundBlur: "BOKEH / ボケ量",
+  sharpness: "SHARPNESS",
+  portability: "PORTABILITY",
+  versatility: "VERSATILITY",
+  lowLight: "LOW LIGHT",
+  closeUp: "CLOSE UP",
+  backgroundBlur: "BOKEH",
 } as const;
 export type RatingKey = keyof typeof cameraRatingLabels;
 export type LensRatingKey = keyof typeof lensRatingLabels;
@@ -57,12 +57,18 @@ export type EquipmentKind = "camera" | "lens";
 export type Inventory = { version: 1; cameras: Camera[]; lenses: Lens[] };
 export const isCamera = (item: Equipment): item is Camera => "specs" in item;
 export const specLabels: Record<keyof Camera["specs"], string> = {
-  sensor: "センサー",
-  resolution: "有効画素数",
-  continuousShooting: "連続撮影",
-  ibis: "手ぶれ補正",
-  weight: "重量",
-  storageSlots: "記録メディア",
-  autofocusNote: "AFシステム",
-  releaseYear: "発売年",
+  sensor: "SENSOR",
+  resolution: "EFFECTIVE PIXELS",
+  continuousShooting: "BURST RATE",
+  ibis: "IMAGE STABILIZATION",
+  weight: "WEIGHT",
+  storageSlots: "STORAGE MEDIA",
+  autofocusNote: "AF SYSTEM",
+  releaseYear: "RELEASE YEAR",
 };
+export const lensSpecLabels = {
+  compatibleMounts: "COMPATIBLE MOUNTS",
+  focalLength: "FOCAL LENGTH",
+  maxAperture: "MAX APERTURE",
+  weight: "WEIGHT",
+} as const;

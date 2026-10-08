@@ -31,6 +31,8 @@
   height: 49px;
   border: 1px solid var(--accent);
   color: var(--accent);
+  text-shadow: var(--accent-glow);
+  box-shadow: 0 0 12px #4fa9ff22, inset 0 0 12px #36cfff11;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,8 +81,9 @@
 }
 .sidebar nav button.active {
   color: var(--accent);
-  background: #26312d;
-  border-color: #455047;
+  text-shadow: var(--accent-glow);
+  background: #172d3b;
+  border-color: #345c76;
 }
 .sidebar nav button.active:before {
   content: "";
@@ -185,6 +188,7 @@
 }
 .pageIntro h1 > span {
   color: var(--accent);
+  text-shadow: var(--accent-glow);
 }
 .pageIntro > div > p:last-child {
   color: #a9b6b6;
@@ -205,6 +209,7 @@
 .introStamp strong {
   font: 31px var(--mono);
   color: var(--accent);
+  text-shadow: var(--accent-glow);
 }
 .introStamp small {
   font-size: 9px;
@@ -227,7 +232,7 @@
   color: #b3c0be;
 }
 .sectionNumber {
-  background: #25322e;
+  background: #193141;
   padding: 5px 7px;
   color: var(--accent);
   font: 9px var(--mono);
@@ -252,7 +257,8 @@
 .exportButton {
   font-size: 11px;
   color: var(--accent);
-  border-color: #566346;
+  border-color: #3d7698;
+  text-shadow: var(--accent-glow);
   padding: 8px 13px;
 }
 .mountSelect {
@@ -321,9 +327,9 @@
   min-width: 0;
 }
 .selected {
-  border-color: #93a66f;
-  background: #1d2826;
-  box-shadow: inset 0 2px var(--accent);
+  border-color: #5ba9d6;
+  background: #192a35;
+  box-shadow: inset 0 2px var(--accent), 0 0 14px #4fa9ff18;
 }
 .selectCard {
   display: flex;
@@ -348,6 +354,7 @@
 }
 .selected .cardMeta {
   color: var(--accent);
+  text-shadow: var(--accent-glow);
 }
 .cardMaker {
   font: 8px var(--mono);
@@ -389,9 +396,10 @@
 }
 .loadoutButton {
   font-size: 11px;
-  border-color: #81925f;
+  border-color: #4d91bc;
   color: var(--accent);
-  background: #283229;
+  background: #193143;
+  text-shadow: var(--accent-glow);
   padding: 10px 17px;
 }
 .footer {

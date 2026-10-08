@@ -18,6 +18,7 @@
 }
 .boardHeader > span:first-child {
   color: var(--accent);
+  text-shadow: var(--accent-glow);
 }
 .visual {
   position: relative;
@@ -27,7 +28,7 @@
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(ellipse at 50% 47%, #34444144, transparent 65%),
+    radial-gradient(ellipse at 50% 47%, #244f6d44, transparent 65%),
     linear-gradient(#1a2529, #101a1e);
 }
 .visual:before {
@@ -47,14 +48,14 @@
   left: 12.5%;
   top: 16%;
   background:
-    linear-gradient(#abc29b, #abc29b) left top/19px 1px no-repeat,
-    linear-gradient(#abc29b, #abc29b) left top/1px 19px no-repeat,
-    linear-gradient(#abc29b, #abc29b) right top/19px 1px no-repeat,
-    linear-gradient(#abc29b, #abc29b) right top/1px 19px no-repeat,
-    linear-gradient(#abc29b, #abc29b) left bottom/19px 1px no-repeat,
-    linear-gradient(#abc29b, #abc29b) left bottom/1px 19px no-repeat,
-    linear-gradient(#abc29b, #abc29b) right bottom/19px 1px no-repeat,
-    linear-gradient(#abc29b, #abc29b) right bottom/1px 19px no-repeat;
+    linear-gradient(var(--accent), var(--accent)) left top/19px 1px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) left top/1px 19px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) right top/19px 1px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) right top/1px 19px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) left bottom/19px 1px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) left bottom/1px 19px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) right bottom/19px 1px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) right bottom/1px 19px no-repeat;
   opacity: 0.45;
   pointer-events: none;
 }
@@ -70,6 +71,7 @@
 }
 .live {
   color: var(--accent);
+  text-shadow: var(--accent-glow);
 }
 .equipmentImage {
   width: 100%;
@@ -149,6 +151,7 @@
   font: 9px var(--mono);
   letter-spacing: 1.2px;
   color: var(--accent);
+  text-shadow: var(--accent-glow);
 }
 .eyebrow span {
   color: #a0b1ac;
@@ -174,8 +177,9 @@
 }
 .badges .role {
   color: var(--accent);
-  border-color: #5a6546;
-  background: #35402b44;
+  border-color: #396b8b;
+  background: #173b5444;
+  text-shadow: var(--accent-glow);
 }
 .assigned {
   font: 9px var(--mono);
@@ -189,7 +193,7 @@
   padding: 12px 0 11px;
   font: 8px var(--mono);
   letter-spacing: 1px;
-  color: #b9cdc2;
+  color: #b7def0;
 }
 .panelTitle small {
   font-size: 7px;
@@ -211,12 +215,13 @@
   margin-bottom: 5px;
 }
 .ratingLabel > span {
-  color: #a6bdb3;
+  color: #b3d5e5;
 }
 .ratingLabel strong {
   font-size: 12px;
   font-weight: 400;
   color: var(--accent);
+  text-shadow: var(--accent-glow);
 }
 .ratingLabel small {
   color: #849b92;
@@ -225,8 +230,8 @@
 .track {
   background: repeating-linear-gradient(
     90deg,
-    #34433e 0,
-    #34433e calc(10% - 3px),
+    #2a3f4c 0,
+    #2a3f4c calc(10% - 3px),
     transparent calc(10% - 3px),
     transparent 10%
   );
@@ -236,7 +241,8 @@
 }
 .track > div {
   height: 100%;
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent));
+  box-shadow: 0 0 8px #4fa9ff66;
   position: relative;
 }
 .track:after {
@@ -267,7 +273,7 @@
 }
 .specs dt {
   font-size: 10px;
-  color: #a4b4ad;
+  color: #aac8da;
 }
 .specs dd {
   font-size: 12px;
@@ -321,6 +327,7 @@
 }
 .boardFooter > span:last-child {
   color: var(--accent);
+  text-shadow: var(--accent-glow);
 }
 .crosshair {
   width: 200px;
