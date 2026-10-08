@@ -1,0 +1,139 @@
+:root {
+  font-family: Arial, "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
+  color: #e5e9e5;
+  background: #101719;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --accent: #d5e58a;
+  --amber: #d5e58a;
+  --muted: #98a6a9;
+  --line: #334044;
+  --panel: #172024;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #425052;
+  background: #1a2427;
+  color: #dfe6e4;
+  padding: 10px 14px;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+button:hover:not(:disabled) {
+  background: #293538;
+  border-color: #a5b9b8;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1c261e;
+  font-weight: 700;
+}
+button.primary:hover:not(:disabled) {
+  background: #ebf7b5;
+}
+button.danger {
+  color: #ffd1c6;
+  border-color: #bf6255;
+  background: #4d2525;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+input,
+textarea,
+select {
+  color: #e5ebe8;
+  background: #111b1e;
+  border: 1px solid #425052;
+  padding: 10px 12px;
+  border-radius: 0;
+  min-width: 0;
+}
+input::placeholder {
+  color: #92a0a2;
+}
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  margin: 0;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+button svg {
+  flex-shrink: 0;
+}
+.eyebrow {
+  font: 11px var(--mono);
+  letter-spacing: 1.3px;
+  color: var(--accent);
+}
+.eyebrow > span {
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+.empty {
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px dashed #425052;
+  color: #a9b9b7;
+  padding: 30px;
+  text-align: center;
+}
+.empty h2 {
+  font-size: 20px;
+  color: #dfe5df;
+}
+.empty p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
