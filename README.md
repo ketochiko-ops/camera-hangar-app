@@ -136,7 +136,28 @@ npm run build
 npm run preview
 ```
 
-生成された`dist/`を静的ホスティングへ置くだけで利用できます。Viteの`base: './'`を設定しており、サブディレクトリへの配置も考慮しています。画面切替はクライアント内で行うため、SPAの履歴ルーティング用リライトは不要です。ビルド結果を`file://`で直接開かず、HTTPサーバーで配信してください。今回はローカル用の実装を完了し、外部への公開・リモートpushは行っていません。
+生成された`dist/`を静的ホスティングへ置くだけで利用できます。Viteの`base: './'`を設定しており、サブディレクトリへの配置も考慮しています。画面切替はクライアント内で行うため、SPAの履歴ルーティング用リライトは不要です。ビルド結果を`file://`で直接開かず、HTTPサーバーで配信してください。Vercel用のビルド設定は`vercel.json`に記載しています。
+
+## Vercelでの自動デプロイ
+
+既存プロジェクト`camera-hangar-app`を使用します。接続先は`ketochiko-ops/camera-hangar-app`です。
+
+| 設定 | 値 |
+| --- | --- |
+| Production Branch | `develop` |
+| Framework Preset | Vite |
+| Root Directory | リポジトリ直下 |
+| Install Command | `npm ci` |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+| Node.js | 24.x |
+| 環境変数 | この静的アプリでは不要 |
+
+VercelのGit連携はProduction Branchへのpushで起動するため、PRを`develop`へマージすると本番が更新されます。直接`develop`にpushした場合も起動します。GitHub ActionsはUT・IT・E2E・ビルド検査を担当し、VercelはGit連携でデプロイします。CIにVercelのトークンを置く必要はありません。
+
+テスト通過をマージの条件にする場合は、GitHubの`develop`ブランチルールで`verify`チェックを必須にしてください。VercelのGit連携だけではGitHub Actionsの完了を待たないため、本番更新をテスト通過後に限定したい場合は、このブランチルールまたはVercel Deployment Checksを追加します。
+
+本番URLはVercelのProductionドメインを利用します。アップロード写真と登録機材は閲覧者ごとのlocalStorageに保持され、Vercelへ送信されません。ローカルと本番は別オリジンなのでデータは共有されません。
 
 ## データ保存
 

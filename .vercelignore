@@ -1,9 +1,7 @@
+.git/
+.github/
 node_modules/
 dist/
 work/
 test-results/
 playwright-report/
-*.tsbuildinfo
-.DS_Store
-
-.vercel/
