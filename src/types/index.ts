@@ -7,12 +7,26 @@ export const ratingLabels = {
   mobility: "MOBILITY",
   versatility: "VERSATILITY",
 } as const;
-export const cameraRatingLabels = ratingLabels;
+export const cameraRatingLabels = {
+  detail: "DETAIL",
+  night: "NIGHT",
+  latitude: "LATITUDE",
+  response: "RESPONSE",
+  stability: "STABILITY",
+  endurance: "ENDURANCE",
+  mobility: "MOBILITY",
+} as const;
 export const lensRatingLabels = ratingLabels;
 export type RatingKey = keyof typeof cameraRatingLabels;
 export type LensRatingKey = keyof typeof lensRatingLabels;
 // Former camera scores remain available in saved data and CSV backups.
 export const legacyCameraRatingKeys = [
+  "resolution",
+  "bokeh",
+  "lowLight",
+  "reach",
+  "closeFocus",
+  "versatility",
   "autofocus",
   "dynamicRange",
   "handling",
@@ -53,7 +67,7 @@ export type Lens = {
   weight: string;
   summary: string;
   usageTags: string[];
-  ratings: Ratings;
+  ratings: Record<LensRatingKey, number>;
 };
 export type Equipment = Camera | Lens;
 export type EquipmentKind = "camera" | "lens";

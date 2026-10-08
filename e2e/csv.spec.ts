@@ -89,7 +89,7 @@ test("invalid CSV and cancellation leave the archive unchanged; templates and pr
   await page.goto("/");
   await page.getByRole("button", { name: /データ管理/ }).click();
   const items = structuredClone(sampleInventory.cameras.slice(0, 2));
-  items[1].ratings.resolution = 11;
+  items[1].ratings.detail = 11;
   await page
     .getByLabel("カメラCSVファイル")
     .setInputFiles({
@@ -100,7 +100,7 @@ test("invalid CSV and cancellation leave the archive unchanged; templates and pr
   const invalid = page.getByRole("dialog", {
     name: "CSVの内容を修正してください",
   });
-  await expect(invalid.getByText(/3行目.*rating_resolution/)).toBeVisible();
+  await expect(invalid.getByText(/3行目.*rating_detail/)).toBeVisible();
   await expect(
     invalid.getByRole("button", { name: /件を登録する/ }),
   ).toHaveCount(0);
@@ -113,7 +113,7 @@ test("invalid CSV and cancellation leave the archive unchanged; templates and pr
       localStorage.getItem("optical-arsenal:inventory:v1"),
     ),
   ).toBeNull();
-  items[1].ratings.resolution = 8;
+  items[1].ratings.detail = 8;
   await page
     .getByLabel("カメラCSVファイル")
     .setInputFiles({
@@ -136,7 +136,7 @@ test("invalid CSV and cancellation leave the archive unchanged; templates and pr
     (await (await downloadPromise).path())!,
     "utf8",
   );
-  expect(template).toContain("rating_resolution");
+  expect(template).toContain("rating_detail");
   await page.getByText("ChatGPTで登録CSVを作る", { exact: true }).click();
   await expect(page.getByLabel("カメラCSV作成の依頼文")).toHaveValue(
     /name,maker,category/,

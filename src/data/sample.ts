@@ -31,13 +31,13 @@ const camera = (
     autofocusNote: "位相差 / コントラスト AF",
   },
   ratings: {
-    resolution: scores[0],
-    bokeh: scores[1],
-    lowLight: scores[2],
-    reach: scores[3],
-    closeFocus: scores[4],
+    detail: scores[0],
+    night: scores[2],
+    latitude: scores[1],
+    response: scores[3],
+    stability: scores[4],
+    endurance: scores[6],
     mobility: scores[5],
-    versatility: scores[6],
   },
 });
 const lens = (
@@ -282,13 +282,13 @@ export const emptyCamera = (): Camera => ({
     releaseYear: "",
   },
   ratings: {
-    resolution: 0,
-    bokeh: 0,
-    lowLight: 0,
-    reach: 0,
-    closeFocus: 0,
+    detail: 0,
+    night: 0,
+    latitude: 0,
+    response: 0,
+    stability: 0,
+    endurance: 0,
     mobility: 0,
-    versatility: 0,
   },
 });
 export const emptyLens = (): Lens => ({

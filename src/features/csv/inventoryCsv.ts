@@ -20,7 +20,7 @@ const cameraSpecs = {
   af_system: "autofocusNote",
   release_year: "releaseYear",
 } as const;
-const profileRatings = {
+const lensRatings = {
   rating_resolution: "resolution",
   rating_bokeh: "bokeh",
   rating_low_light: "lowLight",
@@ -29,7 +29,28 @@ const profileRatings = {
   rating_mobility: "mobility",
   rating_versatility: "versatility",
 } as const;
+const cameraRatings = {
+  rating_detail: "detail",
+  rating_night: "night",
+  rating_latitude: "latitude",
+  rating_response: "response",
+  rating_stability: "stability",
+  rating_endurance: "endurance",
+  rating_mobility: "mobility",
+} as const;
+const cameraRatingFallbacks = {
+  detail: ["rating_detail", "rating_resolution", "resolution"],
+  night: ["rating_night", "rating_low_light", "lowLight"],
+  latitude: ["rating_latitude", "rating_dynamic_range", "dynamicRange"],
+  response: ["rating_response", "rating_autofocus", "autofocus"],
+} as const;
 const legacyCameraRatings = {
+  rating_resolution: "resolution",
+  rating_bokeh: "bokeh",
+  rating_low_light: "lowLight",
+  rating_reach: "reach",
+  rating_close_focus: "closeFocus",
+  rating_versatility: "versatility",
   rating_autofocus: "autofocus",
   rating_dynamic_range: "dynamicRange",
   rating_handling: "handling",
@@ -55,7 +76,7 @@ export const csvColumns = (kind: EquipmentKind): string[] =>
         "role",
         "mount",
         ...Object.keys(cameraSpecs),
-        ...Object.keys(profileRatings),
+        ...Object.keys(cameraRatings),
       ]
     : [
         ...baseColumns,
@@ -64,7 +85,7 @@ export const csvColumns = (kind: EquipmentKind): string[] =>
         "max_aperture",
         "weight",
         "usage_tags",
-        ...Object.keys(profileRatings),
+        ...Object.keys(lensRatings),
       ];
 const requiredColumns = (kind: EquipmentKind) =>
   kind === "camera"
@@ -100,7 +121,7 @@ export function equipmentCsvValues(item: Equipment): Record<string, string> {
     for (const [column, key] of Object.entries(cameraSpecs))
       values[column] = item.specs[key];
     for (const [column, key] of Object.entries(legacyCameraRatings))
-      if (item.ratings[key] !== undefined)
+      if ((item.ratings as Record<string, number>)[key] !== undefined)
         values[column] = String(item.ratings[key]);
   } else {
     values.compatible_mounts = item.compatibleMounts.join("|");
@@ -109,8 +130,11 @@ export function equipmentCsvValues(item: Equipment): Record<string, string> {
     values.weight = item.weight;
     values.usage_tags = item.usageTags.join("|");
   }
-  for (const [column, key] of Object.entries(profileRatings))
-    values[column] = String(item.ratings[key]);
+  const ratings = item.ratings as Record<string, number>;
+  for (const [column, key] of Object.entries(
+    isCamera(item) ? cameraRatings : lensRatings,
+  ))
+    values[column] = String(ratings[key]);
   return values;
 }
 
@@ -123,7 +147,10 @@ export function exportEquipmentCsv(
     ...(kind === "camera"
       ? Object.entries(legacyCameraRatings)
           .filter(([, key]) =>
-            items.some((item) => item.ratings[key] !== undefined),
+            items.some(
+              (item) =>
+                (item.ratings as Record<string, number>)[key] !== undefined,
+            ),
           )
           .map(([column]) => column)
       : []),
@@ -250,7 +277,7 @@ export function parseEquipmentCsv(
     );
   if (result.issues.length) return result;
   const ratingColumns = {
-    ...profileRatings,
+    ...(kind === "camera" ? cameraRatings : lensRatings),
     ...(kind === "camera"
       ? Object.fromEntries(
           Object.entries(legacyCameraRatings).filter(([column]) =>
@@ -293,6 +320,12 @@ export function parseEquipmentCsv(
         return [key, value];
       }),
     );
+    if (kind === "camera") {
+      for (const [key, [column, , former]] of Object.entries(
+        cameraRatingFallbacks,
+      ))
+        if (!headers.includes(column)) ratings[key] = ratings[former] ?? 0;
+    }
     const base = {
       id,
       name: get("name"),
@@ -348,6 +381,12 @@ export function parseEquipmentCsv(
         ]),
       ),
     };
+    if (kind === "camera")
+      for (const [key, [column, formerColumn]] of Object.entries(
+        cameraRatingFallbacks,
+      ))
+        if (!headers.includes(column) && headers.includes(formerColumn))
+          fieldColumns[`ratings.${key}`] = formerColumn;
     for (const [field, message] of Object.entries(validateEquipment(item)))
       issue(row.line, fieldColumns[field] ?? field, message);
     result.items.push(item);
@@ -387,11 +426,16 @@ export function mergeCsvImport(data: Inventory, batch: CsvImport): Inventory {
               .map((key) => [key, previous.ratings[key]]),
           )
         : {};
-    existing.set(item.id, {
-      ...item,
-      ratings: { ...previousScores, ...item.ratings },
-      image: previous?.image,
-    });
+    existing.set(
+      item.id,
+      isCamera(item)
+        ? {
+            ...item,
+            ratings: { ...previousScores, ...item.ratings },
+            image: previous?.image,
+          }
+        : { ...item, image: previous?.image },
+    );
   }
   return batch.kind === "camera"
     ? { ...data, cameras: [...existing.values()] as Camera[] }

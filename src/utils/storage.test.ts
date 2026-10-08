@@ -43,6 +43,12 @@ describe("local repository", () => {
     const loaded = repo.load();
     expect(loaded.error).toBeUndefined();
     expect(loaded.data.cameras[0].ratings).toEqual({
+      detail: 7.5,
+      night: 9,
+      latitude: 7,
+      response: 8,
+      stability: 0,
+      endurance: 0,
       resolution: 7.5,
       bokeh: 0,
       lowLight: 9,
@@ -69,9 +75,39 @@ describe("local repository", () => {
     repo.save(loaded.data);
     expect(repo.load()).toEqual({ data: loaded.data });
   });
+  it("migrates the previous shared camera profile, retaining old values and the original store", () => {
+    const data = structuredClone(sampleInventory);
+    const previous = {
+      resolution: 7,
+      bokeh: 4,
+      lowLight: 8,
+      reach: 6,
+      closeFocus: 5,
+      mobility: 9,
+      versatility: 3,
+      autofocus: 8,
+      dynamicRange: 7,
+    };
+    Object.assign(data.cameras[0], { ratings: previous });
+    const raw = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEY, raw);
+    const loaded = createLocalRepository(localStorage).load();
+    expect(loaded.error).toBeUndefined();
+    expect(loaded.data.cameras[0].ratings).toEqual({
+      ...previous,
+      detail: 7,
+      night: 8,
+      latitude: 7,
+      response: 8,
+      stability: 0,
+      endurance: 0,
+    });
+    expect(loaded.data.lenses).toEqual(data.lenses);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
+  });
   it("does not fill missing current scores or repair invalid legacy scores", () => {
     const data = structuredClone(sampleInventory);
-    Reflect.deleteProperty(data.cameras[0].ratings, "reach");
+    Reflect.deleteProperty(data.cameras[0].ratings, "stability");
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     expect(createLocalRepository(localStorage).load().error).toBeTruthy();
     Object.assign(data.cameras[0], {

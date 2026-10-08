@@ -42,22 +42,22 @@ CSVは **UTF-8・カンマ区切り** です。UTF-8 BOMの有無、CRLF／LF、
 追加の必須列：`role`, `mount`。
 
 ```csv
-id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,image_stabilization,weight,storage_media,af_system,release_year,rating_resolution,rating_bokeh,rating_low_light,rating_reach,rating_close_focus,rating_mobility,rating_versatility
+id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,image_stabilization,weight,storage_media,af_system,release_year,rating_detail,rating_night,rating_latitude,rating_response,rating_stability,rating_endurance,rating_mobility
 ```
 
-| 列                    | 入力例・意味                                        |
-| --------------------- | --------------------------------------------------- |
-| `role`                | MULTIROLE、STREETなど                               |
-| `mount`               | Nikon Zなど。レンズの対応マウントと同じ名前を使用   |
-| `sensor`              | FULL FRAME CMOSなど                                        |
-| `effective_pixels`    | 24.5 MP                                             |
+| 列                    | 入力例・意味                                                     |
+| --------------------- | ---------------------------------------------------------------- |
+| `role`                | MULTIROLE、STREETなど                                            |
+| `mount`               | Nikon Zなど。レンズの対応マウントと同じ名前を使用                |
+| `sensor`              | FULL FRAME CMOSなど                                              |
+| `effective_pixels`    | 24.5 MP                                                          |
 | `burst_rate`          | 14frames /s（14 fps、単位なしの数値、既存の「コマ/秒」も使用可） |
-| `image_stabilization` | 手ぶれ補正の説明                                    |
-| `weight`              | 710 g                                               |
-| `storage_media`       | SD + microSDなど                                    |
-| `af_system`           | AFシステムの説明                                    |
-| `release_year`        | 4桁の発売年（1800〜2199）                           |
-| `rating_*`            | 0〜10の数値。小数可。空欄は0                        |
+| `image_stabilization` | 手ぶれ補正の説明                                                 |
+| `weight`              | 710 g                                                            |
+| `storage_media`       | SD + microSDなど                                                 |
+| `af_system`           | AFシステムの説明                                                 |
+| `release_year`        | 4桁の発売年（1800〜2199）                                        |
+| `rating_*`            | 0〜10の数値。小数可。空欄は0                                     |
 
 ### レンズ
 
@@ -67,14 +67,14 @@ id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,ima
 id,name,maker,category,summary,compatible_mounts,focal_length,max_aperture,weight,usage_tags,rating_resolution,rating_bokeh,rating_low_light,rating_reach,rating_close_focus,rating_mobility,rating_versatility
 ```
 
-| 列                  | 入力例・意味                                              |
-| ------------------- | --------------------------------------------------------- |
-| `compatible_mounts` | Nikon Zなど。複数は半角パイプ区切り |
-| `focal_length`      | 50 mm または 24–70 mm                                     |
-| `max_aperture`      | f/1.8 または f/3.5–4.5                                    |
-| `weight`            | 250 g                                                     |
-| `usage_tags` | street、portraitなど。複数は半角パイプ区切り |
-| `rating_*`          | 0〜10の数値。小数可。空欄は0                              |
+| 列                  | 入力例・意味                                 |
+| ------------------- | -------------------------------------------- |
+| `compatible_mounts` | Nikon Zなど。複数は半角パイプ区切り          |
+| `focal_length`      | 50 mm または 24–70 mm                        |
+| `max_aperture`      | f/1.8 または f/3.5–4.5                       |
+| `weight`            | 250 g                                        |
+| `usage_tags`        | street、portraitなど。複数は半角パイプ区切り |
+| `rating_*`          | 0〜10の数値。小数可。空欄は0                 |
 
 `|` は複数値の区切りとして予約されています。カンマを含む値は二重引用符で囲み、値内の引用符は `""` として記述します。CSVの前後にMarkdownのコードフェンスや説明行は入れません。
 
@@ -94,22 +94,36 @@ Example Lens,Example Maker,Prime,"メモにカンマ, を含む例",Nikon Z,50 m
 
 ## 評価項目と旧データの互換性
 
-カメラ・レンズとも、評価は次の7項目・順序で表示します。
+カメラの評価は次の7項目・順序で表示します。日本語併記モードでは「表示 / 内容」の形式になります。
 
-| 表示 | CSV列 | 内容 |
-| --- | --- | --- |
-| RESOLUTION | `rating_resolution` | 解像性能 |
-| BOKEH | `rating_bokeh` | 背景のボケ |
-| LOW LIGHT | `rating_low_light` | 低照度での性能 |
-| REACH | `rating_reach` | 遠距離の被写体への対応 |
-| CLOSE FOCUS | `rating_close_focus` | 近接撮影 |
-| MOBILITY | `rating_mobility` | 携行性 |
-| VERSATILITY | `rating_versatility` | 汎用性 |
+| 表示      | CSV列              | 内容               |
+| --------- | ------------------ | ------------------ |
+| DETAIL    | `rating_detail`    | 解像性能           |
+| NIGHT     | `rating_night`     | 低照度性能         |
+| LATITUDE  | `rating_latitude`  | ダイナミックレンジ |
+| RESPONSE  | `rating_response`  | 応答性能           |
+| STABILITY | `rating_stability` | 手ぶれ補正性能     |
+| ENDURANCE | `rating_endurance` | バッテリー持続力   |
+| MOBILITY  | `rating_mobility`  | 携行性             |
 
-旧CSVの`rating_high_iso`（カメラ）、`rating_sharpness`（レンズ）、`rating_portability`、`rating_close_up`（レンズ）も読み込めます。それぞれLOW LIGHT、RESOLUTION、MOBILITY、CLOSE FOCUSへ引き継ぎます。旧名と対応する新名を同じCSVに含めると重複列エラーになります。
+レンズの評価は次の7項目・順序です。
 
-旧カメラのAF・ダイナミックレンジ・操作性・色の評価は、意味の異なる新評価へ転用しません。保存済みデータには保持し、CSV出力時も該当する`rating_autofocus`、`rating_dynamic_range`、`rating_handling`、`rating_color`列を追加します。これらの旧列を省略したCSVで更新しても、登録済みの旧評価は保持します。
+| 表示        | CSV列                | 内容                   |
+| ----------- | -------------------- | ---------------------- |
+| RESOLUTION  | `rating_resolution`  | 解像性能               |
+| BOKEH       | `rating_bokeh`       | 背景のボケ             |
+| LOW LIGHT   | `rating_low_light`   | 低照度での性能         |
+| REACH       | `rating_reach`       | 遠距離の被写体への対応 |
+| CLOSE FOCUS | `rating_close_focus` | 近接撮影               |
+| MOBILITY    | `rating_mobility`    | 携行性                 |
+| VERSATILITY | `rating_versatility` | 汎用性                 |
 
-保存済みの旧評価は読み込み時に移行し、新しく追加した項目は0になります。元のlocalStorageは、ユーザーが保存操作をするまでは変更しません。評価項目が欠けた現在の形式や不正な旧評価は、通常の読み込みエラーとして扱います。
+旧カメラCSVも読み込めます。`rating_resolution`をDETAIL、`rating_low_light`（または`rating_high_iso`）をNIGHT、`rating_dynamic_range`をLATITUDE、`rating_autofocus`をRESPONSEへ引き継ぎます。`rating_portability`はMOBILITYへ引き継ぎます。新しい列がある場合、その値を優先します（空欄は0）。STABILITY・ENDURANCEは旧評価から推測せず、列がなければ0です。
+
+旧レンズCSVの`rating_sharpness`、`rating_portability`、`rating_close_up`は、それぞれRESOLUTION、MOBILITY、CLOSE FOCUSへ引き継ぎます。別名と対応する元の列を同じCSVに含めると重複列エラーになります（例：`rating_high_iso`と`rating_low_light`）。
+
+保存済みの旧カメラ評価も同じ対応で移行します。旧BOKEH・REACH・CLOSE FOCUS・VERSATILITYなどは、新評価への転用をせず保持します。CSV出力時は保持している旧評価の列も追加するため、再読み込みで失われません。旧列を省略したCSVで更新しても、保存済みの旧評価は保持します。
+
+元のlocalStorageは、ユーザーが保存操作をするまでは変更しません。評価項目が欠けた現在の形式や不正な旧評価は、通常の読み込みエラーとして扱います。
 
 カメラ詳細と比較画面・PNGの表示はSENSOR、PIXELS、MOUNT、BURST、MEDIA、WEIGHT、RELEASEの7項目です。CSVのスペック列名は従来の形式を維持しています。手ぶれ補正・AFシステムは表示対象から外しますが、既存値とCSV列は保持します。

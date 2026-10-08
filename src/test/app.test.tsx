@@ -24,7 +24,7 @@ describe("UI integration", () => {
     await user.selectOptions(selector, "bilingual");
     expect(
       within(screen.getByTestId("detail-board")).getByRole("meter", {
-        name: "LOW LIGHT / 低照度性能",
+        name: "NIGHT / 低照度性能",
       }),
     ).toBeVisible();
     expect(
@@ -43,7 +43,7 @@ describe("UI integration", () => {
     );
     await user.click(screen.getByRole("button", { name: /データ管理/ }));
     await user.click(screen.getByRole("button", { name: "Nikon Z fを編集" }));
-    expect(screen.getByLabelText("BOKEH / ボケ")).toHaveValue(0);
+    expect(screen.getByLabelText("STABILITY / 手ぶれ補正性能")).toHaveValue(0);
     expect(screen.getByLabelText("PIXELS / 画素数")).toHaveValue("24.5 MP");
     await user.click(screen.getByRole("button", { name: "キャンセル" }));
     await user.click(screen.getByRole("button", { name: /^LENSES/ }));
@@ -95,7 +95,9 @@ describe("UI integration", () => {
         screen.getByRole("combobox", { name: "項目名の表示" }),
         "bilingual",
       );
-      expect(screen.getByRole("meter", { name: "BOKEH / ボケ" })).toBeVisible();
+      expect(
+        screen.getByRole("meter", { name: "STABILITY / 手ぶれ補正性能" }),
+      ).toBeVisible();
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     } finally {
       read.mockRestore();

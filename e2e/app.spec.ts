@@ -18,13 +18,13 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
   ).toBeVisible();
   const board = page.getByTestId("detail-board");
   const ratingNames = [
-    "RESOLUTION",
-    "BOKEH",
-    "LOW LIGHT",
-    "REACH",
-    "CLOSE FOCUS",
+    "DETAIL",
+    "NIGHT",
+    "LATITUDE",
+    "RESPONSE",
+    "STABILITY",
+    "ENDURANCE",
     "MOBILITY",
-    "VERSATILITY",
   ];
   const specNames = [
     "SENSOR",
@@ -70,7 +70,15 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
       .evaluateAll((nodes) =>
         nodes.map((node) => node.getAttribute("aria-label")),
       ),
-  ).toEqual(ratingNames);
+  ).toEqual([
+    "RESOLUTION",
+    "BOKEH",
+    "LOW LIGHT",
+    "REACH",
+    "CLOSE FOCUS",
+    "MOBILITY",
+    "VERSATILITY",
+  ]);
   await expect(
     page.getByRole("button", { name: "NIKKOR Z 40mm f/2を選択" }),
   ).toHaveCount(0);
@@ -152,7 +160,7 @@ test("camera and lens CRUD persist across reload", async ({ page }) => {
 test("form errors and local photo upload", async ({ page }) => {
   await openManagement(page);
   await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
-  await page.getByLabel(/^RESOLUTION\b/).fill("11");
+  await page.getByLabel(/^DETAIL\b/).fill("11");
   await page.getByLabel(/^RELEASE\b/).fill("invalid");
   await page.getByRole("button", { name: "保存する" }).click();
   await expect(
@@ -161,7 +169,7 @@ test("form errors and local photo upload", async ({ page }) => {
   await expect(
     page.getByText("発売年は1800〜2199の整数で入力してください。"),
   ).toBeVisible();
-  await page.getByLabel(/^RESOLUTION\b/).fill("8");
+  await page.getByLabel(/^DETAIL\b/).fill("8");
   await page.getByLabel(/^RELEASE\b/).fill("2023");
   await page.getByLabel("機材画像をアップロード").setInputFiles({
     name: "invalid.svg",
@@ -213,13 +221,13 @@ test("compares up to three cameras", async ({ page }) => {
         nodes.map((node) => node.getAttribute("aria-label")),
       ),
   ).toEqual([
-    "RESOLUTION",
-    "BOKEH",
-    "LOW LIGHT",
-    "REACH",
-    "CLOSE FOCUS",
+    "DETAIL",
+    "NIGHT",
+    "LATITUDE",
+    "RESPONSE",
+    "STABILITY",
+    "ENDURANCE",
     "MOBILITY",
-    "VERSATILITY",
   ]);
   expect(await first.locator("dt").allTextContents()).toEqual([
     "SENSOR",
@@ -259,10 +267,10 @@ test("legacy saved scores remain usable and new scores persist after editing", a
   await page.reload();
   const board = page.getByTestId("detail-board");
   await expect(
-    board.getByRole("meter", { name: "LOW LIGHT", exact: true }),
+    board.getByRole("meter", { name: "NIGHT", exact: true }),
   ).toHaveAttribute("aria-valuenow", "9");
   await expect(
-    board.getByRole("meter", { name: "REACH", exact: true }),
+    board.getByRole("meter", { name: "STABILITY", exact: true }),
   ).toHaveAttribute("aria-valuenow", "0");
   expect(
     await page.evaluate(() =>
@@ -271,7 +279,7 @@ test("legacy saved scores remain usable and new scores persist after editing", a
   ).toBe(raw);
   await openManagement(page);
   await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
-  await page.getByLabel(/^REACH\b/).fill("7.5");
+  await page.getByLabel(/^STABILITY\b/).fill("7.5");
   await page.getByRole("button", { name: "保存する" }).click();
   await page.reload();
   const saved = await page.evaluate(
@@ -280,8 +288,10 @@ test("legacy saved scores remain usable and new scores persist after editing", a
         .cameras[0],
   );
   expect(saved.ratings).toMatchObject({
-    reach: 7.5,
-    lowLight: 9,
+    stability: 7.5,
+    night: 9,
+    latitude: 7,
+    response: 8,
     mobility: 5,
     autofocus: 8,
   });
@@ -296,6 +306,9 @@ for (const labelMode of ["english", "bilingual"] as const)
       test(`${view} exports real PNG ${ratio} with ${labelMode} labels`, async ({
         page,
       }) => {
+        const firstLabel = view === "camera" ? "DETAIL" : "RESOLUTION";
+        const formattedFirstLabel =
+          labelMode === "bilingual" ? `${firstLabel} / 解像性能` : firstLabel;
         if (view === "lens")
           await page.getByRole("button", { name: /LENS.*LOADOUT/ }).click();
         await page
@@ -303,10 +316,7 @@ for (const labelMode of ["english", "bilingual"] as const)
           .selectOption(labelMode);
         await expect(
           page.getByTestId("detail-board").getByRole("meter", {
-            name:
-              labelMode === "bilingual"
-                ? "RESOLUTION / 解像性能"
-                : "RESOLUTION",
+            name: formattedFirstLabel,
             exact: true,
           }),
         ).toBeVisible();
@@ -335,10 +345,7 @@ for (const labelMode of ["english", "bilingual"] as const)
         );
         await expect(
           exportBoard.locator('[role="meter"]').first(),
-        ).toHaveAttribute(
-          "aria-label",
-          labelMode === "bilingual" ? "RESOLUTION / 解像性能" : "RESOLUTION",
-        );
+        ).toHaveAttribute("aria-label", formattedFirstLabel);
         await expect(
           page.getByRole("combobox", { name: "項目名の表示" }),
         ).toBeDisabled();
@@ -394,7 +401,7 @@ test("label mode persists across reloads and works for cameras, lenses, comparis
   await selector.selectOption("bilingual");
   const board = page.getByTestId("detail-board");
   await expect(
-    board.getByRole("meter", { name: "LOW LIGHT / 低照度性能" }),
+    board.getByRole("meter", { name: "NIGHT / 低照度性能" }),
   ).toBeVisible();
   await expect(
     board.getByText("MEDIA / 記録メディア", { exact: true }),
@@ -418,14 +425,14 @@ test("label mode persists across reloads and works for cameras, lenses, comparis
   await expect(
     page.getByLabel("BURST / 連写速度", { exact: true }),
   ).toHaveValue("14frames /s");
-  await expect(page.getByLabel("BOKEH / ボケ", { exact: true })).toHaveValue(
-    "0",
-  );
+  await expect(
+    page.getByLabel("STABILITY / 手ぶれ補正性能", { exact: true }),
+  ).toHaveValue("0");
   await page.getByRole("button", { name: "キャンセル" }).click();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "CSVテンプレート" }).click();
   const header = await readFile((await (await download).path())!, "utf8");
-  expect(header).toContain("rating_low_light");
+  expect(header).toContain("rating_night");
   expect(header).not.toMatch(/[\u3040-\u30ff\u4e00-\u9fff]/);
   expect(
     await page.evaluate(() =>
@@ -435,7 +442,7 @@ test("label mode persists across reloads and works for cameras, lenses, comparis
   await selector.selectOption("english");
   await page.getByRole("button", { name: /CAMERA SELECT/ }).click();
   await expect(
-    board.getByRole("meter", { name: "LOW LIGHT", exact: true }),
+    board.getByRole("meter", { name: "NIGHT", exact: true }),
   ).toBeVisible();
   await expect(
     board.getByText("SENSOR / センサー", { exact: true }),

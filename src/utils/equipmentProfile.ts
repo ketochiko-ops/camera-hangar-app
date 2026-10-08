@@ -1,4 +1,4 @@
-import { legacyCameraRatingKeys, specLabels, type Camera } from "../types";
+import { specLabels, type Camera } from "../types";
 
 export function cameraDetailSpecs(camera: Camera): [string, string][] {
   const sensor = camera.specs.sensor.replace(
@@ -26,6 +26,45 @@ export function cameraDetailSpecs(camera: Camera): [string, string][] {
 export function migrateLegacyRatings(value: unknown, camera: boolean): unknown {
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
   const ratings = value as Record<string, number>;
+  if (camera) {
+    // Recognize the complete previous profile, never repair a partial new one.
+    const currentKeys = [
+      "detail",
+      "night",
+      "latitude",
+      "response",
+      "stability",
+      "endurance",
+    ];
+    const previousKeys = [
+      "resolution",
+      "bokeh",
+      "lowLight",
+      "reach",
+      "closeFocus",
+      "mobility",
+      "versatility",
+    ];
+    if (currentKeys.some((key) => Object.hasOwn(ratings, key))) return value;
+    if (
+      previousKeys.every(
+        (key) =>
+          Number.isFinite(ratings[key]) &&
+          ratings[key] >= 0 &&
+          ratings[key] <= 10,
+      )
+    ) {
+      return {
+        ...ratings,
+        detail: ratings.resolution,
+        night: ratings.lowLight,
+        latitude: ratings.dynamicRange ?? 0,
+        response: ratings.autofocus ?? 0,
+        stability: 0,
+        endurance: 0,
+      };
+    }
+  }
   const oldKeys = camera
     ? [
         "resolution",
@@ -57,7 +96,7 @@ export function migrateLegacyRatings(value: unknown, camera: boolean): unknown {
     )
   )
     return value;
-  return {
+  const migrated = {
     resolution: camera ? ratings.resolution : ratings.sharpness,
     bokeh: camera ? 0 : ratings.backgroundBlur,
     lowLight: camera ? ratings.highIso : ratings.lowLight,
@@ -67,8 +106,11 @@ export function migrateLegacyRatings(value: unknown, camera: boolean): unknown {
     versatility: camera ? 0 : ratings.versatility,
     ...(camera
       ? Object.fromEntries(
-          legacyCameraRatingKeys.map((key) => [key, ratings[key]]),
+          ["autofocus", "dynamicRange", "handling", "colorRendering"].map(
+            (key) => [key, ratings[key]],
+          ),
         )
       : {}),
   };
+  return camera ? migrateLegacyRatings(migrated, true) : migrated;
 }

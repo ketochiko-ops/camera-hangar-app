@@ -17,13 +17,15 @@ describe("equipment CSV", () => {
     );
     expect(batch.issues).toEqual([]);
     expect(batch.items[0].ratings).toEqual({
+      detail: 7,
+      night: 8,
+      latitude: 5,
+      response: 6,
+      stability: 0,
+      endurance: 0,
       resolution: 7,
-      bokeh: 0,
       lowLight: 8,
-      reach: 0,
-      closeFocus: 0,
       mobility: 9,
-      versatility: 0,
       autofocus: 6,
       dynamicRange: 5,
       handling: 4,
@@ -44,6 +46,57 @@ describe("equipment CSV", () => {
       dynamicRange: 5,
       handling: 4,
       colorRendering: 3,
+    });
+  });
+  it("imports the previous shared camera profile without repurposing lens scores", () => {
+    const parsed = parseEquipmentCsv(
+      "id,name,maker,category,summary,role,mount,rating_resolution,rating_bokeh,rating_low_light,rating_reach,rating_close_focus,rating_mobility,rating_versatility\nnikon-zf,Camera,Nikon,Mirrorless,Notes,MULTIROLE,Nikon Z,7,4,8,6,5,9,3",
+      "camera",
+    );
+    expect(parsed.issues).toEqual([]);
+    expect(parsed.items[0].ratings).toMatchObject({
+      detail: 7,
+      night: 8,
+      latitude: 0,
+      response: 0,
+      stability: 0,
+      endurance: 0,
+      mobility: 9,
+      bokeh: 4,
+      reach: 6,
+      closeFocus: 5,
+      versatility: 3,
+    });
+    expect(
+      parseEquipmentCsv(exportEquipmentCsv("camera", parsed.items), "camera")
+        .items,
+    ).toEqual(parsed.items);
+    const update = parseEquipmentCsv(
+      exportEquipmentCsv("camera", [sampleInventory.cameras[0]]),
+      "camera",
+    );
+    expect(
+      mergeCsvImport(mergeCsvImport(sampleInventory, parsed), update).cameras[0]
+        .ratings,
+    ).toMatchObject({ bokeh: 4, reach: 6, closeFocus: 5, versatility: 3 });
+  });
+  it("prefers new camera columns including blank zero values while retaining old scores", () => {
+    const parsed = parseEquipmentCsv(
+      "name,maker,category,summary,role,mount,rating_detail,rating_resolution,rating_night,rating_low_light,rating_latitude,rating_dynamic_range,rating_response,rating_autofocus,rating_stability,rating_endurance\nCamera,Nikon,Mirrorless,Notes,MULTIROLE,Nikon Z,9,7,,8,6,5,4,3,2,1",
+      "camera",
+    );
+    expect(parsed.issues).toEqual([]);
+    expect(parsed.items[0].ratings).toMatchObject({
+      detail: 9,
+      resolution: 7,
+      night: 0,
+      lowLight: 8,
+      latitude: 6,
+      dynamicRange: 5,
+      response: 4,
+      autofocus: 3,
+      stability: 2,
+      endurance: 1,
     });
   });
   it("imports former lens rating columns into the corresponding new scores", () => {
@@ -130,7 +183,7 @@ describe("equipment CSV", () => {
   });
   it("rejects a batch with invalid ratings without returning partial records", () => {
     const items = structuredClone(sampleInventory.cameras.slice(0, 2));
-    items[1].ratings.resolution = 11;
+    items[1].ratings.detail = 11;
     const parsed = parseEquipmentCsv(
       exportEquipmentCsv("camera", items),
       "camera",
@@ -138,7 +191,7 @@ describe("equipment CSV", () => {
     expect(parsed.items).toEqual([]);
     expect(parsed.issues).toContainEqual({
       line: 3,
-      column: "rating_resolution",
+      column: "rating_detail",
       message: "評価は0〜10の数値で入力してください。",
     });
   });
