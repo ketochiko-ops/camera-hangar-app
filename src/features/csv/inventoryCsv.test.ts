@@ -10,10 +10,36 @@ import {
 } from "./inventoryCsv";
 
 describe("equipment CSV", () => {
+  it("backs up eight long part names and all seven effects without exceeding the CSV cell limit", () => {
+    const camera = structuredClone(sampleInventory.cameras[0]);
+    camera.additionalParts = Array.from({ length: 8 }, () => ({
+      kind: "other",
+      name: "x".repeat(64),
+      effects: {
+        detail: 10,
+        night: -10,
+        latitude: 10,
+        response: -10,
+        stability: 10,
+        endurance: -10,
+        mobility: 10,
+      },
+    }));
+    const parsed = parseEquipmentCsv(
+      exportEquipmentCsv("camera", [camera]),
+      "camera",
+    );
+    expect(parsed.issues).toEqual([]);
+    expect(parsed.items).toEqual([camera]);
+  });
   it("round trips multiple parts with quotes, commas, pipes and Japanese names", () => {
     const camera = structuredClone(sampleInventory.cameras[0]);
     camera.additionalParts = [
-      { kind: "grip", name: 'SmallRig, "custom"' },
+      {
+        kind: "grip",
+        name: 'SmallRig, "custom"',
+        effects: { stability: 0.5, mobility: -1 },
+      },
       { kind: "adapter", name: "Adapter | F → Z" },
       { kind: "adapter", name: "別のアダプター" },
     ];
@@ -52,6 +78,13 @@ describe("equipment CSV", () => {
     ),
     JSON.stringify([{ kind: "grip", name: "two\nlines" }]),
     "[broken JSON",
+    '[{"kind":"grip","name":"Bad","effects":null}]',
+    '[{"kind":"grip","name":"Bad","effects":[]}]',
+    '[{"kind":"grip","name":"Bad","effects":{"response":-11}}]',
+    '[{"kind":"grip","name":"Bad","effects":{"detail":11}}]',
+    '[{"kind":"grip","name":"Bad","effects":{"mobility":"-1"}}]',
+    '[{"kind":"grip","name":"Bad","effects":{"autofocus":1}}]',
+    '[{"kind":"grip","name":"Bad","effects":{"__proto__":1}}]',
   ])(
     "rejects invalid parts without partially importing the batch: %s",
     (parts) => {

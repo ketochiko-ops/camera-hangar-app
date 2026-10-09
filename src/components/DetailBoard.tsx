@@ -10,6 +10,7 @@ import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
 import { CameraParts } from "./CameraParts";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
+import { equipmentRatings } from "../utils/partEffects";
 import {
   formatItemLabel,
   useLabelMode,
@@ -109,7 +110,7 @@ export function DetailBoard({
           <small>PERSONAL RATING</small>
         </div>
         <RatingBars
-          ratings={item.ratings}
+          {...equipmentRatings(item)}
           labels={Object.fromEntries(
             Object.entries(cam ? cameraRatingLabels : lensRatingLabels).map(
               ([key, label]) => [key, formatItemLabel(label, activeMode)],

@@ -2,6 +2,20 @@ import { describe, expect, it, vi } from "vitest";
 import { createLocalRepository, STORAGE_KEY } from "./storage";
 import { sampleInventory } from "../data/sample";
 describe("local repository", () => {
+  it("preserves custom effects and protects invalid effects from being overwritten", () => {
+    const data = structuredClone(sampleInventory);
+    data.cameras[0].additionalParts[0].effects = { stability: 1, mobility: -2 };
+    let repo = createLocalRepository(localStorage);
+    repo.save(data);
+    expect(repo.load().data).toEqual(data);
+    data.cameras[0].additionalParts[0].effects = { stability: NaN };
+    const raw = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEY, raw);
+    repo = createLocalRepository(localStorage);
+    expect(repo.load().error).toBeTruthy();
+    expect(() => repo.save(sampleInventory)).toThrow(/読み込めない/);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
+  });
   it("loads old camera records with the specified parts while preserving explicit empty lists and source data", () => {
     const data = structuredClone(sampleInventory);
     for (const camera of data.cameras)

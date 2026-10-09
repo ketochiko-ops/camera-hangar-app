@@ -320,6 +320,96 @@ test("camera parts can be added, validated, removed and retained across reloads"
   expect(stored).toEqual([]);
   await expect(board.getByTestId("camera-parts")).toHaveCount(0);
 });
+test("part effects change ratings, colors and comparison while preserving body scores", async ({
+  page,
+}) => {
+  const board = page.getByTestId("detail-board");
+  const meter = (name: string) =>
+    board.getByRole("meter", { name, exact: true });
+  await expect(meter("STABILITY")).toHaveAttribute("aria-valuenow", "9.5");
+  await expect(meter("STABILITY")).toHaveAttribute(
+    "aria-valuetext",
+    "9.0 → 9.5 (+0.5)",
+  );
+  await expect(meter("STABILITY")).toHaveAttribute("data-change", "increase");
+  await expect(meter("MOBILITY")).toHaveAttribute("aria-valuenow", "5.2");
+  await expect(meter("MOBILITY")).toHaveAttribute("data-change", "decrease");
+  await expect(board.locator('strong[data-change="increase"]')).toHaveCSS(
+    "color",
+    "rgb(115, 216, 255)",
+  );
+  await expect(board.locator('strong[data-change="decrease"]')).toHaveCSS(
+    "color",
+    "rgb(255, 147, 153)",
+  );
+  await page.getByRole("button", { name: "SONY α7R IIIAを選択" }).click();
+  await expect(meter("ENDURANCE")).toHaveAttribute("aria-valuenow", "10");
+  await expect(meter("ENDURANCE")).toHaveAttribute(
+    "aria-valuetext",
+    "8.5 → 10.0 (+1.5)",
+  );
+  await expect(meter("AF")).toHaveAttribute("aria-valuenow", "7.5");
+  await page.getByRole("button", { name: "Nikon Z fを選択" }).click();
+  await page.setViewportSize({ width: 320, height: 844 });
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  const part = page.getByRole("group", { name: "PART 01", exact: true });
+  await part.locator("summary").click();
+  const correction = page.getByLabel("追加パーツ1のSTABILITY補正", {
+    exact: true,
+  });
+  await correction.fill("11");
+  await page.getByRole("button", { name: "保存する" }).click();
+  await expect(
+    page.getByRole("alert").filter({ hasText: /補正は各評価項目/ }),
+  ).toBeVisible();
+  await correction.fill("1");
+  await part.getByRole("button", { name: "参考値に戻す" }).click();
+  await expect(correction).toHaveValue("0.5");
+  await correction.fill("0.8");
+  await expect
+    .poll(() =>
+      page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+    )
+    .toBe(true);
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  await expect(meter("STABILITY")).toHaveAttribute("aria-valuenow", "9.8");
+  const stored = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem("optical-arsenal:inventory:v1")!)
+        .cameras[0],
+  );
+  expect(stored.ratings).toMatchObject({ stability: 9, mobility: 6 });
+  expect(stored.additionalParts[0].effects).toEqual({
+    stability: 0.8,
+    mobility: -0.3,
+  });
+  await page.getByLabel("Nikon Z fを比較に追加").check();
+  await page.getByLabel("SONY α7R IIIAを比較に追加").check();
+  await page.getByRole("button", { name: "比較 2/3" }).click();
+  const first = page.getByRole("dialog").locator("article").first();
+  await expect(
+    first.getByRole("meter", { name: "STABILITY", exact: true }),
+  ).toHaveAttribute("aria-valuenow", "9.8");
+  await expect(
+    first.getByTestId("rating-delta").filter({ hasText: "+0.8" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  await page
+    .getByRole("button", { name: "追加パーツ1を削除", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "追加パーツ1を削除", exact: true })
+    .click();
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  await expect(meter("STABILITY")).toHaveAttribute("aria-valuenow", "9");
+  await expect(meter("MOBILITY")).toHaveAttribute("aria-valuenow", "6");
+  await expect(board.getByTestId("rating-delta")).toHaveCount(0);
+});
 test("legacy saved scores remain usable and new scores persist after editing", async ({
   page,
 }) => {
@@ -327,6 +417,7 @@ test("legacy saved scores remain usable and new scores persist after editing", a
     structuredClone(module.sampleInventory),
   );
   Object.assign(inventory.cameras[0], {
+    additionalParts: [],
     ratings: {
       resolution: 7.5,
       highIso: 9,
@@ -396,6 +487,10 @@ for (const labelMode of ["english", "bilingual"] as const)
                 0,
                 64,
               ),
+              effects:
+                index === 0
+                  ? { stability: 0.5, mobility: -0.8, endurance: 2 }
+                  : {},
             }),
           );
           await page.evaluate(
@@ -454,6 +549,13 @@ for (const labelMode of ["english", "bilingual"] as const)
             }),
           ).toHaveAttribute("aria-valuenow", "9");
         if (view === "camera") {
+          await expect(exportBoard.getByTestId("rating-delta")).toHaveCount(3);
+          await expect(
+            exportBoard.locator('[role="meter"][data-change="increase"]'),
+          ).toHaveCount(2);
+          await expect(
+            exportBoard.locator('[role="meter"][data-change="decrease"]'),
+          ).toHaveCount(1);
           await expect(
             exportBoard.getByTestId("camera-parts").locator("li"),
           ).toHaveCount(8);
@@ -553,7 +655,7 @@ test("label mode persists across reloads and works for cameras, lenses, comparis
     page.getByLabel("BURST / 連写速度", { exact: true }),
   ).toHaveValue("14frames /s");
   await expect(
-    page.getByLabel("STABILITY / 手ぶれ補正性能", { exact: true }),
+    page.getByLabel("STABILITY / 撮影安定性", { exact: true }),
   ).toHaveValue("9");
   await expect(page.getByLabel("AF / AF性能", { exact: true })).toHaveValue(
     "9",

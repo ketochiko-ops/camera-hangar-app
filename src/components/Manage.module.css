@@ -331,6 +331,29 @@
 .addPart {
   font-size: 12px;
 }
+.partEffects {
+  grid-column: 1 / -1;
+  min-width: 0;
+  border-top: 1px solid #3c667b;
+  padding-top: 10px;
+}
+.partEffects summary {
+  cursor: pointer;
+  font: 11px var(--mono);
+  color: var(--accent);
+}
+.partEffects .partsHelp {
+  margin-top: 10px;
+}
+.partEffects a {
+  color: var(--accent);
+}
+.partEffectsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
 .addPart {
   margin: 14px 0 20px;
 }

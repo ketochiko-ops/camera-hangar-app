@@ -59,7 +59,9 @@ id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,ima
 | `release_year`        | 4桁の発売年（1800〜2199）                                        |
 | `rating_*`            | 0〜10の数値。小数可。空欄は0                                     |
 
-`additional_parts`は任意の追加パーツ列です。値はJSON配列で、種類は`grip`・`adapter`・`other`、名称は`name`に指定します。最大8個、名称は1行64文字まで、列全体は2048文字までです。
+`additional_parts`は任意の追加パーツ列です。値はJSON配列で、種類は`grip`・`adapter`・`other`、名称は`name`に指定します。最大8個、名称は1行64文字まで、列全体は4096文字までです。
+
+各パーツに任意の`effects`を指定すると評価を補正できます。例：`{"kind":"grip","name":"Custom grip","effects":{"stability":0.5,"mobility":-0.3}}`。キーは`detail`・`night`・`latitude`・`response`（AF）・`stability`・`endurance`・`mobility`、値は−10〜+10の数値です。`effects`省略は[参考補正](part-effects.md)（未対応名は0）、`effects:{}`は補正なし、オブジェクト内の未指定項目も0です。不正な項目名や値はバッチ全体を取り込みません。`rating_*`は本体評価なので、パーツの補正を加算しないでください。
 
 セルの値の例：
 
@@ -122,7 +124,7 @@ Example Lens,Example Maker,Prime,"メモにカンマ, を含む例",Nikon Z,50 m
 | NIGHT     | `rating_night`     | 低照度性能         |
 | LATITUDE  | `rating_latitude`  | ダイナミックレンジ |
 | AF        | `rating_response`  | AF性能             |
-| STABILITY | `rating_stability` | 手ぶれ補正性能     |
+| STABILITY | `rating_stability` | 撮影安定性         |
 | ENDURANCE | `rating_endurance` | バッテリー持続力   |
 | MOBILITY  | `rating_mobility`  | 携行性             |
 

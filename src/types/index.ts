@@ -39,7 +39,13 @@ export const cameraPartLabels = {
   adapter: "MOUNT ADAPTER",
   other: "OTHER",
 } as const;
-export type CameraPart = { kind: keyof typeof cameraPartLabels; name: string };
+export type PartEffects = Partial<Record<RatingKey, number>>;
+export type CameraPart = {
+  kind: keyof typeof cameraPartLabels;
+  name: string;
+  // Omitted: use researched reference effects. {} explicitly disables all effects.
+  effects?: PartEffects;
+};
 export const MAX_CAMERA_PARTS = 8;
 export const MAX_PART_NAME_LENGTH = 64;
 export type Camera = {

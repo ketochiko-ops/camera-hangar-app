@@ -52,7 +52,7 @@ describe("UI integration", () => {
     );
     await user.click(screen.getByRole("button", { name: /データ管理/ }));
     await user.click(screen.getByRole("button", { name: "Nikon Z fを編集" }));
-    expect(screen.getByLabelText("STABILITY / 手ぶれ補正性能")).toHaveValue(9);
+    expect(screen.getByLabelText("STABILITY / 撮影安定性")).toHaveValue(9);
     expect(screen.getByLabelText("AF / AF性能")).toHaveValue(9);
     expect(screen.getByLabelText("PIXELS / 画素数")).toHaveValue("24.5 MP");
     await user.click(screen.getByRole("button", { name: "キャンセル" }));
@@ -106,7 +106,7 @@ describe("UI integration", () => {
         "bilingual",
       );
       expect(
-        screen.getByRole("meter", { name: "STABILITY / 手ぶれ補正性能" }),
+        screen.getByRole("meter", { name: "STABILITY / 撮影安定性" }),
       ).toBeVisible();
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     } finally {

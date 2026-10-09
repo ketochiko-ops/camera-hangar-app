@@ -1,0 +1,46 @@
+# 追加パーツの参考補正
+
+2026-10-09にメーカー仕様を確認。数値はアプリ内の0〜10評価に合わせた**主観的な参考設定**で、メーカー測定値やベンチマークではありません。本体のスコアは保存したまま、装着した全パーツの補正を合計し、最後に0〜10へ制限します。画面の増減は制限後の実際の差分です。青は増加、赤い斜線は失われた範囲を表します。パーツを削除すると補正も外れます。
+
+| 登録パーツ            | STABILITY | ENDURANCE |   AF | MOBILITY | 設定の根拠                                                                                     |
+| --------------------- | --------: | --------: | ---: | -------: | ---------------------------------------------------------------------------------------------- |
+| SmallRig              |      +0.5 |         0 |    0 |     −0.3 | 型番未指定のためZ f用4262を参考に、保持の改善と102 gの追加重量を反映                           |
+| Nikon FTZ II          |         0 |         0 |    0 |     −0.5 | 125 gの追加重量。対応AF-S/AF-P/AF-Iレンズでの使用を想定し、AFを一律に下げない                  |
+| SONY VG-C3EM          |      +0.5 |      +2.0 |    0 |     −1.5 | 縦位置の保持と、NP-FZ100を2本入れた連続使用を想定。グリップと予備バッテリーの重量・容積を反映  |
+| MonsterAdapter LA-FE1 |         0 |         0 | −1.0 |     −0.5 | 写真のみAF対応、動画AF非対応という機能制約を参考AF評価に反映。三脚座なし約105 g                |
+| Fringer FR-FTX2       |         0 |         0 | −0.5 |     −0.7 | 最適化済みレンズでPDAF対応。レンズ・光条件によるAF変動とアダプターの重量・容積を参考評価に反映 |
+
+DETAIL・NIGHT・LATITUDEはこれらのパーツで変更しません。STABILITYの加算は保持のしやすさを表し、ボディ内手ぶれ補正の段数・センサー性能が向上する意味ではありません。AF減点はメーカーが公表した速度差ではなく、運用制約に対するアプリ内の目安です。レンズの組み合わせ・ファームウェア・使用感に応じて編集してください。VG-C3EMのENDURANCEは2本装填時の補正で、1本のみなら0に変更できます。
+
+初期装備での補正後の例：
+
+| カメラ        |         AF |  STABILITY |             ENDURANCE |   MOBILITY |
+| ------------- | ---------: | ---------: | --------------------: | ---------: |
+| Nikon Z f     |        9.0 | 9.5 (+0.5) |                   6.0 | 5.2 (−0.8) |
+| SONY α7R IIIA | 7.5 (−1.0) | 7.5 (+0.5) | 10.0 (+1.5、上限適用) | 5.0 (−2.0) |
+| FUJIFILM X-T5 | 8.0 (−0.5) |        8.5 |                   8.0 | 7.3 (−0.7) |
+
+## 編集とCSV
+
+追加パーツ欄の「STATUS EFFECTS」で各項目を−10〜+10の範囲で編集できます。既知の名前は参考値を自動で適用し、未登録名は0です。種類も一致する必要があります。名前の英字大小・空白・ハイフン・全角英数字・FTZⅡの表記差は許容します。「SmallRig」は指定のZ fグリップ用の登録名で、他のSmallRig製品へ自動適用しません。
+
+CSVの`additional_parts`内に任意の`effects`オブジェクトを含めます。省略すると自動補正、`{}`は全項目0、指定したオブジェクトの未指定項目も0です。カメラの`rating_*`列は本体評価を入れ、補正を加算しません。保存済みの追加パーツに`effects`がない場合も、データを上書きせず自動補正を表示します。
+
+```json
+[
+  {
+    "kind": "grip",
+    "name": "Custom grip",
+    "effects": { "stability": 0.5, "mobility": -0.3 }
+  },
+  { "kind": "adapter", "name": "Nikon FTZ II" }
+]
+```
+
+## 調査元
+
+- [SmallRig Z f用グリップ4262](https://www.smallrig.com/SmallRig-L-Shape-Handle-for-Nikon-Zf-4262.html)：保持の改善、重量102 g。型番未指定のSmallRigの参考モデル。
+- [Nikon FTZ II仕様・対応機能](https://imaging.nikon.com/imaging/lineup/accessory/camera/ftz_2/)：重量125 g、対応レンズによるAF/AE。AF-Dなどの非対応を全レンズに一般化しない。
+- [Sony VG-C3EM](https://www.sony.com.sg/electronics/interchangeable-lens-cameras-vertical-grips/vg-c3em)：縦位置操作、NP-FZ100を2本搭載して運用時間を延長。
+- [MonsterAdapter LA-FE1](https://www.monsteradapter.com/products/la-fe1-nikon-f-mount-lenses-to-sony-e-mount-cameras-adapter)：対応AFレンズ・写真のみのAF、重量約105 g（三脚座なし）/153 g（あり）。
+- [Fringer NF-FX II / FR-FTX2](https://www.fringeradapter.com/nikon-f-to-fujifilm-x)：最適化済みレンズでPDAF・顔/瞳AF、レンズ・光条件による変動、手ぶれ補正の制約。

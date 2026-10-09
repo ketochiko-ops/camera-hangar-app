@@ -10,6 +10,7 @@ import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
 import { CameraParts } from "./CameraParts";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
+import { equipmentRatings } from "../utils/partEffects";
 import { formatItemLabel, useLabelMode } from "../context/LabelModeContext";
 import styles from "./Manage.module.css";
 export function CompareModal({
@@ -42,7 +43,7 @@ export function CompareModal({
               <h3>{item.name}</h3>
               <p>{item.category}</p>
               <RatingBars
-                ratings={item.ratings}
+                {...equipmentRatings(item)}
                 labels={Object.fromEntries(
                   Object.entries(
                     cam ? cameraRatingLabels : lensRatingLabels,

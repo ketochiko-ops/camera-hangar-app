@@ -267,6 +267,44 @@
   box-shadow: 0 0 8px #4fa9ff66;
   position: relative;
 }
+.ratingDelta {
+  font: 10px var(--mono);
+  margin-right: 9px;
+  padding: 1px 4px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+.ratingLabel strong[data-change="increase"] {
+  color: #73d8ff;
+}
+.ratingLabel strong[data-change="decrease"] {
+  color: #ff9399;
+  text-shadow: 0 0 8px #ef556944;
+}
+.track[data-change="increase"] > div,
+.track[data-change="decrease"] > div {
+  background: #618598;
+  box-shadow: none;
+}
+.increaseSegment,
+.decreaseSegment {
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+.increaseSegment {
+  background: #53ceff;
+  box-shadow: 0 0 8px #53ceffaa;
+}
+.decreaseSegment {
+  background: repeating-linear-gradient(
+    135deg,
+    #ff6376 0,
+    #ff6376 2px,
+    #883449 2px,
+    #883449 4px
+  );
+}
 .track:after {
   position: absolute;
   inset: 0;

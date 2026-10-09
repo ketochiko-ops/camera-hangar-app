@@ -66,10 +66,22 @@ export function validateEquipment(item: Equipment): FormErrors {
           typeof part.name !== "string" ||
           !part.name.trim() ||
           part.name.length > MAX_PART_NAME_LENGTH ||
-          /[\r\n]/.test(part.name),
+          /[\r\n]/.test(part.name) ||
+          (Object.hasOwn(part, "effects") &&
+            (!part.effects ||
+              typeof part.effects !== "object" ||
+              Array.isArray(part.effects) ||
+              Object.entries(part.effects).some(
+                ([key, value]) =>
+                  !Object.hasOwn(cameraRatingLabels, key) ||
+                  typeof value !== "number" ||
+                  !Number.isFinite(value) ||
+                  value < -10 ||
+                  value > 10,
+              ))),
       )
     )
-      errors.additionalParts = `追加パーツは${MAX_CAMERA_PARTS}個まで、種類と1〜${MAX_PART_NAME_LENGTH}文字の名称（1行）を入力してください。`;
+      errors.additionalParts = `追加パーツは${MAX_CAMERA_PARTS}個まで、種類と1〜${MAX_PART_NAME_LENGTH}文字の名称（1行）、補正は各評価項目に−10〜+10の数値を入力してください。`;
     required("mount", item.mount);
     required("role", item.role);
     numeric("specs.weight", item.specs.weight);
