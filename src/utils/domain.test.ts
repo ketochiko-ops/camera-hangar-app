@@ -22,7 +22,7 @@ describe("rating display", () => {
 describe("mount compatibility", () => {
   it("matches exact mounts and preserves all mode", () => {
     expect(filterLenses(sampleInventory.lenses, "Nikon F", true)).toHaveLength(
-      5,
+      12,
     );
     expect(
       filterLenses(sampleInventory.lenses, "Nikon Z", true).every((l) =>
@@ -39,7 +39,7 @@ describe("mount compatibility", () => {
       filterLenses(sampleInventory.lenses, "Nikon Z", true, [
         { cameraMount: "Nikon Z", lensMount: "Nikon F" },
       ]),
-    ).toHaveLength(7);
+    ).toHaveLength(15);
   });
 });
 describe("validation", () => {
@@ -97,6 +97,20 @@ describe("validation", () => {
     sampleInventory.lenses.forEach((l) =>
       expect(validateEquipment(l)).toEqual({}),
     ));
+  it("accepts fixed apertures without relaxing positive values or other numeric fields", () => {
+    const lens = structuredClone(
+      sampleInventory.lenses.find((l) => l.id === "utulens32")!,
+    );
+    expect(lens.maxAperture).toBe("f/16 fixed");
+    expect(validateEquipment(lens)).toEqual({});
+    for (const value of ["f/0 fixed", "f/-16 fixed", "f/16 fixed extra"]) {
+      lens.maxAperture = value;
+      expect(validateEquipment(lens).maxAperture).toBeTruthy();
+    }
+    lens.maxAperture = "f/16 fixed";
+    lens.weight = "46 g fixed";
+    expect(validateEquipment(lens).weight).toBeTruthy();
+  });
 });
 describe("export presets", () => {
   it.each([

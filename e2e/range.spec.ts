@@ -69,7 +69,7 @@ test("each unit and the squadron gain independent wide, close-up, standard and t
   await page.getByLabel("僚機2のレンズ", { exact: true }).selectOption("dx40");
   await expect(
     coverage.getByRole("meter", { name: "CLOSE-UP", exact: true }),
-  ).toHaveAttribute("aria-valuenow", "9");
+  ).toHaveAttribute("aria-valuenow", "9.5");
   await expect(
     coverage.getByText("3 / 3 UNITS", { exact: true }),
   ).toBeVisible();
@@ -107,7 +107,7 @@ test("each unit and the squadron gain independent wide, close-up, standard and t
   ).toBeVisible();
   await expect(
     coverage.getByRole("meter", { name: "CLOSE-UP", exact: true }),
-  ).toHaveAttribute("aria-valuenow", "9");
+  ).toHaveAttribute("aria-valuenow", "9.5");
   await page
     .getByRole("combobox", { name: "項目名の表示" })
     .selectOption("bilingual");
@@ -116,7 +116,7 @@ test("each unit and the squadron gain independent wide, close-up, standard and t
   ).toHaveAttribute("aria-valuenow", "10");
   await expect(
     coverage.getByRole("meter", { name: "CLOSE-UP / 接写", exact: true }),
-  ).toHaveAttribute("aria-valuenow", "9");
+  ).toHaveAttribute("aria-valuenow", "9.5");
   for (const width of [768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     expect(

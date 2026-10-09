@@ -36,11 +36,11 @@ describe("shooting range coverage", () => {
   it("uses the DX image area on full frame and separates macro capability from wide angle", () => {
     const result = shootingRange(camera("nikon-zf"), lens("dx40"));
     expect(result.equivalent).toEqual({ min: 60, max: 60 });
-    expect(result.ratings.closeUp).toBe(9);
+    expect(result.ratings.closeUp).toBe(9.5);
     expect(result.ratings.wide).toBe(2.9);
     const fish = shootingRange(camera("nikon-zf"), lens("sigma15"));
     expect(fish.ratings.wide).toBe(10);
-    expect(fish.ratings.closeUp).toBe(6);
+    expect(fish.ratings.closeUp).toBe(5);
   });
   it("counts only usable combinations and responds to adapter removal without altering equipment", () => {
     const body = camera("nikon-zf");
@@ -96,7 +96,7 @@ describe("shooting range coverage", () => {
     const result = squadronCoverage(data, [leader, tele, macro, {}]);
     expect(result).toEqual({
       eligible: 3,
-      ratings: { wide: 10, closeUp: 9, standard: 10, telephoto: 10 },
+      ratings: { wide: 10, closeUp: 9.5, standard: 10, telephoto: 10 },
     });
     expect(squadronCoverage(data, [leader, macro]).ratings.telephoto).toBe(1.7);
     expect(squadronCoverage(data, [leader, leader]).ratings).toEqual(

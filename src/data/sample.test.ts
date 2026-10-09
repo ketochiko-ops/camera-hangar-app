@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import camerasCsv from "./defaults/cameras_corrected.csv?raw";
 import lensesCsv from "./defaults/lenses_corrected.csv?raw";
+import handheldLensesCsv from "./defaults/lenses_handheld_corrected_v2.csv?raw";
 import { sampleInventory } from "./sample";
 import {
   exportEquipmentCsv,
@@ -11,15 +12,23 @@ import { createLocalRepository, STORAGE_KEY } from "../utils/storage";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
 
 describe("corrected inventory defaults", () => {
-  it("uses every supplied spec, name, part and base rating from the 6-camera and 7-lens CSVs", () => {
+  it("merges supplied lens additions and updates by ID while retaining unmatched original defaults", () => {
     const cameras = parseEquipmentCsv(camerasCsv, "camera");
     const lenses = parseEquipmentCsv(lensesCsv, "lens");
+    const updates = parseEquipmentCsv(handheldLensesCsv, "lens");
     expect(cameras.issues).toEqual([]);
     expect(lenses.issues).toEqual([]);
+    expect(updates.issues).toEqual([]);
     expect(cameras.items).toHaveLength(6);
     expect(lenses.items).toHaveLength(7);
+    expect(updates.items).toHaveLength(16);
     expect(sampleInventory.cameras).toEqual(cameras.items);
-    expect(sampleInventory.lenses).toEqual(lenses.items);
+    const expected = mergeCsvImport(
+      mergeCsvImport({ version: 1, cameras: [], lenses: [] }, lenses),
+      updates,
+    );
+    expect(sampleInventory.lenses).toHaveLength(20);
+    expect(sampleInventory.lenses).toEqual(expected.lenses);
     for (const [kind, items] of [
       ["camera", sampleInventory.cameras],
       ["lens", sampleInventory.lenses],
@@ -50,6 +59,7 @@ describe("corrected inventory defaults", () => {
     saved.cameras[0].additionalParts = [];
     saved.cameras[0].image = "data:image/png;base64,cGhvdG8=";
     saved.lenses[0].name = "My lens";
+    saved.lenses[0].image = "data:image/png;base64,bGVucw==";
     saved.squadron = {
       leader: { cameraId: "nikon-zf", lensId: "dx35" },
       wingmen: [{ cameraId: "fuji-xt5", lensId: "dx40" }],
@@ -60,7 +70,7 @@ describe("corrected inventory defaults", () => {
     expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
     const updated = mergeCsvImport(
       mergeCsvImport(saved, parseEquipmentCsv(camerasCsv, "camera")),
-      parseEquipmentCsv(lensesCsv, "lens"),
+      parseEquipmentCsv(handheldLensesCsv, "lens"),
     );
     expect(updated.cameras[0].specs).toEqual(sampleInventory.cameras[0].specs);
     expect(updated.cameras[0].ratings).toEqual(
@@ -69,5 +79,9 @@ describe("corrected inventory defaults", () => {
     expect(updated.cameras[0].image).toBe(saved.cameras[0].image);
     expect(updated.squadron).toEqual(saved.squadron);
     expect(updated.lenses[0].name).toBe(sampleInventory.lenses[0].name);
+    expect(updated.lenses[0].ratings).toEqual(
+      sampleInventory.lenses[0].ratings,
+    );
+    expect(updated.lenses[0].image).toBe(saved.lenses[0].image);
   });
 });

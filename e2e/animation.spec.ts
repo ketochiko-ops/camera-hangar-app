@@ -117,10 +117,10 @@ test("camera, lens and part changes interpolate the existing graph and settle on
       exact: true,
     })
     .click();
-  await expect(resolution).toHaveAttribute("aria-valuenow", "8.5");
+  await expect(resolution).toHaveAttribute("aria-valuenow", "8");
   const lensMoving = await halfway(resolution.getByTestId("rating-fill"));
-  expect(lensMoving.percent).toBeGreaterThan(75);
-  expect(lensMoving.percent).toBeLessThan(85);
+  expect(lensMoving.percent).toBeGreaterThan(70);
+  expect(lensMoving.percent).toBeLessThan(80);
   await settle(page);
   await page
     .getByRole("button", { name: "この組み合わせで編成へ", exact: true })

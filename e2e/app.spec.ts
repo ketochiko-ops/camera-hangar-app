@@ -113,7 +113,7 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
   await page.getByLabel("使用カメラ").selectOption("canon-5d");
   await page.getByLabel("対応レンズのみ表示").check();
   await expect(
-    page.getByRole("heading", { name: "表示できるレンズがありません" }),
+    page.getByRole("button", { name: "EF50mm F1.8 STMを選択", exact: true }),
   ).toBeVisible();
 });
 test("camera and lens CRUD persist across reload", async ({ page }) => {

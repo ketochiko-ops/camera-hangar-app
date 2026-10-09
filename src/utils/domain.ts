@@ -141,7 +141,13 @@ export function validateEquipment(item: Equipment): FormErrors {
       errors.compatibleMounts = "対応マウントを1つ以上入力してください。";
     for (const key of ["focalLength", "maxAperture", "weight"] as const) {
       required(key, item[key]);
-      numeric(key, item[key]);
+      // Preserve fixed-aperture annotations in storage/CSV while validating the F value.
+      numeric(
+        key,
+        key === "maxAperture"
+          ? item[key].replace(/\s+fixed\s*$/i, "")
+          : item[key],
+      );
     }
   }
   const labels = isCamera(item) ? cameraRatingLabels : lensRatingLabels;

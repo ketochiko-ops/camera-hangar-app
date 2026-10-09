@@ -1,0 +1,17 @@
+﻿id,name,maker,category,summary,compatible_mounts,focal_length,max_aperture,weight,usage_tags,rating_resolution,rating_bokeh,rating_low_light,rating_reach,rating_close_focus,rating_mobility,rating_versatility
+nikkor-h-28-f35,NIKKOR-H Auto 2.8cm F3.5,Nikon,広角単焦点,1960年登場のクラシック広角。歪曲とコマ収差を抑えた設計で、風景やオールドレンズ表現に向く。,Nikon F (Pre-AI),28 mm,f/3.5,215 g,landscape|vintage|street,6.0,3.5,4.0,0.5,1.0,8.2,5.0
+nikkor-s-50-f14,Nikkor-S Auto 50mm F1.4,Nikon,標準単焦点,1962年登場の大口径標準。開放はクラシカルで柔らかく、絞るとシャープさが立ち上がる。,Nikon F (Pre-AI),50 mm,f/1.4,325 g,portrait|vintage|lowlight,5.5,5.5,9.0,2.0,1.5,6.9,5.5
+ai-micro-55-f28s,AI Micro-Nikkor 55mm f/2.8S,Nikon,マクロ,高い解像力で知られるMFマイクロ。単体で0.51倍、PK-13併用で等倍撮影にも対応する。,Nikon F,55 mm,f/2.8,290 g,macro|product|portrait|manual,8.0,6.0,6.0,2.5,7.5,7.3,7.0
+afs-50-f18g,AF-S NIKKOR 50mm f/1.8G,Nikon,標準単焦点,軽量な大口径50mm。ポートレートからスナップまで扱いやすく、F1.8で暗所にも強い。,Nikon F,50 mm,f/1.8,185 g,portrait|street|cosplay|lowlight,7.0,7.0,8.0,2.0,3.0,8.7,6.5
+afs-24-85-ifed,AF-S Zoom-Nikkor 24-85mm f/3.5-4.5G IF-ED,Nikon,標準ズーム,2002年型の非VR標準ズーム。24mmから85mmまでを415gでカバーする軽快なFX用ズーム。,Nikon F,24–85 mm,f/3.5–4.5,415 g,event|landscape|travel|portrait,6.5,6.0,4.5,4.0,4.0,6.1,8.5
+afs-85-f18g,AF-S NIKKOR 85mm f/1.8G,Nikon,中望遠単焦点,人物撮影の王道85mm。F1.8の明るさと自然な圧縮感を活かし、ポートレートやコスプレに強い。,Nikon F,85 mm,f/1.8,350 g,portrait|cosplay|lowlight,7.5,8.5,8.0,4.0,2.5,6.7,5.5
+tamron-a035,TAMRON 100-400mm F/4.5-6.3 Di VC USD (Model A035),TAMRON,超望遠ズーム,400mmまで届く軽量級の超望遠ズーム。4段VCと高速USDを備え、動体・風景・圧縮表現に対応する。,Nikon F,100–400 mm,f/4.5–6.3,1115 g,wildlife|sports|landscape|event,7.5,7.5,5.0,8.0,5.0,3.0,7.5
+sigma-50-art,SIGMA 50mm F1.4 DG HSM | Art,SIGMA,標準単焦点,開放F1.4から高い解像性能を狙ったArt単焦点。重量と引き換えに描写力とボケを優先した一本。,Nikon F,50 mm,f/1.4,815 g,portrait|cosplay|lowlight|studio,9.0,8.5,9.0,2.0,3.5,4.0,6.0
+sigma-24-70-art,SIGMA 24-70mm F2.8 DG OS HSM | Art,SIGMA,大口径標準ズーム,F2.8通しと光学手ブレ補正を両立したArt標準ズーム。イベントや人物撮影を一本で幅広くこなす。,Nikon F,24–70 mm,f/2.8,1020 g,event|portrait|cosplay|studio,8.0,7.5,7.5,3.0,4.0,3.3,9.0
+dx35,AF-S DX NIKKOR 35mm f/1.8G,Nikon,APS-C標準単焦点,DXで約52.5mm相当となる軽量F1.8。日常スナップから人物まで扱いやすい定番標準単焦点。,Nikon F,35 mm,f/1.8,200 g,street|portrait|cosplay|lowlight,7.0,6.5,8.0,1.0,3.0,8.4,6.5
+dx40,AF-S DX Micro NIKKOR 40mm f/2.8G,Nikon,APS-Cマクロ,等倍撮影に対応する軽量DXマイクロ。物撮り・小物・ディテール撮影と普段使いを両立する。,Nikon F,40 mm,f/2.8,235 g,macro|product|cosplay,8.0,6.0,6.0,1.5,9.5,8.0,7.5
+zdx16-50,NIKKOR Z DX 16-50mm f/3.5-6.3 VR,Nikon,APS-C標準ズーム,沈胴時約32mm・135gの超軽量標準ズーム。4.5段VRを備え、携行性重視のスナップや旅行に強い。,Nikon Z,16–50 mm,f/3.5–6.3,135 g,travel|street|landscape,7.5,5.0,4.5,2.0,4.0,9.6,8.5
+xf18-55,FUJINON XF18-55mmF2.8-4 R LM OIS,FUJIFILM,APS-C標準ズーム,F2.8始まりのコンパクトな標準ズーム。OISと使いやすい27-84mm相当画角で人物から風景まで対応する。,Fujifilm X,18–55 mm,f/2.8–4,310 g,travel|portrait|event|landscape,7.5,6.5,6.5,2.5,3.0,7.1,8.5
+utulens32,GIZMON Utulens 32mm F16,GIZMON,トイレンズ,写ルンですの再利用レンズによる32mm F16固定のローファイレンズ。解像力より独特の質感と軽さが武器。,Fujifilm X,32 mm,f/16 fixed,46 g,street|creative|lofi,1.5,1.0,0.5,1.0,0.5,10.0,3.0
+sigma15,SIGMA 15mm F2.8 EX DG DIAGONAL FISHEYE,SIGMA,対角線魚眼,180°の対角線魚眼と15cmの近接性能が特徴。強い歪曲を表現として使う超広角クリエイティブレンズ。,Nikon F,15 mm,f/2.8,370 g,landscape|creative|event,7.0,2.0,6.0,0.0,5.0,6.5,3.5
+ef50stm,EF50mm F1.8 STM,Canon,標準単焦点,160gの軽量F1.8標準単焦点。STMと0.35mの近接性能を備え、人物・スナップに使いやすい。,Canon EF,50 mm,f/1.8,160 g,portrait|street|cosplay|lowlight,7.0,7.0,8.0,2.0,4.0,9.1,6.5
