@@ -31,6 +31,13 @@ export function CameraFeatures({
       ) : (
         <p>{formatItemLabel("NONE", mode)}</p>
       )}
+      {(features.includes("ttl") || features.includes("hss")) && (
+        <p className={styles.note}>
+          {mode === "bilingual"
+            ? "TTL：対応ストロボ使用時。HSS：対応カメラ・ストロボと無線使用時。TT600はTTL非対応。"
+            : "TTL: compatible flash required. HSS: compatible camera / wireless flash required. TT600 does not support TTL."}
+        </p>
+      )}
     </section>
   );
 }

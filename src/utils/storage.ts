@@ -1,5 +1,6 @@
 import { sampleInventory } from "../data/sample";
-import { validateEquipment } from "./domain";
+import { validateEquipment, validCameraParts } from "./domain";
+import { normalizeSquadron, validSquadron } from "./loadout";
 import { migrateLegacyRatings } from "./equipmentProfile";
 import {
   MAX_CAMERA_PARTS,
@@ -30,6 +31,9 @@ export function createLocalRepository(
           data.version !== 1 ||
           !Array.isArray(data.cameras) ||
           !Array.isArray(data.lenses) ||
+          (Object.hasOwn(data, "partCatalog") &&
+            !validCameraParts(data.partCatalog, Infinity)) ||
+          (Object.hasOwn(data, "squadron") && !validSquadron(data.squadron)) ||
           (Object.hasOwn(data, "defaultLightingVersion") &&
             data.defaultLightingVersion !== 1)
         )
@@ -127,6 +131,8 @@ export function createLocalRepository(
           // Persist only with the next successful user save. Later removals stay removed.
           data.defaultLightingVersion = 1;
         }
+        if (data.squadron)
+          data.squadron = normalizeSquadron(data, data.squadron);
         return { data };
       } catch {
         readFailed = true;

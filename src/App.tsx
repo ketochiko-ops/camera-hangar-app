@@ -5,13 +5,17 @@ import {
   useLabelMode,
   type LabelMode,
 } from "./context/LabelModeContext";
-import { filterLenses, isCompatible } from "./utils/domain";
+import { filterLenses } from "./utils/domain";
 import { isCamera, type Camera, type Equipment } from "./types";
 import { DetailBoard } from "./components/DetailBoard";
 import { EquipmentImage } from "./components/EquipmentImage";
 import { ManagePage } from "./components/ManagePage";
 import { CompareModal } from "./components/CompareModal";
 import { Icon } from "./components/Icon";
+import { CameraLoadoutControls } from "./components/CameraLoadoutControls";
+import { SquadronPage } from "./components/SquadronPage";
+import { cameraAcceptsLens } from "./utils/loadout";
+import { cameraAdaptedMounts } from "./utils/partEffects";
 import { exportPng } from "./features/export/exportPng";
 import {
   exportSizes,
@@ -19,7 +23,7 @@ import {
   type ExportRatio,
 } from "./features/export/sizes";
 import styles from "./App.module.css";
-type Page = "camera" | "lens" | "manage";
+type Page = "camera" | "lens" | "manage" | "squadron";
 export function App() {
   return (
     <LabelModeProvider>
@@ -28,7 +32,7 @@ export function App() {
   );
 }
 function EquipmentApp() {
-  const { data, error } = useInventory();
+  const { data, error, saveSquadron } = useInventory();
   const { mode: labelMode, setMode: setLabelMode } = useLabelMode();
   const [page, setPage] = useState<Page>("camera");
   const [cameraId, setCameraId] = useState(data.cameras[0]?.id);
@@ -52,6 +56,12 @@ function EquipmentApp() {
     data.lenses,
     camera?.mount ?? "",
     compatibleOnly,
+    camera
+      ? cameraAdaptedMounts(camera).map((entry) => ({
+          cameraMount: camera.mount,
+          lensMount: entry.mount,
+        }))
+      : [],
   );
   const lens =
     compatibleLenses.find((l) => l.id === lensId) ?? compatibleLenses[0];
@@ -82,6 +92,16 @@ function EquipmentApp() {
           ? [...prev, id]
           : prev,
     );
+  const selectFormation = () => {
+    if (!camera) return;
+    if (
+      saveSquadron({
+        leader: { cameraId: camera.id, lensId: lens?.id },
+        wingmen: data.squadron?.wingmen ?? [],
+      })
+    )
+      navigate("squadron");
+  };
   async function download() {
     if (!item || exportState) return;
     setExportMessage("");
@@ -148,6 +168,17 @@ function EquipmentApp() {
             <span className={styles.navNumber}>02</span>
           </button>
           <button
+            className={page === "squadron" ? styles.active : ""}
+            aria-current={page === "squadron" ? "page" : undefined}
+            onClick={() => navigate("squadron")}
+          >
+            <Icon name="grid" />
+            <span>
+              SQUADRON / SORTIE<small>編成・出撃準備</small>
+            </span>
+            <span className={styles.navNumber}>03</span>
+          </button>
+          <button
             className={page === "manage" ? styles.active : ""}
             aria-current={page === "manage" ? "page" : undefined}
             onClick={() => navigate("manage")}
@@ -156,7 +187,7 @@ function EquipmentApp() {
             <span>
               DATA MANAGEMENT<small>データ管理</small>
             </span>
-            <span className={styles.navNumber}>03</span>
+            <span className={styles.navNumber}>04</span>
           </button>
         </nav>
         <div className={styles.sidebarBottom}>
@@ -209,6 +240,10 @@ function EquipmentApp() {
           )}
           {page === "manage" ? (
             <ManagePage />
+          ) : page === "squadron" ? (
+            <SquadronPage
+              initialLeader={{ cameraId: camera?.id, lensId: lens?.id }}
+            />
           ) : (
             <>
               <div className={styles.pageIntro}>
@@ -320,10 +355,13 @@ function EquipmentApp() {
                   </button>
                 </div>
               )}
+              {page === "camera" && camera && (
+                <CameraLoadoutControls key={camera.id} camera={camera} />
+              )}
               {page === "lens" &&
                 lens &&
                 camera &&
-                !isCompatible(lens, camera.mount) && (
+                !cameraAcceptsLens(camera, lens) && (
                   <p className={styles.compatibilityNotice}>
                     このレンズは選択中カメラのマウントに対応していません。アダプター・AF動作・センサー範囲は別途ご確認ください。
                   </p>
@@ -434,6 +472,14 @@ function EquipmentApp() {
                     onClick={() => navigate("lens")}
                   >
                     レンズを選択 <Icon name="arrow" size={17} />
+                  </button>
+                )}
+                {page === "lens" && camera && (
+                  <button
+                    className={styles.loadoutButton}
+                    onClick={selectFormation}
+                  >
+                    この組み合わせで編成へ <Icon name="arrow" size={17} />
                   </button>
                 )}
               </div>

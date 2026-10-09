@@ -554,9 +554,11 @@
   .sidebar nav {
     flex-direction: row;
     gap: 8px;
+    flex-wrap: wrap;
   }
   .sidebar nav button {
     flex: 1;
+    min-width: 120px;
     padding: 9px 4px;
     min-height: 44px;
     justify-content: center;

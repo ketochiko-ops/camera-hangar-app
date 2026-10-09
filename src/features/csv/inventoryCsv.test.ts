@@ -16,7 +16,7 @@ describe("equipment CSV", () => {
       kind: "other",
       name: "x".repeat(64),
       weightGrams: 10000,
-      features: ["wirelessFlash", "flash"],
+      features: ["wirelessFlash", "hss", "ttl", "flash"],
       effects: {
         detail: 10,
         night: -10,

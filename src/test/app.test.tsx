@@ -9,6 +9,39 @@ import { sampleInventory } from "../data/sample";
 import { LABEL_MODE_KEY } from "../context/LabelModeContext";
 import { STORAGE_KEY } from "../utils/storage";
 describe("UI integration", () => {
+  it("keeps equipped parts and squadron assignments unchanged when saving fails", async () => {
+    const user = userEvent.setup();
+    const data = structuredClone(sampleInventory);
+    render(
+      <InventoryProvider
+        repository={{
+          load: () => ({ data }),
+          save() {
+            throw new Error("保存容量不足");
+          },
+        }}
+      >
+        <App />
+      </InventoryProvider>,
+    );
+    await user.click(screen.getByText(/装備を付け替える/));
+    await user.click(screen.getByRole("button", { name: "Godox X2T-Nを外す" }));
+    expect(
+      screen.getByRole("button", { name: "Godox X2T-Nを外す" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      within(screen.getByTestId("detail-board")).getByTestId("part-weight"),
+    ).toHaveTextContent("+490 g");
+    expect(screen.getByRole("alert")).toHaveTextContent("保存容量不足");
+    await user.click(screen.getByRole("button", { name: /SQUADRON.*SORTIE/ }));
+    await user.click(screen.getByRole("button", { name: "＋ 僚機を追加" }));
+    expect(screen.getAllByTestId("squadron-unit")).toHaveLength(1);
+    expect(screen.getByRole("alert")).toHaveTextContent("保存容量不足");
+    expect(data.squadron).toBeUndefined();
+    expect(data.cameras[0].additionalParts).toEqual(
+      sampleInventory.cameras[0].additionalParts,
+    );
+  });
   it("switches detail, comparison and editor labels, remembers the choice, and keeps equipment data unchanged", async () => {
     const user = userEvent.setup();
     const inventory = JSON.stringify(sampleInventory);

@@ -79,7 +79,7 @@ const profiles: {
     ],
     effects: { mobility: -0.3 },
     weightGrams: 90,
-    features: ["wirelessFlash"],
+    features: ["wirelessFlash", "hss", "ttl"],
     source: "https://godox.com/product-d/X2.html",
   },
   {

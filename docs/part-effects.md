@@ -16,10 +16,10 @@ DETAIL・NIGHT・LATITUDEはこれらのパーツで変更しません。STABILI
 
 | 登録パーツ | 追加重量（電池を含まない） | MOBILITY | 追加機能 |
 | --- | ---: | ---: | --- |
-| Godox X2-T | 90 g | −0.3 | WIRELESS FLASH（無線ストロボ使用可） |
+| Godox X2-T | 90 g | −0.3 | WIRELESS FLASH / HIGH SPEED SYNC / TTL |
 | Godox TT600 | 400 g | −1.5 | FLASH（ストロボ使用可） |
 
-Z fにはX2T-N、α7R IIIAにはX2T-S、X-T5にはX2T-F、5D Mark IVにはX2T-Cを登録し、各カメラへTT600も追加します。機動力の参考減点は重量と容積を考慮した主観的な設定です。他の評価項目は変更しません。機能表示はTTL・HSSやセンサー性能の向上を意味しません。
+Z fにはX2T-N、α7R IIIAにはX2T-S、X-T5にはX2T-F、5D Mark IVにはX2T-Cを登録し、各カメラへTT600も追加します。機動力の参考減点は重量と容積を考慮した主観的な設定です。他の評価項目は変更しません。X2-Tは無線トリガーとしてTTL・HSSに対応します。TTLには対応ストロボが必要です。TT600はTTL非対応で、HSSは対応カメラ・トリガーとの無線使用時のみ対応します。機能欄にはこの条件を表示し、装着だけでTT600がTTL対応になるとは扱いません。
 
 WEIGHTは本体重量を保持し、登録した追加重量の合計を赤字で追記します。従来のグリップ・アダプターの重量初期値は0なので、全装備の実測重量を表す値ではありません。それらの重量や電池を含める場合は編集してください。TT600のメーカー記載は電池なし400 g・電池込み500 gです。ADDITIONAL FUNCTIONS欄の機能は青字で表示し、複数パーツで同じ機能を追加しても重複しません。
 
@@ -32,7 +32,7 @@ WEIGHTは本体重量を保持し、登録した追加重量の合計を赤字�
 | FUJIFILM X-T5 | 8.0 (−0.5) |        8.5 |                   8.0 | 5.5 (−2.5) |
 | Canon EOS 5D Mark IV | 8.0 | 0.0 | 9.0 | 2.2 (−1.8) |
 
-4台ともライティングの追加重量は合計490 g、追加機能はWIRELESS FLASHとFLASHです。
+4台ともライティングの追加重量は合計490 g、追加機能はWIRELESS FLASH・HIGH SPEED SYNC・TTL・FLASHです。
 
 ## 編集とCSV
 
@@ -42,7 +42,7 @@ WEIGHTは本体重量を保持し、登録した追加重量の合計を赤字�
 
 CSVの`additional_parts`内に任意の`effects`オブジェクトを含めます。省略すると自動補正、`{}`は全項目0、指定したオブジェクトの未指定項目も0です。カメラの`rating_*`列は本体評価を入れ、補正を加算しません。保存済みの追加パーツに`effects`がない場合も、データを上書きせず自動補正を表示します。
 
-同じ編集欄で追加重量（0〜10000 g）と機能を設定できます。CSVでは`weightGrams`と`features`を指定し、省略時は参考値、0と空配列はそれぞれ重量・機能なしを表します。機能キーは`wirelessFlash`・`flash`です。評価補正・重量・機能は独立しており、「参考値に戻す」で3つとも参照値に戻ります。`weight`列には追加分を含めない本体重量を登録してください。
+同じ編集欄で追加重量（0〜10000 g）と機能を設定できます。CSVでは`weightGrams`と`features`を指定し、省略時は参考値、0と空配列はそれぞれ重量・機能なしを表します。機能キーは`wirelessFlash`・`flash`・`hss`・`ttl`です。評価補正・重量・機能は独立しており、「参考値に戻す」で3つとも参照値に戻ります。`weight`列には追加分を含めない本体重量を登録してください。
 
 ```json
 [
@@ -62,5 +62,5 @@ CSVの`additional_parts`内に任意の`effects`オブジェクトを含めま�
 - [Sony VG-C3EM](https://www.sony.com.sg/electronics/interchangeable-lens-cameras-vertical-grips/vg-c3em)：縦位置操作、NP-FZ100を2本搭載して運用時間を延長。
 - [MonsterAdapter LA-FE1](https://www.monsteradapter.com/products/la-fe1-nikon-f-mount-lenses-to-sony-e-mount-cameras-adapter)：対応AFレンズ・写真のみのAF、重量約105 g（三脚座なし）/153 g（あり）。
 - [Fringer NF-FX II / FR-FTX2](https://www.fringeradapter.com/nikon-f-to-fujifilm-x)：最適化済みレンズでPDAF・顔/瞳AF、レンズ・光条件による変動、手ぶれ補正の制約。
-- [Godox X2](https://godox.com/product-d/X2.html)・[X2T-N公式説明書](https://www.godox.com/static/upload/file/20230628/1687944822437800.pdf)：2.4 GHz無線トリガー、重量90 g。
+- [Godox X2](https://godox.com/product-d/X2.html)・[X2T-N公式説明書](https://www.godox.com/static/upload/file/20230628/1687944822437800.pdf)：2.4 GHz無線トリガー、重量90 g。[Godox公式カタログ](https://godox.com/Downloads/Godox_Photography_Lighting_Catalogue_EN.pdf)にTTL・HSS対応を記載。
 - [Godox TT600](https://godox.com/product-d/TT600.html)・[公式説明書](https://www.godox.com/static/upload/file/20230227/1677483894404485.pdf)：ストロボ機能、重量400 g（電池なし）/500 g（電池込み）、単3電池4本。

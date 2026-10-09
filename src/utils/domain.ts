@@ -37,6 +37,51 @@ export const filterLenses = (
 export type FormErrors = Record<string, string>;
 const positiveRange =
   /^\s*(?:約\s*)?(?:f\/)?\d+(?:\.\d+)?(?:\s*[-–〜]\s*\d+(?:\.\d+)?)?\s*(?:g|kg|mm|MP|fps|frames?\s*\/\s*s|コマ\/秒)?\s*$/i;
+export function validCameraParts(
+  parts: unknown,
+  limit = MAX_CAMERA_PARTS,
+): parts is import("../types").CameraPart[] {
+  return !(
+    !Array.isArray(parts) ||
+    parts.length > limit ||
+    parts.some(
+      (part) =>
+        !part ||
+        typeof part !== "object" ||
+        !Object.hasOwn(cameraPartLabels, part.kind) ||
+        typeof part.name !== "string" ||
+        !part.name.trim() ||
+        part.name.length > MAX_PART_NAME_LENGTH ||
+        /[\r\n]/.test(part.name) ||
+        (Object.hasOwn(part, "weightGrams") &&
+          (typeof part.weightGrams !== "number" ||
+            !Number.isFinite(part.weightGrams) ||
+            part.weightGrams < 0 ||
+            part.weightGrams > 10000)) ||
+        (Object.hasOwn(part, "features") &&
+          (!Array.isArray(part.features) ||
+            part.features.length > Object.keys(partFeatureLabels).length ||
+            new Set(part.features).size !== part.features.length ||
+            part.features.some(
+              (feature: unknown) =>
+                typeof feature !== "string" ||
+                !Object.hasOwn(partFeatureLabels, feature),
+            ))) ||
+        (Object.hasOwn(part, "effects") &&
+          (!part.effects ||
+            typeof part.effects !== "object" ||
+            Array.isArray(part.effects) ||
+            Object.entries(part.effects).some(
+              ([key, value]) =>
+                !Object.hasOwn(cameraRatingLabels, key) ||
+                typeof value !== "number" ||
+                !Number.isFinite(value) ||
+                value < -10 ||
+                value > 10,
+            ))),
+    )
+  );
+}
 export function validateEquipment(item: Equipment): FormErrors {
   const errors: FormErrors = {};
   const required = (key: string, value: unknown) => {
@@ -56,46 +101,7 @@ export function validateEquipment(item: Equipment): FormErrors {
       errors[key] = "正の数値で入力してください（単位・範囲も可）。";
   };
   if (isCamera(item)) {
-    if (
-      !Array.isArray(item.additionalParts) ||
-      item.additionalParts.length > MAX_CAMERA_PARTS ||
-      item.additionalParts.some(
-        (part) =>
-          !part ||
-          typeof part !== "object" ||
-          !Object.hasOwn(cameraPartLabels, part.kind) ||
-          typeof part.name !== "string" ||
-          !part.name.trim() ||
-          part.name.length > MAX_PART_NAME_LENGTH ||
-          /[\r\n]/.test(part.name) ||
-          (Object.hasOwn(part, "weightGrams") &&
-            (typeof part.weightGrams !== "number" ||
-              !Number.isFinite(part.weightGrams) ||
-              part.weightGrams < 0 ||
-              part.weightGrams > 10000)) ||
-          (Object.hasOwn(part, "features") &&
-            (!Array.isArray(part.features) ||
-              part.features.length > Object.keys(partFeatureLabels).length ||
-              new Set(part.features).size !== part.features.length ||
-              part.features.some(
-                (feature) =>
-                  typeof feature !== "string" ||
-                  !Object.hasOwn(partFeatureLabels, feature),
-              ))) ||
-          (Object.hasOwn(part, "effects") &&
-            (!part.effects ||
-              typeof part.effects !== "object" ||
-              Array.isArray(part.effects) ||
-              Object.entries(part.effects).some(
-                ([key, value]) =>
-                  !Object.hasOwn(cameraRatingLabels, key) ||
-                  typeof value !== "number" ||
-                  !Number.isFinite(value) ||
-                  value < -10 ||
-                  value > 10,
-              ))),
-      )
-    )
+    if (!validCameraParts(item.additionalParts))
       errors.additionalParts = `追加パーツは${MAX_CAMERA_PARTS}個まで、種類と1〜${MAX_PART_NAME_LENGTH}文字の名称（1行）、補正は各評価項目に−10〜+10の数値を入力してください。追加重量は0〜10000 g、追加機能は対応する機能を重複なく指定してください。`;
     required("mount", item.mount);
     required("role", item.role);

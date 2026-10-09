@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-import type { Camera, Inventory, Lens } from "../types";
+import type { Camera, Inventory, Lens, Squadron } from "../types";
+import { prepareInventory } from "../utils/loadout";
 import {
   createLocalRepository,
   type InventoryRepository,
@@ -10,6 +11,7 @@ type InventoryContextValue = {
   error?: string;
   saveCamera(camera: Camera): boolean;
   saveLens(lens: Lens): boolean;
+  saveSquadron(squadron: Squadron): boolean;
   importCsv(batch: CsvImport): boolean;
   remove(kind: "camera" | "lens", id: string): boolean;
   clearError(): void;
@@ -30,8 +32,9 @@ export function InventoryProvider({
   const [error, setError] = useState(initial.error);
   const commit = (next: Inventory) => {
     try {
-      repo.save(next);
-      setData(next);
+      const prepared = prepareInventory(data, next);
+      repo.save(prepared);
+      setData(prepared);
       setError(undefined);
       return true;
     } catch (e) {
@@ -75,6 +78,7 @@ export function InventoryProvider({
         error,
         saveCamera,
         saveLens,
+        saveSquadron: (squadron) => commit({ ...data, squadron }),
         importCsv,
         remove,
         clearError: () => setError(undefined),

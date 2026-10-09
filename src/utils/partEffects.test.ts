@@ -25,7 +25,12 @@ describe("installed part effects", () => {
           .map((part) => part.name),
       ).toEqual([`Godox X2T-${variant}`, "Godox TT600"]);
       expect(cameraPartWeight(camera)).toBe(490);
-      expect(cameraFeatures(camera)).toEqual(["wirelessFlash", "flash"]);
+      expect(cameraFeatures(camera)).toEqual([
+        "wirelessFlash",
+        "hss",
+        "ttl",
+        "flash",
+      ]);
       const before = equipmentRatings(camera);
       camera.additionalParts = camera.additionalParts.filter(
         (part) => part.kind !== "lighting",
@@ -59,7 +64,12 @@ describe("installed part effects", () => {
         weightGrams: 20.5,
       },
     ];
-    expect(cameraFeatures(camera)).toEqual(["wirelessFlash", "flash"]);
+    expect(cameraFeatures(camera)).toEqual([
+      "wirelessFlash",
+      "hss",
+      "ttl",
+      "flash",
+    ]);
     expect(cameraPartWeight(camera)).toBe(610.5);
     expect(
       getPartWeight({ kind: "lighting", name: "TT600", weightGrams: 0 }),

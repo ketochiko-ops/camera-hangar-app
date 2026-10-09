@@ -506,7 +506,7 @@ test("lighting defaults upgrade saved cameras, add features and weight, and can 
       board.getByText(`Godox X2T-${variant}`, { exact: true }),
     ).toBeVisible();
     await expect(board.getByText("Godox TT600", { exact: true })).toBeVisible();
-    await expect(board.getByTestId("part-feature")).toHaveCount(2);
+    await expect(board.getByTestId("part-feature")).toHaveCount(4);
     await expect(board.getByTestId("part-feature").first()).toHaveCSS(
       "color",
       "rgb(115, 216, 255)",
@@ -565,7 +565,7 @@ test("lighting defaults upgrade saved cameras, add features and weight, and can 
   await page.getByRole("button", { name: "保存する" }).click();
   await page.reload();
   await expect(board.getByTestId("part-weight")).toHaveText("+510 g");
-  await expect(board.getByTestId("part-feature")).toHaveCount(1);
+  await expect(board.getByTestId("part-feature")).toHaveCount(3);
   await expect(
     board.getByRole("meter", { name: "MOBILITY / 携行性", exact: true }),
   ).toHaveAttribute("aria-valuenow", "3.3");
@@ -574,7 +574,7 @@ test("lighting defaults upgrade saved cameras, add features and weight, and can 
   await page.getByRole("button", { name: "比較 2/3" }).click();
   await expect(
     page.getByRole("dialog").getByTestId("part-feature"),
-  ).toHaveCount(3);
+  ).toHaveCount(7);
   await expect(
     page.getByRole("dialog").getByTestId("part-weight").first(),
   ).toHaveText("+510 g");
@@ -595,8 +595,8 @@ test("lighting defaults upgrade saved cameras, add features and weight, and can 
   await page.getByRole("button", { name: "保存する" }).click();
   await page.reload();
   await expect(board.getByTestId("part-weight")).toHaveText("+90 g");
-  await expect(board.getByTestId("part-feature")).toHaveCount(1);
-  await expect(board.getByTestId("part-feature")).toContainText(
+  await expect(board.getByTestId("part-feature")).toHaveCount(3);
+  await expect(board.getByTestId("part-feature").first()).toContainText(
     "WIRELESS FLASH",
   );
   await openManagement(page);
@@ -625,7 +625,7 @@ test("lighting defaults upgrade saved cameras, add features and weight, and can 
   await page.getByRole("button", { name: "TT600を追加", exact: true }).click();
   await page.getByRole("button", { name: "保存する" }).click();
   await page.reload();
-  await expect(board.getByTestId("part-feature")).toHaveCount(2);
+  await expect(board.getByTestId("part-feature")).toHaveCount(4);
   await expect(board.getByTestId("part-weight")).toHaveText("+490 g");
 });
 test("legacy saved scores remain usable and new scores persist after editing", async ({
@@ -710,7 +710,8 @@ for (const labelMode of ["english", "bilingual"] as const)
                   ? { stability: 0.5, mobility: -0.8, endurance: 2 }
                   : {},
               weightGrams: index === 0 ? 490 : 0,
-              features: index === 0 ? ["wirelessFlash", "flash"] : [],
+              features:
+                index === 0 ? ["wirelessFlash", "hss", "ttl", "flash"] : [],
             }),
           );
           inventory.cameras[0].additionalParts[1].name = "Nikon FTZ II";
@@ -770,7 +771,7 @@ for (const labelMode of ["english", "bilingual"] as const)
             }),
           ).toHaveAttribute("aria-valuenow", "9");
         if (view === "camera") {
-          await expect(exportBoard.getByTestId("part-feature")).toHaveCount(2);
+          await expect(exportBoard.getByTestId("part-feature")).toHaveCount(4);
           await expect(exportBoard.getByTestId("part-weight")).toHaveText(
             "+490 g",
           );

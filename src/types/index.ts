@@ -44,6 +44,8 @@ export type PartEffects = Partial<Record<RatingKey, number>>;
 export const partFeatureLabels = {
   wirelessFlash: "WIRELESS FLASH",
   flash: "FLASH",
+  hss: "HIGH SPEED SYNC",
+  ttl: "TTL",
 } as const;
 export type PartFeature = keyof typeof partFeatureLabels;
 export type CameraPart = {
@@ -99,6 +101,13 @@ export type Inventory = {
   defaultLightingVersion?: 1;
   cameras: Camera[];
   lenses: Lens[];
+  partCatalog?: CameraPart[];
+  squadron?: Squadron;
+};
+export type LoadoutSelection = { cameraId?: string; lensId?: string };
+export type Squadron = {
+  leader: LoadoutSelection;
+  wingmen: LoadoutSelection[];
 };
 export const isCamera = (item: Equipment): item is Camera => "specs" in item;
 export const specLabels: Record<keyof Camera["specs"], string> = {
