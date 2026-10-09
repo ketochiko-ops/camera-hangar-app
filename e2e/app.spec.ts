@@ -519,7 +519,6 @@ test("lighting defaults upgrade saved cameras, add features and weight, and can 
   for (const [name, variant] of [
     ["Nikon Z f", "N"],
     ["SONY α7R IIIA", "S"],
-    ["FUJIFILM X-T5", "F"],
     ["Canon EOS 5D Mark IV", "C"],
   ]) {
     await page.getByRole("button", { name: `${name}を選択` }).click();
@@ -933,7 +932,7 @@ test("label mode persists across reloads and works for cameras, lenses, comparis
   ).toHaveValue("14 fps (高速連続撮影・拡張) / 30 fps (C30)");
   await expect(
     page.getByLabel("STABILITY / 撮影安定性", { exact: true }),
-  ).toHaveValue("9.5");
+  ).toHaveValue("7.5");
   await expect(page.getByLabel("AF / AF性能", { exact: true })).toHaveValue(
     "9",
   );

@@ -99,7 +99,7 @@ test("invalid CSV and cancellation leave the archive unchanged; templates and pr
   const invalid = page.getByRole("dialog", {
     name: "CSVの内容を修正してください",
   });
-  await expect(invalid.getByText(/3行目.*rating_detail/)).toBeVisible();
+  await expect(invalid.getByText(/4行目.*rating_detail/)).toBeVisible();
   await expect(
     invalid.getByRole("button", { name: /件を登録する/ }),
   ).toHaveCount(0);

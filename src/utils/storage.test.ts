@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createLocalRepository, STORAGE_KEY } from "./storage";
 import { sampleInventory } from "../data/sample";
 describe("local repository", () => {
-  it("adds lighting once to the four specified saved cameras without changing existing equipment, photos or raw storage", () => {
+  it("adds current default lighting once without changing existing equipment, photos or raw storage", () => {
     const data = structuredClone(sampleInventory);
     delete data.defaultLightingVersion;
     data.cameras.forEach(
@@ -19,7 +19,7 @@ describe("local repository", () => {
     const loaded = repo.load();
     expect(loaded.error).toBeUndefined();
     expect(loaded.data.defaultLightingVersion).toBe(1);
-    for (const index of [0, 4, 5, 3]) {
+    for (const index of [0, 4, 3]) {
       expect(
         loaded.data.cameras[index].additionalParts.slice(
           0,
@@ -35,6 +35,9 @@ describe("local repository", () => {
         before.cameras[index].ratings,
       );
     }
+    expect(loaded.data.cameras[5].additionalParts).toEqual(
+      before.cameras[5].additionalParts,
+    );
     expect(loaded.data.cameras[0].image).toBe(before.cameras[0].image);
     expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
     loaded.data.cameras[0].additionalParts = [];

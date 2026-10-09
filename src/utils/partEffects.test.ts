@@ -11,7 +11,7 @@ import {
 } from "./partEffects";
 
 describe("installed part effects", () => {
-  it("registers the four lighting variants, adds weight and features, and only reduces mobility", () => {
+  it("supports the four lighting variants, adds weight and features, and only reduces mobility", () => {
     for (const [index, variant] of [
       [0, "N"],
       [4, "S"],
@@ -19,11 +19,10 @@ describe("installed part effects", () => {
       [3, "C"],
     ] as const) {
       const camera = structuredClone(sampleInventory.cameras[index]);
-      expect(
-        camera.additionalParts
-          .filter((part) => part.kind === "lighting")
-          .map((part) => part.name),
-      ).toEqual([`Godox X2T-${variant}`, "Godox TT600"]);
+      camera.additionalParts = [
+        { kind: "lighting", name: `Godox X2T-${variant}` },
+        { kind: "lighting", name: "Godox TT600" },
+      ];
       expect(cameraPartWeight(camera)).toBe(490);
       expect(cameraFeatures(camera)).toEqual([
         "wirelessFlash",
@@ -120,7 +119,7 @@ describe("installed part effects", () => {
     const camera = structuredClone(sampleInventory.cameras[0]);
     const before = structuredClone(camera);
     expect(equipmentRatings(camera)).toMatchObject({
-      ratings: { stability: 10, mobility: 3.9, response: 9 },
+      ratings: { stability: 8, mobility: 3.9, response: 9 },
       deltas: { stability: 0.5, mobility: -2.6, response: 0 },
     });
     expect(camera).toEqual(before);
@@ -130,12 +129,13 @@ describe("installed part effects", () => {
   it("caps the vertical grip benefit and reports the actual visible increase", () => {
     const camera = structuredClone(sampleInventory.cameras[4]);
     camera.ratings.endurance = 8.5; // Exercise clamping independently of default ratings.
+    camera.ratings.stability = 9.8;
     expect(equipmentRatings(camera)).toMatchObject({
-      ratings: { endurance: 10, stability: 7, response: 7, mobility: 3.2 },
-      deltas: { endurance: 1.5, stability: 0.5, response: -1, mobility: -3.8 },
+      ratings: { endurance: 10, stability: 10, response: 7, mobility: 3.2 },
+      deltas: { endurance: 1.5, stability: 0.2, response: -1, mobility: -3.8 },
     });
     expect(equipmentRatings(sampleInventory.cameras[5])).toMatchObject({
-      ratings: { response: 8, mobility: 5.5 },
+      ratings: { response: 8, mobility: 7.3 },
     });
   });
   it("sums before clamping, is independent of order, and supports cancellation", () => {

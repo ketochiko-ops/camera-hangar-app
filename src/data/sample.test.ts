@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import camerasCsv from "./defaults/cameras_corrected.csv?raw";
+import camerasCsv from "./defaults/cameras_stability_night_revised.csv?raw";
 import lensesCsv from "./defaults/lenses_corrected.csv?raw";
 import handheldLensesCsv from "./defaults/lenses_handheld_corrected_v2.csv?raw";
 import { sampleInventory } from "./sample";
@@ -56,8 +56,14 @@ describe("corrected inventory defaults", () => {
     const saved = structuredClone(sampleInventory);
     saved.cameras[0].specs.continuousShooting = "14frames /s";
     saved.cameras[0].ratings.endurance = 6;
+    saved.cameras[0].ratings.night = 9;
+    saved.cameras[0].ratings.stability = 9.5;
     saved.cameras[0].additionalParts = [];
     saved.cameras[0].image = "data:image/png;base64,cGhvdG8=";
+    saved.cameras[5].additionalParts.push(
+      { kind: "lighting", name: "Godox X2T-F" },
+      { kind: "lighting", name: "Godox TT600" },
+    );
     saved.lenses[0].name = "My lens";
     saved.lenses[0].image = "data:image/png;base64,bGVucw==";
     saved.squadron = {

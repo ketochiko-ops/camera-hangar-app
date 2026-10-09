@@ -79,7 +79,7 @@ test("camera, lens and part changes interpolate the existing graph and settle on
   await page
     .getByRole("button", { name: "SmallRigを外す", exact: true })
     .click();
-  await expect(stability).toHaveAttribute("aria-valuenow", "9.5");
+  await expect(stability).toHaveAttribute("aria-valuenow", "7.5");
   const increase = stability.getByTestId("rating-increase");
   const fading = await halfway(increase);
   expect(fading.percent).toBeGreaterThan(0);
@@ -91,7 +91,7 @@ test("camera, lens and part changes interpolate the existing graph and settle on
   await page
     .getByRole("button", { name: "SmallRigを装着", exact: true })
     .click();
-  await expect(stability).toHaveAttribute("aria-valuenow", "10");
+  await expect(stability).toHaveAttribute("aria-valuenow", "8");
   const growing = await halfway(increase);
   expect(growing.percent).toBeGreaterThan(0);
   expect(growing.percent).toBeLessThan(5);
@@ -169,7 +169,7 @@ test("reduced motion displays final values immediately for selection and parts",
     name: "STABILITY",
     exact: true,
   });
-  await expect(stability).toHaveAttribute("aria-valuenow", "9.5");
+  await expect(stability).toHaveAttribute("aria-valuenow", "7.5");
   await expect(stability.getByTestId("rating-increase")).toHaveCSS(
     "width",
     "0px",

@@ -300,7 +300,7 @@ describe("equipment CSV", () => {
     );
     expect(parsed.items).toEqual([]);
     expect(parsed.issues).toContainEqual({
-      line: 3,
+      line: 4,
       column: "rating_detail",
       message: "評価は0〜10の数値で入力してください。",
     });

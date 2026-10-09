@@ -44,6 +44,16 @@ describe("loadouts and squadron", () => {
     expect(names).not.toContain("Godox X2T-S");
     expect(names).not.toContain("SONY VG-C3EM");
     expect(names).not.toContain("Fringer FR-FTX2");
+    const fuji = data.cameras[5];
+    expect(fuji.additionalParts).toEqual([
+      { kind: "adapter", name: "Fringer FR-FTX2" },
+    ]);
+    expect(
+      availableCameraParts({ ...data, partCatalog: [] }, fuji),
+    ).toContainEqual({
+      kind: "lighting",
+      name: "Godox X2T-F",
+    });
     expect(
       partFitsCamera(
         { kind: "adapter", name: "Nikon FTZ II" },

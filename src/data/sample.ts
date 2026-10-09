@@ -1,12 +1,15 @@
 import type { Camera, Lens, Inventory } from "../types";
 
-// Defaults supplied in cameras_corrected.csv and lenses_corrected.csv (2026-10-09).
+// Camera defaults use cameras_stability_night_revised.csv (2026-10-09).
+// Original lens defaults use lenses_corrected.csv.
 // Lens additions/updates use lenses_handheld_corrected_v2.csv; unmatched originals remain.
 // Specs, names and subjective body/lens ratings are preserved as provided.
 // Source CSVs are retained under defaults/; equipment scores exclude part effects.
 export const sampleInventory: Inventory = {
   version: 1,
   defaultLightingVersion: 1,
+  // X-T5 lighting remains available to equip, rather than installed by default.
+  partCatalog: [{ kind: "lighting", name: "Godox X2T-F" }],
   cameras: [
     {
       id: "nikon-zf",
@@ -14,8 +17,8 @@ export const sampleInventory: Inventory = {
       maker: "Nikon",
       category: "Full Frame Mirrorless",
       summary:
-        "クラシックな操作感と現代の撮影性能を組み合わせた、日常からポートレートまでの相棒。光を見つけ、ダイヤルを回し、次の一枚へ。",
-      role: "MULTIROLE",
+        "クラシックな操作感と現代の撮影性能を組み合わせた、日常からポートレートまでの相棒。\nクラシカルな見た目とは裏腹に、最新のAFシステムを採用している。",
+      role: "Expert",
       mount: "Nikon Z",
       additionalParts: [
         {
@@ -47,10 +50,10 @@ export const sampleInventory: Inventory = {
       },
       ratings: {
         detail: 7.5,
-        night: 9.0,
+        night: 9.5,
         latitude: 8.5,
         response: 9.0,
-        stability: 9.5,
+        stability: 7.5,
         endurance: 4.5,
         mobility: 6.5,
       },
@@ -61,8 +64,8 @@ export const sampleInventory: Inventory = {
       maker: "Nikon",
       category: "APS-C Mirrorless",
       summary:
-        "軽快なボディで街の光を切り取る。持ち歩きたくなるサイズとダイヤル操作が魅力。",
-      role: "STREET",
+        "軽快なボディで街の光を切り取る。持ち歩きたくなるサイズとダイヤル操作が魅力。\nダイヤル操作は電源OFFでも設定を変更できるメリットとなる。",
+      role: "Casual",
       mount: "Nikon Z",
       additionalParts: [],
       specs: {
@@ -78,10 +81,10 @@ export const sampleInventory: Inventory = {
       },
       ratings: {
         detail: 6.5,
-        night: 7.0,
+        night: 6.0,
         latitude: 7.5,
         response: 7.0,
-        stability: 0.0,
+        stability: 4.5,
         endurance: 3.5,
         mobility: 9.0,
       },
@@ -92,7 +95,7 @@ export const sampleInventory: Inventory = {
       maker: "Nikon",
       category: "APS-C DSLR",
       summary:
-        "光学ファインダーで被写体を追いかけるフィールド機。手持ちのFマウントレンズと出かけよう。",
+        "光学ファインダーで被写体を追いかけるフィールド機。手持ちのFマウントレンズと出かけよう。\n「ライターC」を名乗る敏腕ウマ娘ライターの愛機でもある。",
       role: "FIELD",
       mount: "Nikon F",
       additionalParts: [],
@@ -109,10 +112,10 @@ export const sampleInventory: Inventory = {
       },
       ratings: {
         detail: 6.5,
-        night: 7.5,
+        night: 6.5,
         latitude: 8.5,
         response: 7.5,
-        stability: 0.0,
+        stability: 9.0,
         endurance: 7.5,
         mobility: 5.5,
       },
@@ -148,10 +151,10 @@ export const sampleInventory: Inventory = {
       },
       ratings: {
         detail: 7.5,
-        night: 8.0,
+        night: 7.5,
         latitude: 7.5,
         response: 7.5,
-        stability: 0.0,
+        stability: 9.0,
         endurance: 7.5,
         mobility: 4.0,
       },
@@ -196,10 +199,10 @@ export const sampleInventory: Inventory = {
       },
       ratings: {
         detail: 9.0,
-        night: 8.5,
+        night: 9.0,
         latitude: 9.5,
         response: 8.0,
-        stability: 6.5,
+        stability: 9.0,
         endurance: 6.0,
         mobility: 7.0,
       },
@@ -211,20 +214,12 @@ export const sampleInventory: Inventory = {
       category: "APS-C Mirrorless",
       summary:
         "高解像センサーと直感的なダイヤル。写真表現を楽しむための軽快なハイブリッド機。",
-      role: "HYBRID",
+      role: "Expert",
       mount: "Fujifilm X",
       additionalParts: [
         {
           kind: "adapter",
           name: "Fringer FR-FTX2",
-        },
-        {
-          kind: "lighting",
-          name: "Godox X2T-F",
-        },
-        {
-          kind: "lighting",
-          name: "Godox TT600",
         },
       ],
       specs: {
@@ -239,10 +234,10 @@ export const sampleInventory: Inventory = {
       },
       ratings: {
         detail: 9.0,
-        night: 7.0,
+        night: 8.0,
         latitude: 8.5,
         response: 8.5,
-        stability: 8.5,
+        stability: 8.0,
         endurance: 6.5,
         mobility: 8.0,
       },

@@ -58,6 +58,7 @@ export function availableCameraParts(
   const equipped = new Set(camera.additionalParts.map(partKey));
   return collectParts(
     sampleInventory.cameras.flatMap((c) => c.additionalParts),
+    sampleInventory.partCatalog ?? [],
     data.partCatalog ?? [],
     data.cameras.flatMap((c) => c.additionalParts),
     camera.additionalParts,
