@@ -3,6 +3,12 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 export type LabelMode = "english" | "bilingual";
 export const LABEL_MODE_KEY = "optical-arsenal:label-mode:v1";
 const japaneseLabels: Record<string, string> = {
+  "ADDITIONAL PARTS": "追加パーツ",
+  GRIP: "グリップ",
+  "MOUNT ADAPTER": "マウントアダプター",
+  OTHER: "その他",
+  TYPE: "種類",
+  "PART NAME": "パーツ名",
   DETAIL: "解像性能",
   NIGHT: "低照度性能",
   LATITUDE: "ダイナミックレンジ",

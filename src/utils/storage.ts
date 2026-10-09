@@ -30,11 +30,19 @@ export function createLocalRepository(
           [data.lenses, false],
         ] as const) {
           for (const item of items) {
-            if (item && typeof item === "object")
+            if (item && typeof item === "object") {
               item.ratings = migrateLegacyRatings(
                 item.ratings,
                 camera,
               ) as Camera["ratings"];
+              if (camera && !Object.hasOwn(item, "additionalParts"))
+                (item as Camera).additionalParts = structuredClone(
+                  sampleInventory.cameras.find(
+                    (sample) =>
+                      sample.id === item.id && sample.name === item.name,
+                  )?.additionalParts ?? [],
+                );
+            }
           }
         }
         const valid = (items: (Camera | Lens)[], camera: boolean) =>

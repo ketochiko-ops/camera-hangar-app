@@ -298,6 +298,42 @@
   gap: 14px 20px;
   margin-bottom: 18px;
 }
+.partsHelp {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #a7c1cf;
+  margin-bottom: 12px;
+}
+.partsEditor {
+  display: grid;
+  gap: 12px;
+}
+.partRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+  align-items: end;
+  gap: 12px;
+  border: 1px solid #3c667b;
+  padding: 12px;
+  min-width: 0;
+}
+.partRow legend {
+  font: 10px var(--mono);
+  color: var(--accent);
+  padding: 0 6px;
+}
+.partRow select {
+  width: 100%;
+  font-size: 13px;
+  min-width: 0;
+}
+.partRow button,
+.addPart {
+  font-size: 12px;
+}
+.addPart {
+  margin: 14px 0 20px;
+}
 .field {
   display: flex;
   flex-direction: column;
@@ -403,6 +439,12 @@
   overflow-wrap: anywhere;
 }
 @media (max-width: 760px) {
+  .partRow {
+    grid-template-columns: 1fr;
+  }
+  .partRow button {
+    justify-self: end;
+  }
   .manageIntro {
     flex-wrap: wrap;
   }

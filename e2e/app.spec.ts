@@ -242,6 +242,84 @@ test("compares up to three cameras", async ({ page }) => {
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
+test("camera parts can be added, validated, removed and retained across reloads", async ({
+  page,
+}) => {
+  const board = page.getByTestId("detail-board");
+  await expect(
+    board.getByTestId("camera-parts").getByText("SmallRig", { exact: true }),
+  ).toBeVisible();
+  await expect(board.getByText("Nikon FTZ II", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "SONY α7R IIIAを選択" }).click();
+  await expect(board.getByText("SONY VG-C3EM", { exact: true })).toBeVisible();
+  await expect(
+    board.getByText("MonsterAdapter LA-FE1", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "FUJIFILM X-T5を選択" }).click();
+  await expect(
+    board.getByText("Fringer FR-FTX2", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("combobox", { name: "項目名の表示" })
+    .selectOption("bilingual");
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  await expect(
+    page.getByRole("heading", { name: /ADDITIONAL PARTS \/ 追加パーツ/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "追加パーツを追加" }).click();
+  await page.getByRole("button", { name: "保存する" }).click();
+  await expect(
+    page.getByRole("alert").filter({ hasText: /追加パーツは8個まで/ }),
+  ).toBeVisible();
+  const name = '追加アダプター, "F | Z"';
+  await page.getByLabel("追加パーツ3の種類").selectOption("adapter");
+  await page.getByLabel("追加パーツ3の名称").fill(name);
+  for (let index = 4; index <= 8; index++) {
+    await page.getByRole("button", { name: "追加パーツを追加" }).click();
+    await page
+      .getByLabel(`追加パーツ${index}の名称`)
+      .fill(`Custom part ${index}`);
+  }
+  await expect(
+    page.getByRole("button", { name: "追加パーツを追加" }),
+  ).toBeDisabled();
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  await page.getByRole("button", { name: /CAMERA SELECT/ }).click();
+  await expect(
+    board.getByTestId("camera-parts").getByRole("listitem"),
+  ).toHaveCount(8);
+  await expect(board.getByText(name, { exact: true })).toBeVisible();
+  await page.getByLabel("Nikon Z fを比較に追加").check();
+  await page.getByLabel("SONY α7R IIIAを比較に追加").check();
+  await page.getByRole("button", { name: "比較 2/3" }).click();
+  await expect(
+    page.getByRole("dialog").getByTestId("camera-parts"),
+  ).toHaveCount(2);
+  await expect(
+    page.getByRole("dialog").getByText("SONY VG-C3EM", { exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  for (let index = 0; index < 8; index++)
+    await page
+      .getByRole("button", { name: "追加パーツ1を削除", exact: true })
+      .click();
+  await expect(
+    page.getByRole("button", { name: "追加パーツを追加" }),
+  ).toBeEnabled();
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  const stored = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem("optical-arsenal:inventory:v1")!)
+        .cameras[0].additionalParts,
+  );
+  expect(stored).toEqual([]);
+  await expect(board.getByTestId("camera-parts")).toHaveCount(0);
+});
 test("legacy saved scores remain usable and new scores persist after editing", async ({
   page,
 }) => {
@@ -306,6 +384,27 @@ for (const labelMode of ["english", "bilingual"] as const)
       test(`${view} exports real PNG ${ratio} with ${labelMode} labels`, async ({
         page,
       }) => {
+        if (view === "camera") {
+          const inventory = await import("../src/data/sample").then((module) =>
+            structuredClone(module.sampleInventory),
+          );
+          inventory.cameras[0].additionalParts = Array.from(
+            { length: 8 },
+            (_, index) => ({
+              kind: index % 2 ? "adapter" : "grip",
+              name: `Part ${index + 1}: ${"Long equipment name with spaces ".repeat(2)}`.slice(
+                0,
+                64,
+              ),
+            }),
+          );
+          await page.evaluate(
+            (value) =>
+              localStorage.setItem("optical-arsenal:inventory:v1", value),
+            JSON.stringify(inventory),
+          );
+          await page.reload();
+        }
         const firstLabel = view === "camera" ? "DETAIL" : "RESOLUTION";
         const formattedFirstLabel =
           labelMode === "bilingual" ? `${firstLabel} / 解像性能` : firstLabel;
@@ -354,6 +453,26 @@ for (const labelMode of ["english", "bilingual"] as const)
               includeHidden: true,
             }),
           ).toHaveAttribute("aria-valuenow", "9");
+        if (view === "camera") {
+          await expect(
+            exportBoard.getByTestId("camera-parts").locator("li"),
+          ).toHaveCount(8);
+          const bounds = await exportBoard
+            .getByTestId("camera-parts")
+            .evaluate((panel) => {
+              const visual = panel.parentElement!.parentElement!;
+              const rect = visual.getBoundingClientRect();
+              const card = panel.getBoundingClientRect();
+              const image = visual
+                .querySelector("svg, img")!
+                .getBoundingClientRect();
+              return {
+                inside: card.top >= rect.top && card.bottom <= rect.bottom,
+                noOverlap: image.bottom <= card.top + 1,
+              };
+            });
+          expect(bounds).toEqual({ inside: true, noOverlap: true });
+        }
         await expect(
           page.getByRole("combobox", { name: "項目名の表示" }),
         ).toBeDisabled();

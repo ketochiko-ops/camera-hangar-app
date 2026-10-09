@@ -8,6 +8,7 @@ import {
 import { Modal } from "./Modal";
 import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
+import { CameraParts } from "./CameraParts";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
 import { formatItemLabel, useLabelMode } from "../context/LabelModeContext";
 import styles from "./Manage.module.css";
@@ -67,6 +68,7 @@ export function CompareModal({
                   </div>
                 ))}
               </dl>
+              {cam && <CameraParts parts={item.additionalParts} mode={mode} />}
               <p>{item.summary}</p>
             </article>
           );

@@ -76,6 +76,7 @@ export const csvColumns = (kind: EquipmentKind): string[] =>
         "role",
         "mount",
         ...Object.keys(cameraSpecs),
+        "additional_parts",
         ...Object.keys(cameraRatings),
       ]
     : [
@@ -118,6 +119,7 @@ export function equipmentCsvValues(item: Equipment): Record<string, string> {
   if (isCamera(item)) {
     values.role = item.role;
     values.mount = item.mount;
+    values.additional_parts = JSON.stringify(item.additionalParts);
     for (const [column, key] of Object.entries(cameraSpecs))
       values[column] = item.specs[key];
     for (const [column, key] of Object.entries(legacyCameraRatings))
@@ -222,6 +224,7 @@ export type CsvImport = {
   kind: EquipmentKind;
   items: Equipment[];
   issues: CsvIssue[];
+  includesAdditionalParts?: boolean;
 };
 export function parseEquipmentCsv(
   source: string,
@@ -276,6 +279,8 @@ export function parseEquipmentCsv(
       "機材の行がありません。テンプレートに登録内容を入力してください。",
     );
   if (result.issues.length) return result;
+  if (kind === "camera")
+    result.includesAdditionalParts = headers.includes("additional_parts");
   const ratingColumns = {
     ...(kind === "camera" ? cameraRatings : lensRatings),
     ...(kind === "camera"
@@ -301,7 +306,14 @@ export function parseEquipmentCsv(
     );
     const get = (column: string) => values[column] ?? "";
     for (const [column, value] of Object.entries(values)) {
-      const limit = column === "summary" ? 700 : column === "name" ? 100 : 180;
+      const limit =
+        column === "additional_parts"
+          ? 2048
+          : column === "summary"
+            ? 700
+            : column === "name"
+              ? 100
+              : 180;
       if (value.length > limit)
         issue(row.line, column, `${limit}文字以内にしてください。`);
     }
@@ -341,11 +353,24 @@ export function parseEquipmentCsv(
           .filter(Boolean),
       ),
     ];
+    let additionalParts: unknown = [];
+    if (kind === "camera" && get("additional_parts").trim()) {
+      try {
+        additionalParts = JSON.parse(get("additional_parts"));
+      } catch {
+        issue(
+          row.line,
+          "additional_parts",
+          "追加パーツはJSON配列で入力してください。",
+        );
+      }
+    }
     const item: Equipment =
       kind === "camera"
         ? {
             ...base,
             mount: get("mount"),
+            additionalParts: additionalParts as Camera["additionalParts"],
             role: get("role"),
             specs: Object.fromEntries(
               Object.entries(cameraSpecs).map(([column, key]) => [
@@ -365,6 +390,7 @@ export function parseEquipmentCsv(
             ratings: ratings as Lens["ratings"],
           };
     const fieldColumns: Record<string, string> = {
+      additionalParts: "additional_parts",
       compatibleMounts: "compatible_mounts",
       focalLength: "focal_length",
       maxAperture: "max_aperture",
@@ -432,6 +458,12 @@ export function mergeCsvImport(data: Inventory, batch: CsvImport): Inventory {
         ? {
             ...item,
             ratings: { ...previousScores, ...item.ratings },
+            additionalParts:
+              batch.includesAdditionalParts === false &&
+              previous &&
+              isCamera(previous)
+                ? previous.additionalParts
+                : item.additionalParts,
             image: previous?.image,
           }
         : { ...item, image: previous?.image },
@@ -443,7 +475,7 @@ export function mergeCsvImport(data: Inventory, batch: CsvImport): Inventory {
 }
 
 export function csvCreationPrompt(kind: EquipmentKind): string {
-  return `調査結果から${kind === "camera" ? "カメラ" : "レンズ"}登録用のUTF-8 CSVファイルを作成してください。\nヘッダーは次の列名をそのまま使ってください。\n${csvColumns(kind).join(",")}\n必須項目：${requiredColumns(kind).join(", ")}。\n1行に1機材。新規登録のidは空欄。既存機材の更新は出力CSVのidを保持。複数マウント・用途タグは | 区切り。カンマ・改行・引用符を含む値は二重引用符で囲み、値内の引用符は二重にしてください。\n${kind === "camera" ? "rating_responseはAF性能の評価です。" : ""}評価は0〜10の数値。主観評価を測定値と混同せず、評価できない項目は空欄（アプリでは0として登録）。不明な任意スペックも空欄にし、必須情報が確認できない機材は含めないでください。\nセンサーは例 FULL FRAME CMOS、重量は例 710 g、画素数は例 24.5 MP、連写は例 14frames /s、焦点距離は例 24–70 mm、開放F値は例 f/2.8、発売年は4桁。nameは100文字以内、summaryは700文字以内、その他の各セルは180文字以内。写真はCSVに含めません。\n調査元URLと不確かな情報はCSVと別に説明してください。CSV内に説明行やMarkdownのコードフェンス、追加列を入れないでください。`;
+  return `調査結果から${kind === "camera" ? "カメラ" : "レンズ"}登録用のUTF-8 CSVファイルを作成してください。\nヘッダーは次の列名をそのまま使ってください。\n${csvColumns(kind).join(",")}\n必須項目：${requiredColumns(kind).join(", ")}。\n1行に1機材。新規登録のidは空欄。既存機材の更新は出力CSVのidを保持。複数マウント・用途タグは | 区切り。カンマ・改行・引用符を含む値は二重引用符で囲み、値内の引用符は二重にしてください。\n${kind === "camera" ? 'rating_responseはAF性能の評価です。additional_partsは追加パーツのJSON配列です。例 [{"kind":"grip","name":"SmallRig"},{"kind":"adapter","name":"Nikon FTZ II"}]。kindはgrip・adapter・other、名称は1行64文字以内、8個まで。なしは空欄または[]。JSONの引用符もCSVの規則で二重化してください。装備はユーザーが指定したものだけを記載し、機種の仕様から推測しないでください。更新用CSVでは既存の追加パーツを引き継いでください。' : ""}評価は0〜10の数値。主観評価を測定値と混同せず、評価できない項目は空欄（アプリでは0として登録）。不明な任意スペックも空欄にし、必須情報が確認できない機材は含めないでください。\nセンサーは例 FULL FRAME CMOS、重量は例 710 g、画素数は例 24.5 MP、連写は例 14frames /s、焦点距離は例 24–70 mm、開放F値は例 f/2.8、発売年は4桁。nameは100文字以内、summaryは700文字以内、${kind === "camera" ? "additional_partsは2048文字以内、" : ""}その他の各セルは180文字以内。写真はCSVに含めません。\n調査元URLと不確かな情報はCSVと別に説明してください。CSV内に説明行やMarkdownのコードフェンス、追加列を入れないでください。`;
 }
 
 export function downloadCsv(text: string, filename: string): void {

@@ -8,6 +8,7 @@ import {
 } from "../types";
 import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
+import { CameraParts } from "./CameraParts";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
 import {
   formatItemLabel,
@@ -59,6 +60,16 @@ export function DetailBoard({
           name={item.name}
           kind={cam ? "camera" : "lens"}
         />
+        {cam && item.additionalParts.length > 0 && (
+          <div className={styles.partsWrapper}>
+            <CameraParts
+              parts={item.additionalParts}
+              mode={activeMode}
+              exporting={exporting}
+              portrait={portrait}
+            />
+          </div>
+        )}
         <div className={styles.visualBottom}>
           <span>
             OPTICAL SYSTEM

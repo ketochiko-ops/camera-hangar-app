@@ -10,6 +10,67 @@ import {
 } from "./inventoryCsv";
 
 describe("equipment CSV", () => {
+  it("round trips multiple parts with quotes, commas, pipes and Japanese names", () => {
+    const camera = structuredClone(sampleInventory.cameras[0]);
+    camera.additionalParts = [
+      { kind: "grip", name: 'SmallRig, "custom"' },
+      { kind: "adapter", name: "Adapter | F → Z" },
+      { kind: "adapter", name: "別のアダプター" },
+    ];
+    const parsed = parseEquipmentCsv(
+      exportEquipmentCsv("camera", [camera]),
+      "camera",
+    );
+    expect(parsed.issues).toEqual([]);
+    expect(parsed.items).toEqual([camera]);
+  });
+  it("keeps existing parts for old CSVs and clears them when a parts column is explicitly blank", () => {
+    const old =
+      "id,name,maker,category,summary,role,mount\nnikon-zf,Nikon Z f,Nikon,Mirrorless,Updated,MULTIROLE,Nikon Z";
+    const before = structuredClone(sampleInventory);
+    const batch = parseEquipmentCsv(old, "camera");
+    expect(batch.issues).toEqual([]);
+    expect(mergeCsvImport(before, batch).cameras[0].additionalParts).toEqual(
+      before.cameras[0].additionalParts,
+    );
+    const clear = parseEquipmentCsv(
+      old.replace("role,mount\n", "role,mount,additional_parts\n") + ",",
+      "camera",
+    );
+    expect(clear.issues).toEqual([]);
+    expect(mergeCsvImport(before, clear).cameras[0].additionalParts).toEqual(
+      [],
+    );
+    expect(before).toEqual(sampleInventory);
+  });
+  it.each([
+    '{"kind":"grip","name":"Not an array"}',
+    '[{"kind":"unknown","name":"Unsupported"}]',
+    JSON.stringify([{ kind: "grip", name: "x".repeat(65) }]),
+    JSON.stringify(
+      Array.from({ length: 9 }, () => ({ kind: "adapter", name: "Adapter" })),
+    ),
+    JSON.stringify([{ kind: "grip", name: "two\nlines" }]),
+    "[broken JSON",
+  ])(
+    "rejects invalid parts without partially importing the batch: %s",
+    (parts) => {
+      const camera = sampleInventory.cameras[0];
+      const source = exportEquipmentCsv("camera", [camera]);
+      // Replace the serialized cell through the public CSV encoder's output.
+      const invalid = source.replace(
+        '"' +
+          JSON.stringify(camera.additionalParts).replaceAll('"', '""') +
+          '"',
+        '"' + parts.replaceAll('"', '""') + '"',
+      );
+      const batch = parseEquipmentCsv(invalid, "camera");
+      expect(batch.items).toEqual([]);
+      expect(
+        batch.issues.some((issue) => issue.column === "additional_parts"),
+      ).toBe(true);
+    },
+  );
   it("imports former camera ratings, preserves retired scores in exports and updates", () => {
     const batch = parseEquipmentCsv(
       "id,name,maker,category,summary,role,mount,burst_rate,rating_resolution,rating_high_iso,rating_portability,rating_autofocus,rating_dynamic_range,rating_handling,rating_color\nnikon-zf,Camera,Nikon,Mirrorless,Notes,MULTIROLE,Nikon Z,14frames /s,7,8,9,6,5,4,3",

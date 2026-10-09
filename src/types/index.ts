@@ -34,6 +34,14 @@ export const legacyCameraRatingKeys = [
 ] as const;
 export type Ratings = Record<RatingKey, number> &
   Partial<Record<(typeof legacyCameraRatingKeys)[number], number>>;
+export const cameraPartLabels = {
+  grip: "GRIP",
+  adapter: "MOUNT ADAPTER",
+  other: "OTHER",
+} as const;
+export type CameraPart = { kind: keyof typeof cameraPartLabels; name: string };
+export const MAX_CAMERA_PARTS = 8;
+export const MAX_PART_NAME_LENGTH = 64;
 export type Camera = {
   id: string;
   name: string;
@@ -41,6 +49,7 @@ export type Camera = {
   category: string;
   role: string;
   mount: string;
+  additionalParts: CameraPart[];
   image?: string;
   summary: string;
   specs: {

@@ -42,7 +42,7 @@ CSVは **UTF-8・カンマ区切り** です。UTF-8 BOMの有無、CRLF／LF、
 追加の必須列：`role`, `mount`。
 
 ```csv
-id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,image_stabilization,weight,storage_media,af_system,release_year,rating_detail,rating_night,rating_latitude,rating_response,rating_stability,rating_endurance,rating_mobility
+id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,image_stabilization,weight,storage_media,af_system,release_year,additional_parts,rating_detail,rating_night,rating_latitude,rating_response,rating_stability,rating_endurance,rating_mobility
 ```
 
 | 列                    | 入力例・意味                                                     |
@@ -58,6 +58,26 @@ id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,ima
 | `af_system`           | AFシステムの説明                                                 |
 | `release_year`        | 4桁の発売年（1800〜2199）                                        |
 | `rating_*`            | 0〜10の数値。小数可。空欄は0                                     |
+
+`additional_parts`は任意の追加パーツ列です。値はJSON配列で、種類は`grip`・`adapter`・`other`、名称は`name`に指定します。最大8個、名称は1行64文字まで、列全体は2048文字までです。
+
+セルの値の例：
+
+```json
+[
+  { "kind": "grip", "name": "SmallRig" },
+  { "kind": "adapter", "name": "Nikon FTZ II" }
+]
+```
+
+CSVではJSONの引用符を二重にし、セル全体を二重引用符で囲みます。最小構成の例：
+
+```csv
+name,maker,category,summary,role,mount,additional_parts
+Nikon Z f,Nikon,Mirrorless,撮影用の構成,MULTIROLE,Nikon Z,"[{""kind"":""grip"",""name"":""SmallRig""},{""kind"":""adapter"",""name"":""Nikon FTZ II""}]"
+```
+
+既存機材の更新でこの列自体を省略すると、登録済みの追加パーツを保持します。列がある場合はCSVの一覧で置き換え、空欄または`[]`は全パーツの解除になります。旧CSVはそのまま読み込めます。
 
 ### レンズ
 

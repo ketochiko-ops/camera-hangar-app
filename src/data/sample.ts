@@ -25,6 +25,7 @@ const camera = (
   name,
   maker,
   mount,
+  additionalParts: [],
   category,
   role,
   summary,
@@ -264,6 +265,17 @@ export const sampleInventory: Inventory = {
     ),
   ],
 };
+sampleInventory.cameras[0].additionalParts = [
+  { kind: "grip", name: "SmallRig" },
+  { kind: "adapter", name: "Nikon FTZ II" },
+];
+sampleInventory.cameras[4].additionalParts = [
+  { kind: "grip", name: "SONY VG-C3EM" },
+  { kind: "adapter", name: "MonsterAdapter LA-FE1" },
+];
+sampleInventory.cameras[5].additionalParts = [
+  { kind: "adapter", name: "Fringer FR-FTX2" },
+];
 sampleInventory.cameras[0].specs = {
   ...sampleInventory.cameras[0].specs,
   continuousShooting: "14frames /s",
@@ -278,6 +290,7 @@ export const emptyCamera = (): Camera => ({
   category: "",
   role: "MULTIROLE",
   mount: "",
+  additionalParts: [],
   summary: "",
   specs: {
     sensor: "",

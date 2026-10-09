@@ -2,6 +2,35 @@ import { describe, expect, it, vi } from "vitest";
 import { createLocalRepository, STORAGE_KEY } from "./storage";
 import { sampleInventory } from "../data/sample";
 describe("local repository", () => {
+  it("loads old camera records with the specified parts while preserving explicit empty lists and source data", () => {
+    const data = structuredClone(sampleInventory);
+    for (const camera of data.cameras)
+      Reflect.deleteProperty(camera, "additionalParts");
+    data.cameras[0].additionalParts = [];
+    const raw = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEY, raw);
+    const loaded = createLocalRepository(localStorage).load();
+    expect(loaded.error).toBeUndefined();
+    expect(loaded.data.cameras[0].additionalParts).toEqual([]);
+    expect(loaded.data.cameras[4].additionalParts).toEqual(
+      sampleInventory.cameras[4].additionalParts,
+    );
+    expect(loaded.data.cameras[5].additionalParts).toEqual(
+      sampleInventory.cameras[5].additionalParts,
+    );
+    expect(loaded.data.cameras[1].additionalParts).toEqual([]);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
+  });
+  it("protects stored data containing invalid parts from being overwritten", () => {
+    const data = structuredClone(sampleInventory);
+    Object.assign(data.cameras[0], { additionalParts: null });
+    const raw = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEY, raw);
+    const repo = createLocalRepository(localStorage);
+    expect(repo.load().error).toBeTruthy();
+    expect(() => repo.save(sampleInventory)).toThrow(/読み込めない/);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
+  });
   it("seeds only a missing store", () =>
     expect(createLocalRepository(localStorage).load().data).toEqual(
       sampleInventory,

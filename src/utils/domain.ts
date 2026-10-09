@@ -1,4 +1,7 @@
 import {
+  cameraPartLabels,
+  MAX_CAMERA_PARTS,
+  MAX_PART_NAME_LENGTH,
   cameraRatingLabels,
   lensRatingLabels,
   legacyCameraRatingKeys,
@@ -52,6 +55,21 @@ export function validateEquipment(item: Equipment): FormErrors {
       errors[key] = "正の数値で入力してください（単位・範囲も可）。";
   };
   if (isCamera(item)) {
+    if (
+      !Array.isArray(item.additionalParts) ||
+      item.additionalParts.length > MAX_CAMERA_PARTS ||
+      item.additionalParts.some(
+        (part) =>
+          !part ||
+          typeof part !== "object" ||
+          !Object.hasOwn(cameraPartLabels, part.kind) ||
+          typeof part.name !== "string" ||
+          !part.name.trim() ||
+          part.name.length > MAX_PART_NAME_LENGTH ||
+          /[\r\n]/.test(part.name),
+      )
+    )
+      errors.additionalParts = `追加パーツは${MAX_CAMERA_PARTS}個まで、種類と1〜${MAX_PART_NAME_LENGTH}文字の名称（1行）を入力してください。`;
     required("mount", item.mount);
     required("role", item.role);
     numeric("specs.weight", item.specs.weight);

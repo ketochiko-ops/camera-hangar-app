@@ -14,6 +14,7 @@ import { validateEquipment, type FormErrors } from "../utils/domain";
 import { prepareImage } from "../utils/image";
 import { useInventory } from "../context/InventoryContext";
 import { formatItemLabel, useLabelMode } from "../context/LabelModeContext";
+import { CameraPartsEditor } from "./CameraPartsEditor";
 import { EquipmentImage } from "./EquipmentImage";
 import { Modal } from "./Modal";
 import styles from "./Manage.module.css";
@@ -99,7 +100,14 @@ export function EquipmentEditor({
       ),
     ];
     const normalized = isCamera(item)
-      ? { ...item, mount: item.mount.trim() }
+      ? {
+          ...item,
+          mount: item.mount.trim(),
+          additionalParts: item.additionalParts.map((part) => ({
+            ...part,
+            name: part.name.trim(),
+          })),
+        }
       : {
           ...item,
           compatibleMounts: parseList(mountsText),
@@ -287,8 +295,22 @@ export function EquipmentEditor({
             </div>
           </>
         )}
+        {isCamera(item) && (
+          <CameraPartsEditor
+            parts={item.additionalParts}
+            mode={mode}
+            error={errors.additionalParts}
+            onChange={(update) =>
+              setItem((prev) =>
+                isCamera(prev)
+                  ? { ...prev, additionalParts: update(prev.additionalParts) }
+                  : prev,
+              )
+            }
+          />
+        )}
         <h3 className={styles.sectionLabel}>
-          {cam ? "03" : "02"} / PERFORMANCE PROFILE{" "}
+          {cam ? "04" : "02"} / PERFORMANCE PROFILE{" "}
           <small>0–10 · DECIMALS ALLOWED</small>
         </h3>
         <div className={styles.formGrid}>

@@ -127,6 +127,21 @@
   line-height: 1.7;
   letter-spacing: 0.5px;
 }
+.partsWrapper {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  padding: 14px 21px;
+  border-top: 1px solid #314d5d;
+}
+.visual:has(.partsWrapper) .equipmentImage > svg,
+.visual:has(.partsWrapper) .equipmentImage > img {
+  height: 100%;
+  max-height: 300px;
+}
+.board:not(.exportBoard) .visual:has(.partsWrapper) .equipmentImage {
+  min-height: 220px;
+}
 .visualBottom > span:last-child {
   text-align: right;
 }
