@@ -5,15 +5,17 @@ export function RatingBars({
   labels,
   base = ratings,
   deltas = {},
+  animate = true,
 }: {
   ratings: Record<string, number>;
   labels: Record<string, string>;
   base?: Record<string, number>;
   deltas?: Record<string, number>;
+  animate?: boolean;
 }) {
   return (
     <div className={styles.ratings}>
-      {Object.entries(labels).map(([key, label]) => {
+      {Object.entries(labels).map(([key, label], index) => {
         const value = ratingPercent(ratings[key]) / 10;
         const original = ratingPercent(base[key]) / 10;
         const delta = deltas[key] ?? 0;
@@ -21,7 +23,8 @@ export function RatingBars({
         const direction =
           delta > 0 ? "increase" : delta < 0 ? "decrease" : "none";
         return (
-          <div className={styles.rating} key={key}>
+          // Keep the seven graph slots mounted when changing camera/lens profiles.
+          <div className={styles.rating} key={index}>
             <div className={styles.ratingLabel}>
               <span>{label}</span>
               <strong data-change={direction}>
@@ -50,20 +53,32 @@ export function RatingBars({
                   : undefined
               }
               data-change={direction}
+              data-animate={animate}
             >
-              <div style={{ width: `${Math.min(original, value) * 10}%` }} />
-              {delta !== 0 && (
-                <span
-                  className={
-                    delta > 0 ? styles.increaseSegment : styles.decreaseSegment
-                  }
-                  aria-hidden="true"
-                  style={{
-                    left: `${Math.min(original, value) * 10}%`,
-                    width: `${Math.abs(value - original) * 10}%`,
-                  }}
-                />
-              )}
+              <div
+                data-testid="rating-fill"
+                style={{ width: `${Math.min(original, value) * 10}%` }}
+              />
+              <span
+                className={styles.increaseSegment}
+                data-testid="rating-increase"
+                aria-hidden="true"
+                style={{
+                  left: `${Math.min(original, value) * 10}%`,
+                  width: `${delta > 0 ? Math.abs(value - original) * 10 : 0}%`,
+                  opacity: delta > 0 ? 1 : 0,
+                }}
+              />
+              <span
+                className={styles.decreaseSegment}
+                data-testid="rating-decrease"
+                aria-hidden="true"
+                style={{
+                  left: `${Math.min(original, value) * 10}%`,
+                  width: `${delta < 0 ? Math.abs(value - original) * 10 : 0}%`,
+                  opacity: delta < 0 ? 1 : 0,
+                }}
+              />
             </div>
           </div>
         );

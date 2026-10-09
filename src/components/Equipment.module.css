@@ -305,6 +305,24 @@
     #883449 4px
   );
 }
+.track[data-animate="true"] > div,
+.track[data-animate="true"] > span {
+  transition:
+    width 550ms cubic-bezier(0.22, 1, 0.36, 1),
+    left 550ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 550ms ease-out;
+}
+@starting-style {
+  .track[data-animate="true"] > div,
+  .track[data-animate="true"] > span {
+    width: 0 !important;
+    opacity: 0 !important;
+  }
+}
+.track[data-animate="false"] > div,
+.track[data-animate="false"] > span {
+  transition: none;
+}
 .track:after {
   position: absolute;
   inset: 0;

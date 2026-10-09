@@ -783,6 +783,17 @@ for (const labelMode of ["english", "bilingual"] as const)
         await expect(
           exportBoard.locator('[role="meter"]').first(),
         ).toHaveAttribute("aria-label", formattedFirstLabel);
+        expect(
+          await exportBoard
+            .getByRole("meter", { includeHidden: true })
+            .evaluateAll((meters) =>
+              meters.every(
+                (meter) =>
+                  meter.getAttribute("data-animate") === "false" &&
+                  meter.getAnimations({ subtree: true }).length === 0,
+              ),
+            ),
+        ).toBe(true);
         if (view === "camera")
           await expect(
             exportBoard.getByRole("meter", {

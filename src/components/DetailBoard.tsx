@@ -119,6 +119,7 @@ export function DetailBoard({
         </div>
         <RatingBars
           {...equipmentRatings(item)}
+          animate={!exporting}
           labels={Object.fromEntries(
             Object.entries(cam ? cameraRatingLabels : lensRatingLabels).map(
               ([key, label]) => [key, formatItemLabel(label, activeMode)],
