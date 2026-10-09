@@ -12,7 +12,7 @@ it("formats legacy units without assuming sensor technology or changing the save
     ["PIXELS", "24.5 MP"],
     ["MOUNT", "NIKON Z"],
     ["BURST", "~14frames /s"],
-    ["MEDIA", "SD + microSD"],
+    ["MEDIA", "SD (UHS-II) + microSD (UHS-I)"],
     ["WEIGHT", "710 g"],
     ["RELEASE", "2023"],
   ]);

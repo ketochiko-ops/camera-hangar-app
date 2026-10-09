@@ -51,7 +51,7 @@ id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,ima
 | `mount`               | Nikon Zなど。レンズの対応マウントと同じ名前を使用                |
 | `sensor`              | FULL FRAME CMOSなど                                              |
 | `effective_pixels`    | 24.5 MP                                                          |
-| `burst_rate`          | 14frames /s（14 fps、単位なしの数値、既存の「コマ/秒」も使用可） |
+| `burst_rate`          | 14frames /s、14 fps (拡張) / 30 fps (C30)など（単位なしの数値、既存の「コマ/秒」も使用可） |
 | `image_stabilization` | 手ぶれ補正の説明                                                 |
 | `weight`              | 710 g                                                            |
 | `storage_media`       | SD + microSDなど                                                 |

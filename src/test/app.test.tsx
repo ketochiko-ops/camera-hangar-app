@@ -85,7 +85,7 @@ describe("UI integration", () => {
     );
     await user.click(screen.getByRole("button", { name: /データ管理/ }));
     await user.click(screen.getByRole("button", { name: "Nikon Z fを編集" }));
-    expect(screen.getByLabelText("STABILITY / 撮影安定性")).toHaveValue(9);
+    expect(screen.getByLabelText("STABILITY / 撮影安定性")).toHaveValue(9.5);
     expect(screen.getByLabelText("AF / AF性能")).toHaveValue(9);
     expect(screen.getByLabelText("PIXELS / 画素数")).toHaveValue("24.5 MP");
     await user.click(screen.getByRole("button", { name: "キャンセル" }));
@@ -175,7 +175,7 @@ describe("UI integration", () => {
     ).toBeVisible();
     await user.click(screen.getByRole("button", { name: /LENS.*LOADOUT/ }));
     expect(
-      screen.getByRole("button", { name: "AF-S DX 35mm f/1.8Gを選択" }),
+      screen.getByRole("button", { name: "AF-S DX NIKKOR 35mm f/1.8Gを選択" }),
     ).toBeVisible();
     expect(
       screen.queryByRole("button", { name: "NIKKOR Z 40mm f/2を選択" }),

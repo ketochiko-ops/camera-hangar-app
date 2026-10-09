@@ -1,0 +1,8 @@
+﻿id,name,maker,category,summary,compatible_mounts,focal_length,max_aperture,weight,usage_tags,rating_resolution,rating_bokeh,rating_low_light,rating_reach,rating_close_focus,rating_mobility,rating_versatility
+dx35,AF-S DX NIKKOR 35mm f/1.8G,Nikon,単焦点,小さく明るい標準単焦点。背景を整理しながら、日常のワンシーンを自然な距離感で描く。,Nikon F,35 mm,f/1.8,200 g,portrait|street,7.5,7.5,8,0.5,3,9,6.5
+dx40,AF-S DX Micro NIKKOR 40mm f/2.8G,Nikon,マクロ,小物や花のディテールへ接近。普段使いにも扱いやすいコンパクトなマクロレンズ。,Nikon F,40 mm,f/2.8,235 g,macro|product,8.5,6.5,6,0.5,9,8.5,7.5
+af28,AF NIKKOR 28-85mm f/3.5-4.5,Nikon,標準ズーム,広角から中望遠までカバーするクラシックなズーム。構図を素早く調整したい場面に。,Nikon F,28–85 mm,f/3.5–4.5,540 g,event|landscape,5.5,5,4,2,6.5,5.5,8
+af70,AF NIKKOR 70-210mm f/4-5.6,Nikon,望遠ズーム,遠くの被写体を引き寄せる望遠ズーム。距離と圧縮効果を活かした撮影へ。,Nikon F,70–210 mm,f/4–5.6,590 g,event|portrait,5.5,6.5,3,4,2.5,5,6.5
+sigma15,SIGMA 15mm F2.8 EX DG DIAGONAL FISHEYE,SIGMA,魚眼,大胆なパースと曲線で、見慣れた風景を新しい構図に変える対角線魚眼。,Nikon F,15 mm,f/2.8,370 g,landscape|creative,6.5,2,6,0,6,7,3.5
+z40,NIKKOR Z 40mm f/2,Nikon,単焦点,軽く小さな標準レンズ。Zボディの機動力を活かし、光の変化にすぐ反応できる。,Nikon Z,40 mm,f/2,170 g,street|portrait,8,7,7.5,0.5,3,9.5,7
+z24,NIKKOR Z 24-70mm f/4 S,Nikon,標準ズーム,広角からポートレートまでを一本で。撮影場所が変わっても柔軟に対応する。,Nikon Z,24–70 mm,f/4,500 g,landscape|event,9,5.5,4.5,1.5,6,6,9

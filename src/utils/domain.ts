@@ -37,6 +37,23 @@ export const filterLenses = (
 export type FormErrors = Record<string, string>;
 const positiveRange =
   /^\s*(?:約\s*)?(?:f\/)?\d+(?:\.\d+)?(?:\s*[-–〜]\s*\d+(?:\.\d+)?)?\s*(?:g|kg|mm|MP|fps|frames?\s*\/\s*s|コマ\/秒)?\s*$/i;
+const burstSegment = String.raw`(?:約\s*)?(\d+(?:\.\d+)?)(?:\s*[-–〜]\s*(\d+(?:\.\d+)?))?\s*(?:fps|frames?\s*\/\s*s|コマ\/秒)?\s*(?:\([^()\r\n]*\)|（[^（）\r\n]*）)?`;
+const burstPattern = new RegExp(
+  `^\\s*${burstSegment}(?:\\s*/\\s*${burstSegment})*\\s*$`,
+  "i",
+);
+export function validBurstRate(value: string): boolean {
+  if (!value.trim()) return true;
+  // Mode notes may include numbers (C30, 1.29× crop) that are not burst rates.
+  if (!burstPattern.test(value)) return false;
+  return [...value.matchAll(new RegExp(burstSegment, "gi"))].every((match) => {
+    const low = Number(match[1]);
+    const high = match[2] === undefined ? low : Number(match[2]);
+    return (
+      Number.isFinite(low) && Number.isFinite(high) && low > 0 && low <= high
+    );
+  });
+}
 export function validCameraParts(
   parts: unknown,
   limit = MAX_CAMERA_PARTS,
@@ -107,7 +124,9 @@ export function validateEquipment(item: Equipment): FormErrors {
     required("role", item.role);
     numeric("specs.weight", item.specs.weight);
     numeric("specs.resolution", item.specs.resolution);
-    numeric("specs.continuousShooting", item.specs.continuousShooting);
+    if (!validBurstRate(item.specs.continuousShooting))
+      errors["specs.continuousShooting"] =
+        "正の連写速度を入力してください（単位・撮影モードの補足も可）。";
     if (
       item.specs.releaseYear &&
       !/^(18|19|20|21)\d{2}$/.test(item.specs.releaseYear)

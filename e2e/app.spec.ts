@@ -61,11 +61,11 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
   ).toEqual(ratingNames);
   expect(await board.locator("dt").allTextContents()).toEqual(specNames);
   expect(await board.locator("dd").allTextContents()).toEqual([
-    "FULL FRAME CMOS",
+    "FULL FRAME BSI CMOS",
     "24.5 MP",
     "NIKON Z + NIKON F",
-    "14frames /s",
-    "SD + microSD",
+    "14 fps (高速連続撮影・拡張) / 30 fps (C30)",
+    "SD (UHS-II) + microSD (UHS-I)",
     "710 g",
     "2023",
   ]);
@@ -99,12 +99,12 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
     page.getByRole("button", { name: "NIKKOR Z 40mm f/2を選択" }),
   ).toHaveCount(0);
   await page
-    .getByRole("button", { name: "AF-S DX Micro 40mm f/2.8Gを選択" })
+    .getByRole("button", { name: "AF-S DX Micro NIKKOR 40mm f/2.8Gを選択" })
     .click();
   await expect(
     page
       .getByTestId("detail-board")
-      .getByRole("heading", { name: "AF-S DX Micro 40mm f/2.8G" }),
+      .getByRole("heading", { name: "AF-S DX Micro NIKKOR 40mm f/2.8G" }),
   ).toBeVisible();
   await page.getByLabel("対応レンズのみ表示").uncheck();
   await expect(
@@ -254,7 +254,11 @@ test("compares up to three cameras", async ({ page }) => {
     "WEIGHT",
     "RELEASE",
   ]);
-  await expect(first.getByText("14frames /s", { exact: true })).toBeVisible();
+  await expect(
+    first.getByText("14 fps (高速連続撮影・拡張) / 30 fps (C30)", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
@@ -390,6 +394,23 @@ test("adapted lens mounts appear in blue in detail and comparison and disappear 
 test("part effects change ratings, colors and comparison while preserving body scores", async ({
   page,
 }) => {
+  const fixture = structuredClone(sampleInventory);
+  fixture.cameras.forEach((camera) => {
+    camera.additionalParts = camera.additionalParts.filter(
+      (part) => part.kind !== "lighting",
+    );
+  });
+  Object.assign(fixture.cameras[0].ratings, { stability: 9, mobility: 6 });
+  Object.assign(fixture.cameras[4].ratings, {
+    stability: 7,
+    endurance: 8.5,
+    response: 8.5,
+  });
+  await page.evaluate(
+    (value) => localStorage.setItem("optical-arsenal:inventory:v1", value),
+    JSON.stringify(fixture),
+  );
+  await page.reload();
   const board = page.getByTestId("detail-board");
   const meter = (name: string) =>
     board.getByRole("meter", { name, exact: true });
@@ -568,7 +589,7 @@ test("lighting defaults upgrade saved cameras, add features and weight, and can 
   await expect(board.getByTestId("part-feature")).toHaveCount(3);
   await expect(
     board.getByRole("meter", { name: "MOBILITY / 携行性", exact: true }),
-  ).toHaveAttribute("aria-valuenow", "3.3");
+  ).toHaveAttribute("aria-valuenow", "3.8");
   await page.getByLabel("Nikon Z fを比較に追加").check();
   await page.getByLabel("SONY α7R IIIAを比較に追加").check();
   await page.getByRole("button", { name: "比較 2/3" }).click();
@@ -618,7 +639,7 @@ test("lighting defaults upgrade saved cameras, add features and weight, and can 
   );
   expect(saved.defaultLightingVersion).toBe(1);
   expect(saved.cameras[0].specs.weight).toBe("710 g");
-  expect(saved.cameras[0].ratings.mobility).toBe(6);
+  expect(saved.cameras[0].ratings.mobility).toBe(6.5);
   await openManagement(page);
   await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
   await page.getByRole("button", { name: "X2-Tを追加", exact: true }).click();
@@ -898,10 +919,10 @@ test("label mode persists across reloads and works for cameras, lenses, comparis
   await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
   await expect(
     page.getByLabel("BURST / 連写速度", { exact: true }),
-  ).toHaveValue("14frames /s");
+  ).toHaveValue("14 fps (高速連続撮影・拡張) / 30 fps (C30)");
   await expect(
     page.getByLabel("STABILITY / 撮影安定性", { exact: true }),
-  ).toHaveValue("9");
+  ).toHaveValue("9.5");
   await expect(page.getByLabel("AF / AF性能", { exact: true })).toHaveValue(
     "9",
   );

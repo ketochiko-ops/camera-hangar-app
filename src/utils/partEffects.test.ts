@@ -120,7 +120,7 @@ describe("installed part effects", () => {
     const camera = structuredClone(sampleInventory.cameras[0]);
     const before = structuredClone(camera);
     expect(equipmentRatings(camera)).toMatchObject({
-      ratings: { stability: 9.5, mobility: 3.4, response: 9 },
+      ratings: { stability: 10, mobility: 3.9, response: 9 },
       deltas: { stability: 0.5, mobility: -2.6, response: 0 },
     });
     expect(camera).toEqual(before);
@@ -128,8 +128,10 @@ describe("installed part effects", () => {
     expect(equipmentRatings(camera).ratings).toEqual(camera.ratings);
   });
   it("caps the vertical grip benefit and reports the actual visible increase", () => {
-    expect(equipmentRatings(sampleInventory.cameras[4])).toMatchObject({
-      ratings: { endurance: 10, stability: 7.5, response: 7.5, mobility: 3.2 },
+    const camera = structuredClone(sampleInventory.cameras[4]);
+    camera.ratings.endurance = 8.5; // Exercise clamping independently of default ratings.
+    expect(equipmentRatings(camera)).toMatchObject({
+      ratings: { endurance: 10, stability: 7, response: 7, mobility: 3.2 },
       deltas: { endurance: 1.5, stability: 0.5, response: -1, mobility: -3.8 },
     });
     expect(equipmentRatings(sampleInventory.cameras[5])).toMatchObject({
@@ -158,7 +160,7 @@ describe("installed part effects", () => {
     camera.additionalParts.pop();
     expect(equipmentRatings(camera)).toMatchObject({
       ratings: { detail: 0, mobility: 10 },
-      deltas: { detail: -7.5, mobility: 4 },
+      deltas: { detail: -7.5, mobility: 3.5 },
     });
   });
   it("recognizes formatting variants, leaves unknown parts neutral, and respects explicit overrides", () => {

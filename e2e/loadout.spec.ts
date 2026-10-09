@@ -23,7 +23,7 @@ test("camera screen swaps parts, keeps them available after reload, and updates 
   await expect(board.getByTestId("part-weight")).toHaveText("+400 g");
   await expect(
     board.getByRole("meter", { name: "MOBILITY", exact: true }),
-  ).toHaveAttribute("aria-valuenow", "3.7");
+  ).toHaveAttribute("aria-valuenow", "4.2");
   await page.reload();
   await page.getByText("装備を付け替える", { exact: false }).click();
   await page
@@ -40,7 +40,7 @@ test("camera screen swaps parts, keeps them available after reload, and updates 
   await page.getByRole("button", { name: /LENS.*LOADOUT/ }).click();
   await expect(
     page.getByRole("button", {
-      name: "AF-S DX 35mm f/1.8Gを選択",
+      name: "AF-S DX NIKKOR 35mm f/1.8Gを選択",
       exact: true,
     }),
   ).toHaveCount(0);
@@ -52,7 +52,7 @@ test("camera screen swaps parts, keeps them available after reload, and updates 
   await page.getByRole("button", { name: /LENS.*LOADOUT/ }).click();
   await expect(
     page.getByRole("button", {
-      name: "AF-S DX 35mm f/1.8Gを選択",
+      name: "AF-S DX NIKKOR 35mm f/1.8Gを選択",
       exact: true,
     }),
   ).toBeVisible();

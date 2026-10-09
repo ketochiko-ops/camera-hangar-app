@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { ratingPercent, filterLenses, validateEquipment } from "./domain";
+import {
+  ratingPercent,
+  filterLenses,
+  validateEquipment,
+  validBurstRate,
+} from "./domain";
 import { sampleInventory, emptyCamera, emptyLens } from "../data/sample";
 import { getExportSize } from "../features/export/sizes";
 describe("rating display", () => {
@@ -38,6 +43,31 @@ describe("mount compatibility", () => {
   });
 });
 describe("validation", () => {
+  it.each([
+    "14 fps (高速連続撮影・拡張) / 30 fps (C30)",
+    "11 fps (高速連続撮影・拡張)",
+    "15 fps (メカ) / 20 fps (電子・1.29×クロップ)",
+    "約 8 コマ/秒",
+    "14frames /s",
+    "10–14 fps (RAW)",
+    "11 fps（拡張）",
+  ])("accepts mode-aware burst rate %s", (value) =>
+    expect(validBurstRate(value)).toBe(true),
+  );
+  it.each([
+    "0 fps",
+    "-1 fps",
+    "14 fps / 0 fps (C30)",
+    "30–14 fps",
+    "14 fps (未閉じ",
+    "Infinity fps",
+    "14 kg",
+    "14 fps / -30 fps",
+    "1(note)4 fps",
+    "14 fps (RAW) extra",
+  ])("rejects invalid burst rate %s", (value) =>
+    expect(validBurstRate(value)).toBe(false),
+  );
   it("accepts complete samples", () =>
     sampleInventory.cameras
       .concat([])
