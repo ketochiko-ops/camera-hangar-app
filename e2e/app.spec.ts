@@ -47,7 +47,7 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
   expect(await board.locator("dd").allTextContents()).toEqual([
     "FULL FRAME CMOS",
     "24.5 MP",
-    "NIKON Z",
+    "NIKON Z + NIKON F",
     "14frames /s",
     "SD + microSD",
     "710 g",
@@ -320,6 +320,57 @@ test("camera parts can be added, validated, removed and retained across reloads"
   expect(stored).toEqual([]);
   await expect(board.getByTestId("camera-parts")).toHaveCount(0);
 });
+test("adapted lens mounts appear in blue in detail and comparison and disappear after removal", async ({
+  page,
+}) => {
+  const board = page.getByTestId("detail-board");
+  for (const [name, mount] of [
+    ["Nikon Z f", "NIKON Z"],
+    ["SONY α7R IIIA", "SONY E"],
+    ["FUJIFILM X-T5", "FUJIFILM X"],
+  ]) {
+    await page.getByRole("button", { name: `${name}を選択` }).click();
+    const addition = board.getByTestId("adapter-mount");
+    await expect(addition).toHaveText("+ NIKON F");
+    await expect(addition).toHaveCSS("color", "rgb(115, 216, 255)");
+    await expect(addition.locator("..").locator("..")).toHaveText(
+      `${mount} + NIKON F`,
+    );
+  }
+  await page
+    .getByRole("combobox", { name: "項目名の表示" })
+    .selectOption("bilingual");
+  await expect(
+    board.locator("dt").filter({ hasText: /^MOUNT \/ マウント$/ }),
+  ).toBeVisible();
+  await page.getByLabel("Nikon Z fを比較に追加").check();
+  await page.getByLabel("SONY α7R IIIAを比較に追加").check();
+  await page.getByRole("button", { name: "比較 2/3" }).click();
+  await expect(
+    page.getByRole("dialog").getByTestId("adapter-mount"),
+  ).toHaveCount(2);
+  await expect(
+    page.getByRole("dialog").getByTestId("adapter-mount").first(),
+  ).toHaveCSS("color", "rgb(115, 216, 255)");
+  await page.keyboard.press("Escape");
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  await page
+    .getByRole("button", { name: "追加パーツ2を削除", exact: true })
+    .click();
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  await expect(board.getByTestId("adapter-mount")).toHaveCount(0);
+  await expect(
+    board.locator("dd").filter({ hasText: /^NIKON Z$/ }),
+  ).toHaveCount(1);
+  const camera = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem("optical-arsenal:inventory:v1")!)
+        .cameras[0],
+  );
+  expect(camera.mount).toBe("Nikon Z");
+});
 test("part effects change ratings, colors and comparison while preserving body scores", async ({
   page,
 }) => {
@@ -493,6 +544,7 @@ for (const labelMode of ["english", "bilingual"] as const)
                   : {},
             }),
           );
+          inventory.cameras[0].additionalParts[1].name = "Nikon FTZ II";
           await page.evaluate(
             (value) =>
               localStorage.setItem("optical-arsenal:inventory:v1", value),
@@ -549,6 +601,13 @@ for (const labelMode of ["english", "bilingual"] as const)
             }),
           ).toHaveAttribute("aria-valuenow", "9");
         if (view === "camera") {
+          await expect(exportBoard.getByTestId("adapter-mount")).toHaveText(
+            "+ NIKON F",
+          );
+          await expect(exportBoard.getByTestId("adapter-mount")).toHaveCSS(
+            "color",
+            "rgb(115, 216, 255)",
+          );
           await expect(exportBoard.getByTestId("rating-delta")).toHaveCount(3);
           await expect(
             exportBoard.locator('[role="meter"][data-change="increase"]'),

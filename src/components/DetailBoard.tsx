@@ -9,6 +9,7 @@ import {
 import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
 import { CameraParts } from "./CameraParts";
+import { CameraMounts } from "./CameraMounts";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
 import { equipmentRatings } from "../utils/partEffects";
 import {
@@ -125,7 +126,13 @@ export function DetailBoard({
           {specs.map(([label, value]) => (
             <div key={label}>
               <dt>{formatItemLabel(label, activeMode)}</dt>
-              <dd>{value}</dd>
+              <dd>
+                {cam && label === "MOUNT" ? (
+                  <CameraMounts camera={item} />
+                ) : (
+                  value
+                )}
+              </dd>
             </div>
           ))}
         </dl>

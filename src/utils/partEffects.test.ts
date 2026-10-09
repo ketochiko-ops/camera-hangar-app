@@ -1,8 +1,45 @@
 import { describe, expect, it } from "vitest";
 import { sampleInventory } from "../data/sample";
-import { equipmentRatings, getPartEffects } from "./partEffects";
+import {
+  cameraAdaptedMounts,
+  equipmentRatings,
+  getPartEffects,
+} from "./partEffects";
 
 describe("installed part effects", () => {
+  it("adds the correct lens mount for each specified adapter independently of score overrides", () => {
+    for (const index of [0, 4, 5]) {
+      const camera = structuredClone(sampleInventory.cameras[index]);
+      const adapter = camera.additionalParts.find(
+        (part) => part.kind === "adapter",
+      )!;
+      adapter.effects = {};
+      const before = structuredClone(camera);
+      expect(cameraAdaptedMounts(camera)).toEqual([
+        { mount: "Nikon F", adapters: [adapter.name] },
+      ]);
+      expect(camera).toEqual(before);
+      camera.additionalParts = camera.additionalParts.filter(
+        (part) => part.kind !== "adapter",
+      );
+      expect(cameraAdaptedMounts(camera)).toEqual([]);
+    }
+  });
+  it("deduplicates mounts and ignores unknown, wrongly typed or mismatched adapters", () => {
+    const camera = structuredClone(sampleInventory.cameras[0]);
+    camera.additionalParts = [
+      { kind: "adapter", name: "FTZⅡ" },
+      { kind: "adapter", name: "Nikon FTZ II" },
+      { kind: "adapter", name: "Unknown adapter" },
+      { kind: "grip", name: "FTZ II" },
+      { kind: "adapter", name: "MonsterAdapter LA-FE1" },
+    ];
+    expect(cameraAdaptedMounts(camera)).toEqual([
+      { mount: "Nikon F", adapters: ["FTZⅡ", "Nikon FTZ II"] },
+    ]);
+    camera.mount = "Nikon F";
+    expect(cameraAdaptedMounts(camera)).toEqual([]);
+  });
   it("applies researched parts to existing cameras without changing saved body scores", () => {
     const camera = structuredClone(sampleInventory.cameras[0]);
     const before = structuredClone(camera);

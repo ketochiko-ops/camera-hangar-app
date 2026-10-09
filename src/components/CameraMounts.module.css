@@ -1,0 +1,7 @@
+.added {
+  display: inline-block;
+  color: #73d8ff;
+  text-shadow: 0 0 8px #53ceff55;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}

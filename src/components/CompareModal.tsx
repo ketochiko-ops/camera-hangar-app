@@ -9,6 +9,7 @@ import { Modal } from "./Modal";
 import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
 import { CameraParts } from "./CameraParts";
+import { CameraMounts } from "./CameraMounts";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
 import { equipmentRatings } from "../utils/partEffects";
 import { formatItemLabel, useLabelMode } from "../context/LabelModeContext";
@@ -65,7 +66,13 @@ export function CompareModal({
                 ).map(([k, v]) => (
                   <div key={k}>
                     <dt>{formatItemLabel(k, mode)}</dt>
-                    <dd>{v}</dd>
+                    <dd>
+                      {cam && k === "MOUNT" ? (
+                        <CameraMounts camera={item} />
+                      ) : (
+                        v
+                      )}
+                    </dd>
                   </div>
                 ))}
               </dl>
