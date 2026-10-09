@@ -1,7 +1,14 @@
 import { sampleInventory } from "../data/sample";
 import { validateEquipment } from "./domain";
 import { migrateLegacyRatings } from "./equipmentProfile";
-import { specLabels, type Camera, type Inventory, type Lens } from "../types";
+import {
+  MAX_CAMERA_PARTS,
+  specLabels,
+  type Camera,
+  type Inventory,
+  type Lens,
+} from "../types";
+import { partProfile } from "./partEffects";
 export const STORAGE_KEY = "optical-arsenal:inventory:v1";
 export interface InventoryRepository {
   load(): { data: Inventory; error?: string };
@@ -22,7 +29,9 @@ export function createLocalRepository(
         if (
           data.version !== 1 ||
           !Array.isArray(data.cameras) ||
-          !Array.isArray(data.lenses)
+          !Array.isArray(data.lenses) ||
+          (Object.hasOwn(data, "defaultLightingVersion") &&
+            data.defaultLightingVersion !== 1)
         )
           throw new Error("Invalid schema");
         for (const [items, camera] of [
@@ -95,6 +104,29 @@ export function createLocalRepository(
           )
         )
           throw new Error("Invalid image");
+        if (data.defaultLightingVersion !== 1) {
+          for (const camera of data.cameras) {
+            const defaults =
+              sampleInventory.cameras
+                .find(
+                  (sample) =>
+                    sample.id === camera.id && sample.name === camera.name,
+                )
+                ?.additionalParts.filter((part) => part.kind === "lighting") ??
+              [];
+            for (const part of defaults) {
+              if (camera.additionalParts.length >= MAX_CAMERA_PARTS) break;
+              if (
+                !camera.additionalParts.some(
+                  (existing) => partProfile(existing) === partProfile(part),
+                )
+              )
+                camera.additionalParts.push(structuredClone(part));
+            }
+          }
+          // Persist only with the next successful user save. Later removals stay removed.
+          data.defaultLightingVersion = 1;
+        }
         return { data };
       } catch {
         readFailed = true;

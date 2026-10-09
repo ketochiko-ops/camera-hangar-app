@@ -2,9 +2,70 @@ import { describe, expect, it, vi } from "vitest";
 import { createLocalRepository, STORAGE_KEY } from "./storage";
 import { sampleInventory } from "../data/sample";
 describe("local repository", () => {
+  it("adds lighting once to the four specified saved cameras without changing existing equipment, photos or raw storage", () => {
+    const data = structuredClone(sampleInventory);
+    delete data.defaultLightingVersion;
+    data.cameras.forEach(
+      (camera) =>
+        (camera.additionalParts = camera.additionalParts.filter(
+          (part) => part.kind !== "lighting",
+        )),
+    );
+    data.cameras[0].image = "data:image/png;base64,cGhvdG8=";
+    const before = structuredClone(data);
+    const raw = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEY, raw);
+    const repo = createLocalRepository(localStorage);
+    const loaded = repo.load();
+    expect(loaded.error).toBeUndefined();
+    expect(loaded.data.defaultLightingVersion).toBe(1);
+    for (const index of [0, 4, 5, 3]) {
+      expect(
+        loaded.data.cameras[index].additionalParts.slice(
+          0,
+          before.cameras[index].additionalParts.length,
+        ),
+      ).toEqual(before.cameras[index].additionalParts);
+      expect(
+        loaded.data.cameras[index].additionalParts.filter(
+          (part) => part.kind === "lighting",
+        ),
+      ).toHaveLength(2);
+      expect(loaded.data.cameras[index].ratings).toEqual(
+        before.cameras[index].ratings,
+      );
+    }
+    expect(loaded.data.cameras[0].image).toBe(before.cameras[0].image);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
+    loaded.data.cameras[0].additionalParts = [];
+    repo.save(loaded.data);
+    expect(repo.load().data.cameras[0].additionalParts).toEqual([]);
+  });
+  it("does not replace full loadouts, duplicate existing lighting or attach lighting to renamed cameras", () => {
+    const data = structuredClone(sampleInventory);
+    delete data.defaultLightingVersion;
+    data.cameras[0].additionalParts = Array.from({ length: 8 }, () => ({
+      kind: "other",
+      name: "Existing part",
+    }));
+    data.cameras[3].name = "Custom body";
+    data.cameras[3].additionalParts = [];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const loaded = createLocalRepository(localStorage).load();
+    expect(loaded.error).toBeUndefined();
+    expect(loaded.data.cameras[0].additionalParts).toEqual(
+      data.cameras[0].additionalParts,
+    );
+    expect(loaded.data.cameras[4].additionalParts).toEqual(
+      data.cameras[4].additionalParts,
+    );
+    expect(loaded.data.cameras[3].additionalParts).toEqual([]);
+  });
   it("preserves custom effects and protects invalid effects from being overwritten", () => {
     const data = structuredClone(sampleInventory);
     data.cameras[0].additionalParts[0].effects = { stability: 1, mobility: -2 };
+    data.cameras[0].additionalParts[0].weightGrams = 20;
+    data.cameras[0].additionalParts[0].features = ["flash"];
     let repo = createLocalRepository(localStorage);
     repo.save(data);
     expect(repo.load().data).toEqual(data);

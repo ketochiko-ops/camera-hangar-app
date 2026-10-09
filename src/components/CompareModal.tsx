@@ -10,6 +10,8 @@ import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
 import { CameraParts } from "./CameraParts";
 import { CameraMounts } from "./CameraMounts";
+import { CameraFeatures } from "./CameraFeatures";
+import { CameraWeight } from "./CameraWeight";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
 import { equipmentRatings } from "../utils/partEffects";
 import { formatItemLabel, useLabelMode } from "../context/LabelModeContext";
@@ -69,6 +71,8 @@ export function CompareModal({
                     <dd>
                       {cam && k === "MOUNT" ? (
                         <CameraMounts camera={item} />
+                      ) : cam && k === "WEIGHT" ? (
+                        <CameraWeight camera={item} />
                       ) : (
                         v
                       )}
@@ -77,6 +81,7 @@ export function CompareModal({
                 ))}
               </dl>
               {cam && <CameraParts parts={item.additionalParts} mode={mode} />}
+              {cam && <CameraFeatures camera={item} mode={mode} />}
               <p>{item.summary}</p>
             </article>
           );

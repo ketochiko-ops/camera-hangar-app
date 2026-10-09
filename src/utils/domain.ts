@@ -1,5 +1,6 @@
 import {
   cameraPartLabels,
+  partFeatureLabels,
   MAX_CAMERA_PARTS,
   MAX_PART_NAME_LENGTH,
   cameraRatingLabels,
@@ -67,6 +68,20 @@ export function validateEquipment(item: Equipment): FormErrors {
           !part.name.trim() ||
           part.name.length > MAX_PART_NAME_LENGTH ||
           /[\r\n]/.test(part.name) ||
+          (Object.hasOwn(part, "weightGrams") &&
+            (typeof part.weightGrams !== "number" ||
+              !Number.isFinite(part.weightGrams) ||
+              part.weightGrams < 0 ||
+              part.weightGrams > 10000)) ||
+          (Object.hasOwn(part, "features") &&
+            (!Array.isArray(part.features) ||
+              part.features.length > Object.keys(partFeatureLabels).length ||
+              new Set(part.features).size !== part.features.length ||
+              part.features.some(
+                (feature) =>
+                  typeof feature !== "string" ||
+                  !Object.hasOwn(partFeatureLabels, feature),
+              ))) ||
           (Object.hasOwn(part, "effects") &&
             (!part.effects ||
               typeof part.effects !== "object" ||
@@ -81,7 +96,7 @@ export function validateEquipment(item: Equipment): FormErrors {
               ))),
       )
     )
-      errors.additionalParts = `追加パーツは${MAX_CAMERA_PARTS}個まで、種類と1〜${MAX_PART_NAME_LENGTH}文字の名称（1行）、補正は各評価項目に−10〜+10の数値を入力してください。`;
+      errors.additionalParts = `追加パーツは${MAX_CAMERA_PARTS}個まで、種類と1〜${MAX_PART_NAME_LENGTH}文字の名称（1行）、補正は各評価項目に−10〜+10の数値を入力してください。追加重量は0〜10000 g、追加機能は対応する機能を重複なく指定してください。`;
     required("mount", item.mount);
     required("role", item.role);
     numeric("specs.weight", item.specs.weight);

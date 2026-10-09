@@ -1,0 +1,43 @@
+.panel {
+  min-width: 0;
+}
+.afterParts {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #314d5d;
+}
+.panel h3 {
+  color: var(--accent);
+  text-shadow: var(--accent-glow);
+  font: 10px var(--mono);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.panel ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.panel li {
+  color: #73d8ff;
+  background: #183141;
+  border: 1px solid #4587a3;
+  padding: 5px 8px;
+  font: 10px var(--mono);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.panel p {
+  color: #9dbccc;
+  font: 10px var(--mono);
+  margin: 0;
+}
+.exporting h3,
+.exporting li,
+.exporting p {
+  font-size: 12px;
+}

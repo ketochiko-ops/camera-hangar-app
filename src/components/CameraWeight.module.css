@@ -1,0 +1,7 @@
+.extra {
+  display: inline-block;
+  color: #ff9399;
+  text-shadow: 0 0 8px #ef556944;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}

@@ -5,6 +5,7 @@ import {
   type Camera,
   type Equipment,
   type PartEffects,
+  type PartFeature,
   type RatingKey,
 } from "../types";
 import { ratingPercent } from "./domain";
@@ -23,6 +24,8 @@ const profiles: {
   effects: PartEffects;
   source: string;
   adapter?: { cameraMount: string; lensMount: string };
+  weightGrams?: number;
+  features?: PartFeature[];
 }[] = [
   {
     kind: "grip",
@@ -60,6 +63,33 @@ const profiles: {
     effects: { response: -0.5, mobility: -0.7 },
     source: "https://www.fringeradapter.com/nikon-f-to-fujifilm-x",
   },
+  {
+    kind: "lighting",
+    names: [
+      "X2-T",
+      "X2T",
+      "Godox X2-T",
+      "Godox X2T",
+      ...["N", "S", "F", "C", "O", "P"].flatMap((variant) => [
+        `X2T-${variant}`,
+        `Godox X2T-${variant}`,
+        `X2-T-${variant}`,
+        `Godox X2-T-${variant}`,
+      ]),
+    ],
+    effects: { mobility: -0.3 },
+    weightGrams: 90,
+    features: ["wirelessFlash"],
+    source: "https://godox.com/product-d/X2.html",
+  },
+  {
+    kind: "lighting",
+    names: ["TT600", "Godox TT600", "TT600S", "Godox TT600S"],
+    effects: { mobility: -1.5 },
+    weightGrams: 400,
+    features: ["flash"],
+    source: "https://godox.com/product-d/TT600.html",
+  },
 ];
 export function partProfile(part: CameraPart) {
   return profiles.find(
@@ -70,6 +100,25 @@ export function partProfile(part: CameraPart) {
 }
 export function getPartEffects(part: CameraPart): PartEffects {
   return part.effects ?? partProfile(part)?.effects ?? {};
+}
+export function getPartWeight(part: CameraPart): number {
+  return part.weightGrams ?? partProfile(part)?.weightGrams ?? 0;
+}
+export function getPartFeatures(part: CameraPart): PartFeature[] {
+  return part.features ?? partProfile(part)?.features ?? [];
+}
+export function cameraPartWeight(camera: Camera): number {
+  return (
+    Math.round(
+      camera.additionalParts.reduce(
+        (total, part) => total + getPartWeight(part),
+        0,
+      ) * 10,
+    ) / 10
+  );
+}
+export function cameraFeatures(camera: Camera): PartFeature[] {
+  return [...new Set(camera.additionalParts.flatMap(getPartFeatures))];
 }
 export function cameraAdaptedMounts(camera: Camera) {
   const mounts = new Map<string, { mount: string; adapters: string[] }>();

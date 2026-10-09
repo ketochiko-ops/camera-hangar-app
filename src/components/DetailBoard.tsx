@@ -10,6 +10,8 @@ import { EquipmentImage } from "./EquipmentImage";
 import { RatingBars } from "./RatingBars";
 import { CameraParts } from "./CameraParts";
 import { CameraMounts } from "./CameraMounts";
+import { CameraFeatures } from "./CameraFeatures";
+import { CameraWeight } from "./CameraWeight";
 import { cameraDetailSpecs } from "../utils/equipmentProfile";
 import { equipmentRatings } from "../utils/partEffects";
 import {
@@ -62,13 +64,18 @@ export function DetailBoard({
           name={item.name}
           kind={cam ? "camera" : "lens"}
         />
-        {cam && item.additionalParts.length > 0 && (
+        {cam && (
           <div className={styles.partsWrapper}>
             <CameraParts
               parts={item.additionalParts}
               mode={activeMode}
               exporting={exporting}
               portrait={portrait}
+            />
+            <CameraFeatures
+              camera={item}
+              mode={activeMode}
+              exporting={exporting}
             />
           </div>
         )}
@@ -129,6 +136,8 @@ export function DetailBoard({
               <dd>
                 {cam && label === "MOUNT" ? (
                   <CameraMounts camera={item} />
+                ) : cam && label === "WEIGHT" ? (
+                  <CameraWeight camera={item} />
                 ) : (
                   value
                 )}

@@ -59,16 +59,26 @@ id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,ima
 | `release_year`        | 4桁の発売年（1800〜2199）                                        |
 | `rating_*`            | 0〜10の数値。小数可。空欄は0                                     |
 
-`additional_parts`は任意の追加パーツ列です。値はJSON配列で、種類は`grip`・`adapter`・`other`、名称は`name`に指定します。最大8個、名称は1行64文字まで、列全体は4096文字までです。
+`additional_parts`は任意の追加パーツ列です。値はJSON配列で、種類は`grip`・`adapter`・`lighting`・`other`、名称は`name`に指定します。最大8個、名称は1行64文字まで、列全体は4096文字までです。
 
 各パーツに任意の`effects`を指定すると評価を補正できます。例：`{"kind":"grip","name":"Custom grip","effects":{"stability":0.5,"mobility":-0.3}}`。キーは`detail`・`night`・`latitude`・`response`（AF）・`stability`・`endurance`・`mobility`、値は−10〜+10の数値です。`effects`省略は[参考補正](part-effects.md)（未対応名は0）、`effects:{}`は補正なし、オブジェクト内の未指定項目も0です。不正な項目名や値はバッチ全体を取り込みません。`rating_*`は本体評価なので、パーツの補正を加算しないでください。
+
+追加重量は任意の`weightGrams`（0〜10000の有限な数値）、追加機能は任意の`features`配列（`wirelessFlash`＝無線ストロボ使用可、`flash`＝ストロボ使用可）で設定します。機能の重複や未対応の値はエラーになります。省略すると既知の装備の参考値を使い、`weightGrams:0`・`features:[]`は明示的に無効にします。`effects:{}`で評価補正を無効にしても、重量と機能には影響しません。`weight`列には本体重量を入れ、追加重量を加算しないでください。
 
 セルの値の例：
 
 ```json
 [
   { "kind": "grip", "name": "SmallRig" },
-  { "kind": "adapter", "name": "Nikon FTZ II" }
+  { "kind": "adapter", "name": "Nikon FTZ II" },
+  { "kind": "lighting", "name": "Godox X2T-N" },
+  {
+    "kind": "lighting",
+    "name": "Godox TT600",
+    "weightGrams": 500,
+    "features": ["flash"],
+    "effects": { "mobility": -1.5 }
+  }
 ]
 ```
 

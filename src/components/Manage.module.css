@@ -354,6 +354,38 @@
   gap: 12px;
   margin-bottom: 12px;
 }
+.featureChoices {
+  margin: 0 0 12px;
+  padding: 10px;
+  border: 1px solid #3c667b;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-width: 0;
+}
+.featureChoices legend {
+  font: 10px var(--mono);
+  color: var(--accent);
+}
+.featureChoices label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.featureChoices input {
+  width: auto;
+  accent-color: var(--accent-blue);
+}
+.lightingPresets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.lightingPresets button {
+  font-size: 12px;
+}
 .addPart {
   margin: 14px 0 20px;
 }

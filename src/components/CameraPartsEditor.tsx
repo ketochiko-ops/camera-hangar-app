@@ -1,12 +1,18 @@
 import {
   cameraPartLabels,
   cameraRatingLabels,
+  partFeatureLabels,
   MAX_CAMERA_PARTS,
   MAX_PART_NAME_LENGTH,
   type CameraPart,
   type RatingKey,
 } from "../types";
-import { getPartEffects, partProfile } from "../utils/partEffects";
+import {
+  getPartEffects,
+  getPartFeatures,
+  getPartWeight,
+  partProfile,
+} from "../utils/partEffects";
 import { formatItemLabel, type LabelMode } from "../context/LabelModeContext";
 import styles from "./Manage.module.css";
 
@@ -36,6 +42,8 @@ export function CameraPartsEditor({
         {parts.map((part, index) => {
           const profile = partProfile(part);
           const effects = getPartEffects(part);
+          const weight = getPartWeight(part);
+          const features = getPartFeatures(part);
           return (
             <fieldset key={index} className={styles.partRow}>
               <legend>PART {String(index + 1).padStart(2, "0")}</legend>
@@ -97,8 +105,10 @@ export function CameraPartsEditor({
               <details className={styles.partEffects}>
                 <summary>{formatItemLabel("STATUS EFFECTS", mode)}</summary>
                 <p className={styles.partsHelp}>
-                  {part.effects !== undefined
-                    ? "カスタム補正"
+                  {part.effects !== undefined ||
+                  part.weightGrams !== undefined ||
+                  part.features !== undefined
+                    ? "カスタム設定"
                     : profile
                       ? "メーカー仕様をもとにした参考補正"
                       : "参考補正がないため、初期値は0です。"}
@@ -113,8 +123,42 @@ export function CameraPartsEditor({
                   )}
                   <br />
                   STABILITYは手ぶれ補正と保持の安定性。縦グリップのENDURANCEはバッテリー2本使用を想定。補正後の評価は0〜10です。
+                  <br />
+                  重量は本体に加算表示します。ライティングの参考重量は電池を含まないため、必要に応じて編集できます。
                 </p>
                 <div className={styles.partEffectsGrid}>
+                  <label className={styles.field}>
+                    PART {String(index + 1).padStart(2, "0")} /{" "}
+                    {formatItemLabel("PART WEIGHT", mode)}
+                    <input
+                      type="number"
+                      min={0}
+                      max={10000}
+                      step={0.1}
+                      aria-label={`追加パーツ${index + 1}の追加重量`}
+                      aria-describedby={error ? "parts-error" : undefined}
+                      aria-invalid={
+                        !!error &&
+                        (!Number.isFinite(weight) ||
+                          weight < 0 ||
+                          weight > 10000)
+                      }
+                      value={Number.isNaN(weight) ? "" : weight}
+                      onChange={(event) => {
+                        const number =
+                          event.target.value === ""
+                            ? NaN
+                            : Number(event.target.value);
+                        onChange((current) =>
+                          current.map((entry, i) =>
+                            i === index
+                              ? { ...entry, weightGrams: number }
+                              : entry,
+                          ),
+                        );
+                      }}
+                    />
+                  </label>
                   {Object.entries(cameraRatingLabels).map(([key, label]) => {
                     const ratingKey = key as RatingKey;
                     const value = effects[ratingKey] ?? 0;
@@ -160,6 +204,41 @@ export function CameraPartsEditor({
                     );
                   })}
                 </div>
+                <fieldset className={styles.featureChoices}>
+                  <legend>
+                    {formatItemLabel("ADDITIONAL FUNCTIONS", mode)}
+                  </legend>
+                  {Object.entries(partFeatureLabels).map(([key, label]) => {
+                    const feature = key as keyof typeof partFeatureLabels;
+                    return (
+                      <label key={key}>
+                        <input
+                          type="checkbox"
+                          aria-label={`追加パーツ${index + 1}の${label}機能`}
+                          checked={features.includes(feature)}
+                          onChange={(event) => {
+                            const checked = event.target.checked;
+                            onChange((current) =>
+                              current.map((entry, i) => {
+                                if (i !== index) return entry;
+                                const previous = getPartFeatures(entry).filter(
+                                  (value) => value !== feature,
+                                );
+                                return {
+                                  ...entry,
+                                  features: checked
+                                    ? [...previous, feature]
+                                    : previous,
+                                };
+                              }),
+                            );
+                          }}
+                        />
+                        {formatItemLabel(label, mode)}
+                      </label>
+                    );
+                  })}
+                </fieldset>
                 <button
                   type="button"
                   onClick={() =>
@@ -168,6 +247,8 @@ export function CameraPartsEditor({
                         if (i !== index) return entry;
                         const reference = { ...entry };
                         delete reference.effects;
+                        delete reference.weightGrams;
+                        delete reference.features;
                         return reference;
                       }),
                     )
@@ -195,6 +276,23 @@ export function CameraPartsEditor({
       >
         追加パーツを追加
       </button>
+      <div className={styles.lightingPresets}>
+        {[
+          ["X2-T", "Godox X2-T"],
+          ["TT600", "Godox TT600"],
+        ].map(([label, name]) => (
+          <button
+            key={name}
+            type="button"
+            disabled={parts.length >= MAX_CAMERA_PARTS}
+            onClick={() =>
+              onChange((current) => [...current, { kind: "lighting", name }])
+            }
+          >
+            {label}を追加
+          </button>
+        ))}
+      </div>
     </>
   );
 }

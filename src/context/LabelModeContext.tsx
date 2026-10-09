@@ -4,6 +4,12 @@ export type LabelMode = "english" | "bilingual";
 export const LABEL_MODE_KEY = "optical-arsenal:label-mode:v1";
 const japaneseLabels: Record<string, string> = {
   "ADDITIONAL PARTS": "追加パーツ",
+  "ADDITIONAL FUNCTIONS": "追加機能",
+  "WIRELESS FLASH": "無線ストロボ使用可",
+  FLASH: "ストロボ使用可",
+  "PART WEIGHT": "追加重量（g）",
+  LIGHTING: "ライティング",
+  NONE: "なし",
   GRIP: "グリップ",
   "MOUNT ADAPTER": "マウントアダプター",
   OTHER: "その他",

@@ -15,6 +15,8 @@ describe("equipment CSV", () => {
     camera.additionalParts = Array.from({ length: 8 }, () => ({
       kind: "other",
       name: "x".repeat(64),
+      weightGrams: 10000,
+      features: ["wirelessFlash", "flash"],
       effects: {
         detail: 10,
         night: -10,
@@ -42,6 +44,13 @@ describe("equipment CSV", () => {
       },
       { kind: "adapter", name: "Adapter | F → Z" },
       { kind: "adapter", name: "別のアダプター" },
+      {
+        kind: "lighting",
+        name: "Godox TT600",
+        weightGrams: 500,
+        features: ["flash"],
+        effects: { mobility: -2 },
+      },
     ];
     const parsed = parseEquipmentCsv(
       exportEquipmentCsv("camera", [camera]),
@@ -85,6 +94,13 @@ describe("equipment CSV", () => {
     '[{"kind":"grip","name":"Bad","effects":{"mobility":"-1"}}]',
     '[{"kind":"grip","name":"Bad","effects":{"autofocus":1}}]',
     '[{"kind":"grip","name":"Bad","effects":{"__proto__":1}}]',
+    '[{"kind":"lighting","name":"Bad","weightGrams":-1}]',
+    '[{"kind":"lighting","name":"Bad","weightGrams":10001}]',
+    '[{"kind":"lighting","name":"Bad","weightGrams":null}]',
+    '[{"kind":"lighting","name":"Bad","weightGrams":"90"}]',
+    '[{"kind":"lighting","name":"Bad","features":null}]',
+    '[{"kind":"lighting","name":"Bad","features":["unknown"]}]',
+    '[{"kind":"lighting","name":"Bad","features":["flash","flash"]}]',
   ])(
     "rejects invalid parts without partially importing the batch: %s",
     (parts) => {

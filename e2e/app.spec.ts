@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
+import { sampleInventory } from "../src/data/sample";
 async function openManagement(page: Page) {
   await page.getByRole("button", { name: /データ管理/ }).click();
 }
@@ -10,6 +11,21 @@ async function fillBase(page: Page, name: string) {
   await page.getByLabel(/説明・機材メモ/).fill("私の機材。撮影用のメモ。");
 }
 test.beforeEach(async ({ page }) => {
+  // Keep the original camera/adapter flows independent of the new lighting defaults.
+  const baseline = structuredClone(sampleInventory);
+  baseline.cameras.forEach(
+    (camera) =>
+      (camera.additionalParts = camera.additionalParts.filter(
+        (part) => part.kind !== "lighting",
+      )),
+  );
+  await page.addInitScript((data) => {
+    if (localStorage.getItem("optical-arsenal:inventory:v1") === null)
+      localStorage.setItem(
+        "optical-arsenal:inventory:v1",
+        JSON.stringify(data),
+      );
+  }, baseline);
   await page.goto("/");
 });
 test("sample cameras, selection and compatible lens flow", async ({ page }) => {
@@ -461,6 +477,157 @@ test("part effects change ratings, colors and comparison while preserving body s
   await expect(meter("MOBILITY")).toHaveAttribute("aria-valuenow", "6");
   await expect(board.getByTestId("rating-delta")).toHaveCount(0);
 });
+test("lighting defaults upgrade saved cameras, add features and weight, and can be edited or removed", async ({
+  page,
+}) => {
+  const previous = structuredClone(sampleInventory);
+  delete previous.defaultLightingVersion;
+  previous.cameras.forEach(
+    (camera) =>
+      (camera.additionalParts = camera.additionalParts.filter(
+        (part) => part.kind !== "lighting",
+      )),
+  );
+  const raw = JSON.stringify(previous);
+  await page.evaluate(
+    (value) => localStorage.setItem("optical-arsenal:inventory:v1", value),
+    raw,
+  );
+  await page.reload();
+  const board = page.getByTestId("detail-board");
+  for (const [name, variant] of [
+    ["Nikon Z f", "N"],
+    ["SONY α7R IIIA", "S"],
+    ["FUJIFILM X-T5", "F"],
+    ["Canon EOS 5D Mark IV", "C"],
+  ]) {
+    await page.getByRole("button", { name: `${name}を選択` }).click();
+    await expect(
+      board.getByText(`Godox X2T-${variant}`, { exact: true }),
+    ).toBeVisible();
+    await expect(board.getByText("Godox TT600", { exact: true })).toBeVisible();
+    await expect(board.getByTestId("part-feature")).toHaveCount(2);
+    await expect(board.getByTestId("part-feature").first()).toHaveCSS(
+      "color",
+      "rgb(115, 216, 255)",
+    );
+    await expect(board.getByTestId("part-weight")).toHaveText("+490 g");
+    await expect(board.getByTestId("part-weight")).toHaveCSS(
+      "color",
+      "rgb(255, 147, 153)",
+    );
+  }
+  expect(
+    await page.evaluate(() =>
+      localStorage.getItem("optical-arsenal:inventory:v1"),
+    ),
+  ).toBe(raw);
+  await page.getByRole("button", { name: "Nikon Z fを選択" }).click();
+  await page
+    .getByRole("combobox", { name: "項目名の表示" })
+    .selectOption("bilingual");
+  await page.setViewportSize({ width: 320, height: 844 });
+  await expect(
+    board.getByRole("heading", {
+      name: "ADDITIONAL FUNCTIONS / 追加機能",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    board
+      .getByTestId("part-feature")
+      .filter({ hasText: "WIRELESS FLASH / 無線ストロボ使用可" }),
+  ).toBeVisible();
+  await expect(
+    board
+      .getByTestId("part-feature")
+      .filter({ hasText: /^\+ FLASH \/ ストロボ使用可$/ }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  const trigger = page.getByRole("group", { name: "PART 03", exact: true });
+  await trigger.locator("summary").click();
+  await expect(
+    page.getByLabel("追加パーツ3の追加重量", { exact: true }),
+  ).toHaveValue("90");
+  await page.getByLabel("追加パーツ3の追加重量", { exact: true }).fill("110");
+  await page
+    .getByLabel("追加パーツ3のMOBILITY補正", { exact: true })
+    .fill("-0.4");
+  await page
+    .getByLabel("追加パーツ3のWIRELESS FLASH機能", { exact: true })
+    .uncheck();
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  await expect(board.getByTestId("part-weight")).toHaveText("+510 g");
+  await expect(board.getByTestId("part-feature")).toHaveCount(1);
+  await expect(
+    board.getByRole("meter", { name: "MOBILITY / 携行性", exact: true }),
+  ).toHaveAttribute("aria-valuenow", "3.3");
+  await page.getByLabel("Nikon Z fを比較に追加").check();
+  await page.getByLabel("SONY α7R IIIAを比較に追加").check();
+  await page.getByRole("button", { name: "比較 2/3" }).click();
+  await expect(
+    page.getByRole("dialog").getByTestId("part-feature"),
+  ).toHaveCount(3);
+  await expect(
+    page.getByRole("dialog").getByTestId("part-weight").first(),
+  ).toHaveText("+510 g");
+  await page.keyboard.press("Escape");
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  await trigger.locator("summary").click();
+  await trigger.getByRole("button", { name: "参考値に戻す" }).click();
+  await expect(
+    page.getByLabel("追加パーツ3の追加重量", { exact: true }),
+  ).toHaveValue("90");
+  await expect(
+    page.getByLabel("追加パーツ3のWIRELESS FLASH機能", { exact: true }),
+  ).toBeChecked();
+  await page
+    .getByRole("button", { name: "追加パーツ4を削除", exact: true })
+    .click();
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  await expect(board.getByTestId("part-weight")).toHaveText("+90 g");
+  await expect(board.getByTestId("part-feature")).toHaveCount(1);
+  await expect(board.getByTestId("part-feature")).toContainText(
+    "WIRELESS FLASH",
+  );
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  await page
+    .getByRole("button", { name: "追加パーツ3を削除", exact: true })
+    .click();
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  await expect(board.getByTestId("part-weight")).toHaveCount(0);
+  await expect(board.getByTestId("part-feature")).toHaveCount(0);
+  await expect(
+    board
+      .getByTestId("camera-features")
+      .getByText("NONE / なし", { exact: true }),
+  ).toBeVisible();
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("optical-arsenal:inventory:v1")!),
+  );
+  expect(saved.defaultLightingVersion).toBe(1);
+  expect(saved.cameras[0].specs.weight).toBe("710 g");
+  expect(saved.cameras[0].ratings.mobility).toBe(6);
+  await openManagement(page);
+  await page.getByRole("button", { name: "Nikon Z fを編集" }).click();
+  await page.getByRole("button", { name: "X2-Tを追加", exact: true }).click();
+  await page.getByRole("button", { name: "TT600を追加", exact: true }).click();
+  await page.getByRole("button", { name: "保存する" }).click();
+  await page.reload();
+  await expect(board.getByTestId("part-feature")).toHaveCount(2);
+  await expect(board.getByTestId("part-weight")).toHaveText("+490 g");
+});
 test("legacy saved scores remain usable and new scores persist after editing", async ({
   page,
 }) => {
@@ -542,6 +709,8 @@ for (const labelMode of ["english", "bilingual"] as const)
                 index === 0
                   ? { stability: 0.5, mobility: -0.8, endurance: 2 }
                   : {},
+              weightGrams: index === 0 ? 490 : 0,
+              features: index === 0 ? ["wirelessFlash", "flash"] : [],
             }),
           );
           inventory.cameras[0].additionalParts[1].name = "Nikon FTZ II";
@@ -601,6 +770,10 @@ for (const labelMode of ["english", "bilingual"] as const)
             }),
           ).toHaveAttribute("aria-valuenow", "9");
         if (view === "camera") {
+          await expect(exportBoard.getByTestId("part-feature")).toHaveCount(2);
+          await expect(exportBoard.getByTestId("part-weight")).toHaveText(
+            "+490 g",
+          );
           await expect(exportBoard.getByTestId("adapter-mount")).toHaveText(
             "+ NIKON F",
           );
@@ -627,12 +800,21 @@ for (const labelMode of ["english", "bilingual"] as const)
               const image = visual
                 .querySelector("svg, img")!
                 .getBoundingClientRect();
+              const features = visual
+                .querySelector('[data-testid="camera-features"]')!
+                .getBoundingClientRect();
               return {
                 inside: card.top >= rect.top && card.bottom <= rect.bottom,
                 noOverlap: image.bottom <= card.top + 1,
+                featuresInside:
+                  features.top >= card.bottom && features.bottom <= rect.bottom,
               };
             });
-          expect(bounds).toEqual({ inside: true, noOverlap: true });
+          expect(bounds).toEqual({
+            inside: true,
+            noOverlap: true,
+            featuresInside: true,
+          });
         }
         await expect(
           page.getByRole("combobox", { name: "項目名の表示" }),
@@ -684,6 +866,9 @@ for (const labelMode of ["english", "bilingual"] as const)
 test("label mode persists across reloads and works for cameras, lenses, comparison and CSV", async ({
   page,
 }) => {
+  const initialInventory = await page.evaluate(() =>
+    localStorage.getItem("optical-arsenal:inventory:v1"),
+  );
   const selector = page.getByRole("combobox", { name: "項目名の表示" });
   await expect(selector).toHaveValue("english");
   await selector.selectOption("bilingual");
@@ -729,7 +914,7 @@ test("label mode persists across reloads and works for cameras, lenses, comparis
     await page.evaluate(() =>
       localStorage.getItem("optical-arsenal:inventory:v1"),
     ),
-  ).toBeNull();
+  ).toBe(initialInventory);
   await selector.selectOption("english");
   await page.getByRole("button", { name: /CAMERA SELECT/ }).click();
   await expect(

@@ -85,6 +85,7 @@ const lens = (
 // Scores and descriptions are editable demonstration data, not measured reviews.
 export const sampleInventory: Inventory = {
   version: 1,
+  defaultLightingVersion: 1,
   cameras: [
     camera(
       "nikon-zf",
@@ -276,6 +277,17 @@ sampleInventory.cameras[4].additionalParts = [
 sampleInventory.cameras[5].additionalParts = [
   { kind: "adapter", name: "Fringer FR-FTX2" },
 ];
+for (const [index, variant] of [
+  [0, "N"],
+  [4, "S"],
+  [5, "F"],
+  [3, "C"],
+] as const) {
+  sampleInventory.cameras[index].additionalParts.push(
+    { kind: "lighting", name: `Godox X2T-${variant}` },
+    { kind: "lighting", name: "Godox TT600" },
+  );
+}
 sampleInventory.cameras[0].specs = {
   ...sampleInventory.cameras[0].specs,
   continuousShooting: "14frames /s",
