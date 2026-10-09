@@ -13,6 +13,70 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+.sidebar > * {
+  flex-shrink: 0;
+}
+.cameraMenu {
+  display: none;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.cameraMenu h2 {
+  margin: 0 0 12px;
+  font: 10px var(--mono);
+  color: #a8c9de;
+  line-height: 1.6;
+}
+.cameraMenu p {
+  color: #a8bac5;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.cameraMenuList {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 34vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.cameraMenuList button {
+  width: 100%;
+  min-height: 36px;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 8px;
+  background: transparent;
+  border-color: transparent;
+  font-size: 11px;
+  line-height: 1.5;
+  gap: 8px;
+}
+.cameraMenuList button > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.cameraMenuList button:focus-visible {
+  outline-offset: -3px;
+}
+.cameraMenuList button.cameraMenuSelected {
+  color: var(--accent);
+  text-shadow: var(--accent-glow);
+  border-color: #345c76;
+  background: #172d3b;
+  box-shadow: inset 2px 0 var(--accent);
+}
+.cameraMenuNumber {
+  flex-shrink: 0;
+  font: 9px var(--mono);
+  color: #9bb5c6;
 }
 .brand {
   display: flex;
@@ -483,6 +547,11 @@
   }
   .selectCard strong {
     font-size: 13px;
+  }
+}
+@media (min-width: 1024px) and (orientation: landscape) {
+  .cameraMenu {
+    display: block;
   }
 }
 @media (max-width: 1150px) {

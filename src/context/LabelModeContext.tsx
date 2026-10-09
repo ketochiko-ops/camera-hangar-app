@@ -12,6 +12,7 @@ const japaneseLabels: Record<string, string> = {
   LEADER: "メイン機",
   WINGMAN: "僚機",
   CAMERA: "カメラ",
+  "CAMERA ROSTER": "登録カメラ",
   LENS: "レンズ",
   READY: "編成完了",
   INCOMPLETE: "選択待ち",

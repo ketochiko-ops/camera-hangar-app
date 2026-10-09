@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useInventory } from "./context/InventoryContext";
 import {
   LabelModeProvider,
+  formatItemLabel,
   useLabelMode,
   type LabelMode,
 } from "./context/LabelModeContext";
@@ -190,6 +191,38 @@ function EquipmentApp() {
             <span className={styles.navNumber}>04</span>
           </button>
         </nav>
+        <section
+          className={styles.cameraMenu}
+          aria-label="登録カメラ"
+          data-testid="sidebar-camera-menu"
+        >
+          <h2>{formatItemLabel("CAMERA ROSTER", labelMode)}</h2>
+          <ul className={styles.cameraMenuList}>
+            {data.cameras.map((entry, index) => (
+              <li key={entry.id}>
+                <button
+                  className={
+                    entry.id === camera?.id ? styles.cameraMenuSelected : ""
+                  }
+                  aria-label={`${entry.name}をサイドメニューから選択`}
+                  aria-pressed={entry.id === camera?.id}
+                  onClick={() => {
+                    setCameraId(entry.id);
+                    setLensId(undefined);
+                    navigate("camera");
+                    window.scrollTo({ top: 0, behavior: "instant" });
+                  }}
+                >
+                  <span className={styles.cameraMenuNumber} aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span>{entry.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {!data.cameras.length && <p>データ管理からカメラを登録できます。</p>}
+        </section>
         <div className={styles.sidebarBottom}>
           <div className={styles.archiveNumbers}>
             <span>
