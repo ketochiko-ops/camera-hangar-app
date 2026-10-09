@@ -1,4 +1,5 @@
 import type { Camera, Lens, Inventory } from "../types";
+import { cameraImageProcessors } from "./cameraImageProcessors";
 
 // Camera defaults use cameras_stability_night_revised.csv (2026-10-09).
 // Original lens defaults use lenses_corrected.csv.
@@ -41,6 +42,7 @@ export const sampleInventory: Inventory = {
       specs: {
         sensor: "FULL FRAME BSI CMOS",
         resolution: "24.5 MP",
+        imageProcessor: cameraImageProcessors["nikon-zf"].value,
         continuousShooting: "14 fps (高速連続撮影・拡張) / 30 fps (C30)",
         ibis: "ボディ内5軸 / 最大8.0段",
         weight: "710 g",
@@ -71,6 +73,7 @@ export const sampleInventory: Inventory = {
       specs: {
         sensor: "APS-C CMOS",
         resolution: "20.9 MP",
+        imageProcessor: cameraImageProcessors["nikon-zfc"].value,
         continuousShooting: "11 fps (高速連続撮影・拡張)",
         ibis: "ボディ内補正なし / VRレンズ使用時レンズシフト",
         weight: "445 g",
@@ -102,6 +105,7 @@ export const sampleInventory: Inventory = {
       specs: {
         sensor: "APS-C CMOS",
         resolution: "20.9 MP",
+        imageProcessor: cameraImageProcessors["nikon-d7500"].value,
         continuousShooting: "8 fps",
         ibis: "ボディ内補正なし / VRレンズ使用時レンズシフト",
         weight: "720 g",
@@ -142,6 +146,7 @@ export const sampleInventory: Inventory = {
       specs: {
         sensor: "FULL FRAME CMOS",
         resolution: "30.4 MP",
+        imageProcessor: cameraImageProcessors["canon-5d"].value,
         continuousShooting: "7 fps",
         ibis: "ボディ内補正なし / 対応レンズ側IS",
         weight: "890 g",
@@ -189,6 +194,7 @@ export const sampleInventory: Inventory = {
       specs: {
         sensor: "FULL FRAME BSI CMOS",
         resolution: "42.4 MP",
+        imageProcessor: cameraImageProcessors["sony-a7r"].value,
         continuousShooting: "10 fps",
         ibis: "ボディ内5軸 / 5.5段",
         weight: "657 g",
@@ -225,6 +231,7 @@ export const sampleInventory: Inventory = {
       specs: {
         sensor: "APS-C X-Trans CMOS 5 HR",
         resolution: "40.2 MP",
+        imageProcessor: cameraImageProcessors["fuji-xt5"].value,
         continuousShooting: "15 fps (メカ) / 20 fps (電子・1.29×クロップ)",
         ibis: "ボディ内5軸 / 最大7.0段",
         weight: "557 g",
@@ -699,6 +706,7 @@ export const emptyCamera = (): Camera => ({
   specs: {
     sensor: "",
     resolution: "",
+    imageProcessor: "",
     continuousShooting: "",
     ibis: "",
     weight: "",

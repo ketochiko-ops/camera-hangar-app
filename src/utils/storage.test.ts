@@ -2,6 +2,43 @@ import { describe, expect, it, vi } from "vitest";
 import { createLocalRepository, STORAGE_KEY } from "./storage";
 import { sampleInventory } from "../data/sample";
 describe("local repository", () => {
+  it("fills only missing processor fields in old records and preserves stored edits and the original JSON", () => {
+    const data = structuredClone(sampleInventory);
+    data.cameras.forEach((camera) =>
+      Reflect.deleteProperty(camera.specs, "imageProcessor"),
+    );
+    data.cameras[0].ratings.night = 6;
+    const custom = structuredClone(data.cameras[0]);
+    custom.id = "custom-camera";
+    custom.name = "My camera";
+    data.cameras.push(custom);
+    data.cameras[3].specs.imageProcessor = "Custom DIGIC";
+    data.cameras[4].specs.imageProcessor = "";
+    const raw = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEY, raw);
+    const loaded = createLocalRepository(localStorage).load();
+    expect(loaded.error).toBeUndefined();
+    expect(
+      loaded.data.cameras.map((camera) => camera.specs.imageProcessor),
+    ).toEqual([
+      "EXPEED 7",
+      "EXPEED 6",
+      "EXPEED 5",
+      "Custom DIGIC",
+      "",
+      "X-Processor 5",
+      "",
+    ]);
+    expect(loaded.data.cameras[0].ratings.night).toBe(6);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(raw);
+    Object.assign(data.cameras[0].specs, { imageProcessor: 123 });
+    const invalid = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEY, invalid);
+    const repo = createLocalRepository(localStorage);
+    expect(repo.load().error).toBeTruthy();
+    expect(() => repo.save(sampleInventory)).toThrow(/保護/);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(invalid);
+  });
   it("adds current default lighting once without changing existing equipment, photos or raw storage", () => {
     const data = structuredClone(sampleInventory);
     delete data.defaultLightingVersion;

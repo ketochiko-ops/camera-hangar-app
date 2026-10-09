@@ -45,6 +45,7 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
   const specNames = [
     "SENSOR",
     "PIXELS",
+    "ENGINE",
     "MOUNT",
     "BURST",
     "MEDIA",
@@ -63,6 +64,7 @@ test("sample cameras, selection and compatible lens flow", async ({ page }) => {
   expect(await board.locator("dd").allTextContents()).toEqual([
     "FULL FRAME BSI CMOS",
     "24.5 MP",
+    "EXPEED 7",
     "NIKON Z + NIKON F",
     "14 fps (高速連続撮影・拡張) / 30 fps (C30)",
     "SD (UHS-II) + microSD (UHS-I)",
@@ -248,6 +250,7 @@ test("compares up to three cameras", async ({ page }) => {
   expect(await first.locator("dt").allTextContents()).toEqual([
     "SENSOR",
     "PIXELS",
+    "ENGINE",
     "MOUNT",
     "BURST",
     "MEDIA",
@@ -802,6 +805,15 @@ for (const labelMode of ["english", "bilingual"] as const)
             }),
           ).toHaveAttribute("aria-valuenow", "9");
         if (view === "camera") {
+          await expect(
+            exportBoard.getByText(
+              labelMode === "bilingual" ? "ENGINE / 映像エンジン" : "ENGINE",
+              { exact: true },
+            ),
+          ).toHaveCount(1);
+          await expect(
+            exportBoard.getByText("EXPEED 7", { exact: true }),
+          ).toHaveCount(1);
           await expect(exportBoard.getByTestId("part-feature")).toHaveCount(4);
           await expect(exportBoard.getByTestId("part-weight")).toHaveText(
             "+490 g",

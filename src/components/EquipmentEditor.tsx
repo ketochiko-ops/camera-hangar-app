@@ -285,6 +285,7 @@ export function EquipmentEditor({
                   {
                     sensor: "FULL FRAME CMOS",
                     resolution: "24.5 MP",
+                    imageProcessor: "EXPEED 7",
                     continuousShooting: "14frames /s",
                     storageSlots: "SD + microSD",
                     weight: "710 g",

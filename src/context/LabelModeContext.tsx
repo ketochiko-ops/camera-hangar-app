@@ -50,6 +50,7 @@ const japaneseLabels: Record<string, string> = {
   VERSATILITY: "汎用性",
   SENSOR: "センサー",
   PIXELS: "画素数",
+  ENGINE: "映像エンジン",
   MOUNT: "マウント",
   BURST: "連写速度",
   MEDIA: "記録メディア",

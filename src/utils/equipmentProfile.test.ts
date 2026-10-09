@@ -10,6 +10,7 @@ it("formats legacy units without assuming sensor technology or changing the save
   expect(cameraDetailSpecs(camera)).toEqual([
     ["SENSOR", "FULL FRAME"],
     ["PIXELS", "24.5 MP"],
+    ["ENGINE", "EXPEED 7"],
     ["MOUNT", "NIKON Z"],
     ["BURST", "~14frames /s"],
     ["MEDIA", "SD (UHS-II) + microSD (UHS-I)"],
@@ -20,5 +21,5 @@ it("formats legacy units without assuming sensor technology or changing the save
   camera.specs.sensor = "フルサイズ CCD";
   camera.specs.continuousShooting = "12 fps";
   expect(cameraDetailSpecs(camera)[0][1]).toBe("フルサイズ CCD");
-  expect(cameraDetailSpecs(camera)[3][1]).toBe("12frames /s");
+  expect(cameraDetailSpecs(camera)[4][1]).toBe("12frames /s");
 });

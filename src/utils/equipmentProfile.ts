@@ -13,6 +13,7 @@ export function cameraDetailSpecs(camera: Camera): [string, string][] {
   return [
     [specLabels.sensor, sensor || "—"],
     [specLabels.resolution, camera.specs.resolution || "—"],
+    [specLabels.imageProcessor, camera.specs.imageProcessor || "—"],
     ["MOUNT", camera.mount.toUpperCase() || "—"],
     [specLabels.continuousShooting, burst || "—"],
     [specLabels.storageSlots, camera.specs.storageSlots || "—"],

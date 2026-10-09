@@ -1,4 +1,5 @@
 import { sampleInventory } from "../data/sample";
+import { defaultCameraImageProcessor } from "../data/cameraImageProcessors";
 import { validateEquipment, validCameraParts } from "./domain";
 import { normalizeSquadron, validSquadron } from "./loadout";
 import { migrateLegacyRatings } from "./equipmentProfile";
@@ -44,6 +45,15 @@ export function createLocalRepository(
         ] as const) {
           for (const item of items) {
             if (item && typeof item === "object") {
+              if (
+                camera &&
+                "specs" in item &&
+                item.specs &&
+                typeof item.specs === "object" &&
+                !Array.isArray(item.specs) &&
+                !Object.hasOwn(item.specs, "imageProcessor")
+              )
+                item.specs.imageProcessor = defaultCameraImageProcessor(item);
               item.ratings = migrateLegacyRatings(
                 item.ratings,
                 camera,

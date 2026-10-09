@@ -31,7 +31,7 @@ for (const [width, height] of [
         await expect(board).toBeInViewport({ ratio: 1 });
         expect(await page.evaluate(() => scrollY)).toBe(0);
         await expect(board.getByRole("meter")).toHaveCount(7);
-        await expect(board.locator("dt")).toHaveCount(7);
+        await expect(board.locator("dt")).toHaveCount(8);
         await expect(
           board.getByText("READY TO CAPTURE", { exact: true }),
         ).toBeInViewport({ ratio: 1 });

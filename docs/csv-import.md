@@ -42,7 +42,7 @@ CSVは **UTF-8・カンマ区切り** です。UTF-8 BOMの有無、CRLF／LF、
 追加の必須列：`role`, `mount`。
 
 ```csv
-id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,image_stabilization,weight,storage_media,af_system,release_year,additional_parts,rating_detail,rating_night,rating_latitude,rating_response,rating_stability,rating_endurance,rating_mobility
+id,name,maker,category,summary,role,mount,sensor,effective_pixels,image_processor,burst_rate,image_stabilization,weight,storage_media,af_system,release_year,additional_parts,rating_detail,rating_night,rating_latitude,rating_response,rating_stability,rating_endurance,rating_mobility
 ```
 
 | 列                    | 入力例・意味                                                     |
@@ -50,6 +50,7 @@ id,name,maker,category,summary,role,mount,sensor,effective_pixels,burst_rate,ima
 | `role`                | MULTIROLE、STREETなど                                            |
 | `mount`               | Nikon Zなど。レンズの対応マウントと同じ名前を使用                |
 | `sensor`              | FULL FRAME CMOSなど                                              |
+| `image_processor`     | EXPEED 7、DIGIC 6+、BIONZ Xなど。任意の映像エンジン名 |
 | `effective_pixels`    | 24.5 MP                                                          |
 | `burst_rate`          | 14frames /s、14 fps (拡張) / 30 fps (C30)など（単位なしの数値、既存の「コマ/秒」も使用可） |
 | `image_stabilization` | 手ぶれ補正の説明                                                 |
@@ -162,4 +163,6 @@ AFの内部キーとCSV列名は互換性のため`response`・`rating_response`
 
 元のlocalStorageは、ユーザーが保存操作をするまでは変更しません。評価項目が欠けた現在の形式や不正な旧評価は、通常の読み込みエラーとして扱います。
 
-カメラ詳細と比較画面・PNGの表示はSENSOR、PIXELS、MOUNT、BURST、MEDIA、WEIGHT、RELEASEの7項目です。CSVのスペック列名は従来の形式を維持しています。手ぶれ補正・AFシステムは表示対象から外しますが、既存値とCSV列は保持します。
+カメラ詳細と比較画面・PNGの表示はSENSOR、PIXELS、ENGINE、MOUNT、BURST、MEDIA、WEIGHT、RELEASEの8項目です。CSVは従来のスペック列に`image_processor`を追加しています。手ぶれ補正・AFシステムは表示対象から外しますが、既存値とCSV列は保持します。
+
+`image_processor`列がない旧CSVも使用できます。既存カメラの更新では登録済みエンジン名を保持します。新規の標準6台はIDと名称の一致で初期値を補完し、その他は空欄です。列があり空欄の場合は明示的に空欄へ更新します。[初期値とメーカー出典](image-processors.md)を参照してください。

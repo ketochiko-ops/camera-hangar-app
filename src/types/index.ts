@@ -71,6 +71,7 @@ export type Camera = {
   specs: {
     sensor: string;
     resolution: string;
+    imageProcessor: string;
     continuousShooting: string;
     ibis: string;
     weight: string;
@@ -113,6 +114,7 @@ export const isCamera = (item: Equipment): item is Camera => "specs" in item;
 export const specLabels: Record<keyof Camera["specs"], string> = {
   sensor: "SENSOR",
   resolution: "PIXELS",
+  imageProcessor: "ENGINE",
   continuousShooting: "BURST",
   ibis: "IMAGE STABILIZATION",
   weight: "WEIGHT",
@@ -123,6 +125,7 @@ export const specLabels: Record<keyof Camera["specs"], string> = {
 export const cameraDetailSpecKeys = [
   "sensor",
   "resolution",
+  "imageProcessor",
   "continuousShooting",
   "storageSlots",
   "weight",

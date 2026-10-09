@@ -7,12 +7,14 @@ import {
   type Inventory,
 } from "../../types";
 import { validateEquipment } from "../../utils/domain";
+import { defaultCameraImageProcessor } from "../../data/cameraImageProcessors";
 
 export const CSV_MAX_BYTES = 2 * 1024 * 1024;
 export const CSV_MAX_RECORDS = 1000;
 const cameraSpecs = {
   sensor: "sensor",
   effective_pixels: "resolution",
+  image_processor: "imageProcessor",
   burst_rate: "continuousShooting",
   image_stabilization: "ibis",
   weight: "weight",
@@ -225,6 +227,7 @@ export type CsvImport = {
   items: Equipment[];
   issues: CsvIssue[];
   includesAdditionalParts?: boolean;
+  includesImageProcessor?: boolean;
 };
 export function parseEquipmentCsv(
   source: string,
@@ -281,6 +284,8 @@ export function parseEquipmentCsv(
   if (result.issues.length) return result;
   if (kind === "camera")
     result.includesAdditionalParts = headers.includes("additional_parts");
+  if (kind === "camera")
+    result.includesImageProcessor = headers.includes("image_processor");
   const ratingColumns = {
     ...(kind === "camera" ? cameraRatings : lensRatings),
     ...(kind === "camera"
@@ -389,6 +394,8 @@ export function parseEquipmentCsv(
             usageTags: splitList("usage_tags"),
             ratings: ratings as Lens["ratings"],
           };
+    if (isCamera(item) && !result.includesImageProcessor)
+      item.specs.imageProcessor = defaultCameraImageProcessor(item);
     const fieldColumns: Record<string, string> = {
       additionalParts: "additional_parts",
       compatibleMounts: "compatible_mounts",
@@ -457,6 +464,15 @@ export function mergeCsvImport(data: Inventory, batch: CsvImport): Inventory {
       isCamera(item)
         ? {
             ...item,
+            specs: {
+              ...item.specs,
+              imageProcessor:
+                batch.includesImageProcessor === false &&
+                previous &&
+                isCamera(previous)
+                  ? (previous.specs.imageProcessor ?? item.specs.imageProcessor)
+                  : item.specs.imageProcessor,
+            },
             ratings: { ...previousScores, ...item.ratings },
             additionalParts:
               batch.includesAdditionalParts === false &&
@@ -475,7 +491,7 @@ export function mergeCsvImport(data: Inventory, batch: CsvImport): Inventory {
 }
 
 export function csvCreationPrompt(kind: EquipmentKind): string {
-  return `調査結果から${kind === "camera" ? "カメラ" : "レンズ"}登録用のUTF-8 CSVファイルを作成してください。\nヘッダーは次の列名をそのまま使ってください。\n${csvColumns(kind).join(",")}\n必須項目：${requiredColumns(kind).join(", ")}。\n1行に1機材。新規登録のidは空欄。既存機材の更新は出力CSVのidを保持。複数マウント・用途タグは | 区切り。カンマ・改行・引用符を含む値は二重引用符で囲み、値内の引用符は二重にしてください。\n${kind === "camera" ? 'rating_responseはAF性能の評価です。additional_partsは追加パーツのJSON配列です。例 [{"kind":"grip","name":"SmallRig"},{"kind":"adapter","name":"Nikon FTZ II"}]。kindはgrip・adapter・lighting・other、名称は1行64文字以内、8個まで。任意のeffectsにパーツごとの補正を指定できます。例 {"kind":"grip","name":"Custom grip","effects":{"stability":0.5,"mobility":-0.3}}。effectsのキーはdetail・night・latitude・response（AF）・stability・endurance・mobility、値は−10〜+10。effects省略はアプリの参考補正（未登録品は0）、effects:{}は補正なし。任意のweightGramsは追加重量（0〜10000 g）、featuresは追加機能の配列でwirelessFlash（無線ストロボ使用可）・flash（ストロボ使用可）・hss（ハイスピードシンクロ）・ttl（TTL自動調光）を重複なく指定します。例 {"kind":"lighting","name":"Godox TT600","weightGrams":400,"features":["flash"]}。weightGrams・features省略は参考設定、weightGrams:0・features:[]は明示的に無効化。weight列はカメラ本体のみの重量とし、追加重量を加算しないでください。rating_*は本体だけの評価で、パーツ補正を加算しないでください。既存effectsは保持し、新規の主観補正は測定値でないと別途説明してください。なしは空欄または[]。JSONの引用符もCSVの規則で二重化してください。装備はユーザーが指定したものだけを記載し、機種の仕様から推測しないでください。更新用CSVでは既存の追加パーツを引き継いでください。' : ""}評価は0〜10の数値。主観評価を測定値と混同せず、評価できない項目は空欄（アプリでは0として登録）。不明な任意スペックも空欄にし、必須情報が確認できない機材は含めないでください。\nセンサーは例 FULL FRAME CMOS、重量は例 710 g、画素数は例 24.5 MP、連写は例 14frames /s、焦点距離は例 24–70 mm、開放F値は例 f/2.8、発売年は4桁。nameは100文字以内、summaryは700文字以内、${kind === "camera" ? "additional_partsは4096文字以内、" : ""}その他の各セルは180文字以内。写真はCSVに含めません。\n調査元URLと不確かな情報はCSVと別に説明してください。CSV内に説明行やMarkdownのコードフェンス、追加列を入れないでください。`;
+  return `調査結果から${kind === "camera" ? "カメラ" : "レンズ"}登録用のUTF-8 CSVファイルを作成してください。\nヘッダーは次の列名をそのまま使ってください。\n${csvColumns(kind).join(",")}\n必須項目：${requiredColumns(kind).join(", ")}。\n1行に1機材。新規登録のidは空欄。既存機材の更新は出力CSVのidを保持。複数マウント・用途タグは | 区切り。カンマ・改行・引用符を含む値は二重引用符で囲み、値内の引用符は二重にしてください。\n${kind === "camera" ? 'image_processorは映像エンジン名です（例 EXPEED 7）。rating_responseはAF性能の評価です。additional_partsは追加パーツのJSON配列です。例 [{"kind":"grip","name":"SmallRig"},{"kind":"adapter","name":"Nikon FTZ II"}]。kindはgrip・adapter・lighting・other、名称は1行64文字以内、8個まで。任意のeffectsにパーツごとの補正を指定できます。例 {"kind":"grip","name":"Custom grip","effects":{"stability":0.5,"mobility":-0.3}}。effectsのキーはdetail・night・latitude・response（AF）・stability・endurance・mobility、値は−10〜+10。effects省略はアプリの参考補正（未登録品は0）、effects:{}は補正なし。任意のweightGramsは追加重量（0〜10000 g）、featuresは追加機能の配列でwirelessFlash（無線ストロボ使用可）・flash（ストロボ使用可）・hss（ハイスピードシンクロ）・ttl（TTL自動調光）を重複なく指定します。例 {"kind":"lighting","name":"Godox TT600","weightGrams":400,"features":["flash"]}。weightGrams・features省略は参考設定、weightGrams:0・features:[]は明示的に無効化。weight列はカメラ本体のみの重量とし、追加重量を加算しないでください。rating_*は本体だけの評価で、パーツ補正を加算しないでください。既存effectsは保持し、新規の主観補正は測定値でないと別途説明してください。なしは空欄または[]。JSONの引用符もCSVの規則で二重化してください。装備はユーザーが指定したものだけを記載し、機種の仕様から推測しないでください。更新用CSVでは既存の追加パーツを引き継いでください。' : ""}評価は0〜10の数値。主観評価を測定値と混同せず、評価できない項目は空欄（アプリでは0として登録）。不明な任意スペックも空欄にし、必須情報が確認できない機材は含めないでください。\nセンサーは例 FULL FRAME CMOS、重量は例 710 g、画素数は例 24.5 MP、連写は例 14frames /s、焦点距離は例 24–70 mm、開放F値は例 f/2.8、発売年は4桁。nameは100文字以内、summaryは700文字以内、${kind === "camera" ? "additional_partsは4096文字以内、" : ""}その他の各セルは180文字以内。写真はCSVに含めません。\n調査元URLと不確かな情報はCSVと別に説明してください。CSV内に説明行やMarkdownのコードフェンス、追加列を入れないでください。`;
 }
 
 export function downloadCsv(text: string, filename: string): void {

@@ -10,6 +10,34 @@ import {
 } from "./inventoryCsv";
 
 describe("equipment CSV", () => {
+  it("imports and exports processors while old CSV updates preserve existing values and explicit blanks clear them", () => {
+    const data = structuredClone(sampleInventory);
+    data.cameras[0].specs.imageProcessor = "Custom processor";
+    const legacy = parseEquipmentCsv(
+      "id,name,maker,category,summary,role,mount\nnikon-zf,Nikon Z f,Nikon,Mirrorless,Notes,Expert,Nikon Z",
+      "camera",
+    );
+    expect(legacy.issues).toEqual([]);
+    expect(legacy.includesImageProcessor).toBe(false);
+    expect(mergeCsvImport(data, legacy).cameras[0].specs.imageProcessor).toBe(
+      "Custom processor",
+    );
+    const roundTrip = parseEquipmentCsv(
+      exportEquipmentCsv("camera", data.cameras),
+      "camera",
+    );
+    expect(roundTrip.issues).toEqual([]);
+    expect(roundTrip.includesImageProcessor).toBe(true);
+    expect(roundTrip.items).toEqual(data.cameras);
+    const blank = parseEquipmentCsv(
+      "id,name,maker,category,summary,role,mount,image_processor\nnikon-zf,Nikon Z f,Nikon,Mirrorless,Notes,Expert,Nikon Z,",
+      "camera",
+    );
+    expect(blank.issues).toEqual([]);
+    expect(mergeCsvImport(data, blank).cameras[0].specs.imageProcessor).toBe(
+      "",
+    );
+  });
   it("backs up eight long part names and all seven effects without exceeding the CSV cell limit", () => {
     const camera = structuredClone(sampleInventory.cameras[0]);
     camera.additionalParts = Array.from({ length: 8 }, () => ({
