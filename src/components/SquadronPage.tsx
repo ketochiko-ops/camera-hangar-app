@@ -10,6 +10,7 @@ import {
 } from "../types";
 import { cameraAcceptsLens, normalizeSquadron } from "../utils/loadout";
 import { equipmentRatings } from "../utils/partEffects";
+import { shootingRange, squadronCoverage } from "../utils/shootingRange";
 import { EquipmentImage } from "./EquipmentImage";
 import { CameraParts } from "./CameraParts";
 import { CameraFeatures } from "./CameraFeatures";
@@ -17,6 +18,7 @@ import { CameraMounts } from "./CameraMounts";
 import { CameraWeight } from "./CameraWeight";
 import { CameraLoadoutControls } from "./CameraLoadoutControls";
 import { RatingBars } from "./RatingBars";
+import { ShootingRangePanel } from "./ShootingRangePanel";
 import styles from "./Loadout.module.css";
 
 export function SquadronPage({
@@ -32,6 +34,7 @@ export function SquadronPage({
     data.squadron ?? { leader: initialLeader, wingmen: [] },
   );
   const units = [squadron.leader, ...squadron.wingmen];
+  const coverage = squadronCoverage(data, units);
   const ready = units.every((entry) => {
     const camera = data.cameras.find((c) => c.id === entry.cameraId);
     const lens = data.lenses.find((l) => l.id === entry.lensId);
@@ -65,6 +68,7 @@ export function SquadronPage({
         </div>
       </div>
       {message && <p role="status">{message}</p>}
+      <ShootingRangePanel {...coverage} total={units.length} />
       <div className={styles.roster}>
         {units.map((selection, index) => (
           <SquadronUnit
@@ -153,6 +157,7 @@ function SquadronUnit({
   const title = index === 0 ? "メイン機" : `僚機${index}`;
   const compatible = !!camera && !!lens && cameraAcceptsLens(camera, lens);
   const cameraScores = camera ? equipmentRatings(camera) : undefined;
+  const range = shootingRange(camera, lens);
   return (
     <article
       className={`${styles.unit} ${index === 0 ? styles.leader : ""}`}
@@ -300,6 +305,7 @@ function SquadronUnit({
           この組み合わせは登録済みの対応マウントに一致しません。対応するアダプターの装着またはレンズの変更を確認してください。
         </p>
       )}
+      <ShootingRangePanel profile={range} ratings={range.ratings} />
       <div className={styles.ratings}>
         {cameraScores && (
           <div>
