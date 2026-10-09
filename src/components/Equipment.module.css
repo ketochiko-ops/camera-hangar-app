@@ -618,3 +618,80 @@
     flex-direction: row;
   }
 }
+
+/* Compact the live PC panel without changing the PNG export canvas. */
+@media (min-width: 1024px) and (orientation: landscape) {
+  .board:not(.exportBoard) .boardHeader {
+    padding: 7px 16px;
+  }
+  .board:not(.exportBoard) .visual {
+    min-height: 0;
+  }
+  .board:not(.exportBoard) .visualTop {
+    padding: 10px 16px;
+  }
+  .board:not(.exportBoard) .visual .equipmentImage,
+  .board:not(.exportBoard) .visual:has(.partsWrapper) .equipmentImage {
+    min-height: 130px;
+  }
+  .board:not(.exportBoard) .equipmentImage > svg,
+  .board:not(.exportBoard) .equipmentImage > img {
+    max-height: clamp(120px, 20vh, 220px);
+  }
+  .board:not(.exportBoard) .imageNote {
+    margin-bottom: 6px;
+  }
+  .board:not(.exportBoard) .partsWrapper {
+    padding: 8px 16px;
+  }
+  .board:not(.exportBoard) .visualBottom {
+    padding: 8px 16px;
+  }
+  .board:not(.exportBoard) .visualCaption {
+    padding: 7px 16px;
+  }
+  .board:not(.exportBoard) .details {
+    padding: 10px 16px;
+  }
+  .board:not(.exportBoard) .identity {
+    padding-bottom: 6px;
+  }
+  .board:not(.exportBoard) .identity h2 {
+    font-size: 24px;
+    margin: 4px 0 7px;
+  }
+  .board:not(.exportBoard) .badges > span {
+    padding: 3px 6px;
+  }
+  .board:not(.exportBoard) .assigned {
+    margin-top: 6px;
+  }
+  .board:not(.exportBoard) .panelTitle {
+    padding: 6px 0;
+  }
+  .board:not(.exportBoard) .ratings {
+    gap: 4px;
+    padding-bottom: 8px;
+  }
+  .board:not(.exportBoard) .ratingLabel {
+    margin-bottom: 2px;
+  }
+  .board:not(.exportBoard) .specs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 10px;
+  }
+  .board:not(.exportBoard) .specs > div {
+    padding: 4px 0;
+    gap: 2px;
+  }
+  .board:not(.exportBoard) .briefing {
+    padding: 9px 16px;
+    gap: 16px;
+  }
+  .board:not(.exportBoard) .briefing p {
+    line-height: 1.6;
+  }
+  .board:not(.exportBoard) .boardFooter {
+    padding: 6px 16px;
+  }
+}

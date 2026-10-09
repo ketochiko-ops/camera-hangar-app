@@ -718,3 +718,58 @@
     letter-spacing: 0.2px;
   }
 }
+
+@media (min-width: 1024px) and (orientation: landscape) {
+  .topbar {
+    min-height: 36px;
+  }
+  .labelModeControl select {
+    padding: 4px 8px;
+  }
+  .content {
+    padding-top: 12px;
+  }
+  .pageIntro {
+    margin-bottom: 10px;
+  }
+  .pageIntro > div:first-child {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+  }
+  .pageIntro h1 {
+    font-size: 26px;
+    margin: 0;
+  }
+  .pageIntro > div > p:last-child {
+    display: none;
+  }
+  .introStamp {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 0 0 0 14px;
+  }
+  .introStamp > span {
+    margin: 0;
+  }
+  .introStamp strong {
+    font-size: 20px;
+  }
+  .toolbar {
+    margin-bottom: 8px;
+  }
+  .exportControls select,
+  .exportButton,
+  .mountSelect select {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1150px) and (orientation: landscape) {
+  .pageIntro :global(.eyebrow) {
+    display: none;
+  }
+}

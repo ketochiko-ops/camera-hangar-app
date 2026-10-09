@@ -47,3 +47,22 @@
   font-size: 10px;
   overflow-wrap: anywhere;
 }
+
+@media (min-width: 1024px) and (orientation: landscape) {
+  :global([data-layout="live"]) .afterParts {
+    margin-top: 7px;
+    padding-top: 7px;
+  }
+  :global([data-layout="live"]) .panel h3 {
+    margin-bottom: 5px;
+  }
+  :global([data-layout="live"]) .panel ul {
+    gap: 4px;
+  }
+  :global([data-layout="live"]) .panel li {
+    padding: 2px 6px;
+  }
+  :global([data-layout="live"]) .panel .note {
+    margin-top: 5px;
+  }
+}

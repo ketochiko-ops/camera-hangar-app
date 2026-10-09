@@ -48,6 +48,7 @@ export function DetailBoard({
     <section
       className={`${styles.board} ${portrait ? styles.portrait : ""} ${exporting ? styles.exportBoard : ""}`}
       data-testid="detail-board"
+      data-layout={exporting ? "export" : "live"}
     >
       <div className={styles.boardHeader}>
         <span>OA / {cam ? "CAMERA SELECT" : "LENS LOADOUT"}</span>
